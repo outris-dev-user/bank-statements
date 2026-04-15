@@ -96,11 +96,31 @@ Every external dependency is hidden behind an abstraction in `core/`:
 
 The bank plugin doesn't know which provider is wired — it just calls `core.llm.complete(...)`. A config flag at deployment time decides.
 
+## UX orientation: table-first, graph-second
+
+Bank-analyser's primary UX surface is the **transaction table**, not the graph canvas. This is a deliberate divergence from crypto's UX, which is graph-first with a side inspector.
+
+Why: bank transactions are a chronological ledger. Investigators need to:
+1. **Verify the OCR** (is each row correct? can we trust the data?) — table view, inline edit, confidence markers
+2. **Scan for anomalies** (big debits, round numbers, unusual times) — table view with visual heuristics (green/red bands, badges)
+3. **Pivot to relationships** (who is this person really transacting with?) — *then* the graph view
+
+Crypto's problem is the opposite — addresses and flows are the primary object, tables are an auxiliary view. Same platform, different entry point.
+
+See [docs/ux-phases.md](docs/ux-phases.md) for the phased UX plan.
+
+**Implication for `core/ui/` sync:**
+- `GraphCanvas`, `AutoInvestigateReport` — fork and maintain locally (crypto-specific visual language, not worth live-syncing)
+- `NodeInspector` tab layout — we may not use the right-side inspector at all. Bank's "open a row" might be a row-expand inline, or a modal, or a dedicated drill-down page
+- Shared: Zustand stores (selection, filter, investigation state), Case management components, CSV import
+
 ## Why a Workbench-Bank tab inside crypto works
 
 In SaaS, both plugins load. The crypto team's existing case/investigation/graph layer is already domain-agnostic — same `Case` row can have a crypto investigation and a bank investigation as siblings, surfaced as two tabs in the workbench UI. Persons and entities link across via shared IDs in the `core/` layer.
 
 For LEA offline, only the bank plugin loads. The Workbench-Bank tab is the *only* tab. Same code, different deployment config.
+
+The **Workbench-Bank tab uses the table-first layout**, independent of how crypto's Workbench tab renders. Both coexist inside the same case view because they're tabs — each can optimise for its own domain.
 
 ## What changes from the original `bank-analyser/`
 
