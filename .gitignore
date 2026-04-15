@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Benchmark outputs (regenerated; large)
+benchmarks/results/*
+!benchmarks/results/.gitkeep
+
+# Logs
+*.log
+*.txt.log
+
+# Test data with potentially sensitive info — keep curated PDFs only
+data/pdf/*.tmp
+data/pdf/*_decrypted.pdf
+
+# Local Azure / cloud creds (deployment metadata can contain resource IDs)
+deployment/saas/azure/Deployment-FormRecognizer*
+secrets/
+
+# Models (large, downloaded at runtime)
+*.onnx
+*.pt
+models/
