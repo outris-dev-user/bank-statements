@@ -1,6 +1,41 @@
-# UX decisions — open questions before Phase 1 build
+# UX decisions — **RESOLVED 2026-04-15**
 
-This is a sprint-planning artifact. The open design decisions below need answers before we commit to an implementation. Each has options with real tradeoffs; some are philosophical (what's an entity?), some are tactical (inline edit vs modal). A UX sprint of ~2 days can resolve all of them.
+All 12 decisions locked in. Each section below shows the resolution first, then preserves the original options as historical context.
+
+## Summary of decisions
+
+| # | Decision | Resolution |
+|---|---|---|
+| 1 | Entity model | **Key-value pairs, extensible**. Core promoted entities: Counterparty, Channel, Category. Users can define custom entity types and tags. |
+| 2 | Visual display | **Structured columns for promoted entities + compact chips for the rest**. Avoid per-entity-type columns (sparse cells). |
+| 3 | Edit pattern | **Hybrid** — inline for typos (amount/date/description), drawer for entity resolution. |
+| 4 | Correction vs enrichment | **Option C** — single edit surface, audit log distinguishes. |
+| 5 | Confidence signaling | **Tiered** (green / amber / bright amber / red). |
+| 6 | Multi-statement view | **Both merged timeline AND per-account tabs**. Within an account tab: inter-file separators between statements. Enables per-file re-upload. |
+| 7 | Entity resolution | **Auto-merge on exact** (VPA, account, phone). **Suggest-merge on fuzzy name**. Bulk-accept for multiple suggestions. |
+| 8 | Drill-in | **Expand-in-place for peek, drawer for full edit**. Key framing: table is the **primary entry point after upload** — LEA reviews/approves there before journey begins. |
+| 9 | Audit trail | **Minimal** (user, timestamp, old value, new value). Forensic-grade deferred. |
+| 10 | Keyboard shortcuts | **Deferred** to post-Phase-1 usage patterns. |
+| 11 | PDF source linking | **Page-level only** in Phase 1. Line-level is Phase 2. |
+| 12 | Amount-edit recompute | **Silent recompute + transient visual indicator** (bold/italic/highlight for 2-3s on changed rows). Warn loudly on sum-check flip. |
+
+## Architectural consequences (the big ones)
+
+1. **Entity data model is key-value, not rigid columns** — the backend `Transaction` row stores `entities: Dict[str, EntityValue]` with the type registry separate. New entity types can be added without schema migration. See [data-model.md](data-model.md).
+
+2. **Journey is table-first** — unlike crypto where the graph opens first and tables are an inspector tab, bank opens the transaction table immediately after upload. This is the LEA's daily driver surface; everything else (graph, algorithms) is a pivot *from* the table.
+
+3. **File-level operations matter** — user must be able to re-upload a specific statement (e.g. corrupted PDF, wrong password). Tabs-per-account + inter-file separator is the UI surface; backend `Statement` is a first-class entity inside a `Case`, with cascade-delete of its transactions.
+
+4. **User-defined categories and LEA-pattern tags** — category is not a fixed enum; users register new categories. Tags are similar — LEA analysts can define tags ("possible-hawala", "round-tripping", etc.) that can be applied to rows and surfaced in filters/aggregates. These are just another key-value entity type.
+
+---
+
+# Original decision sections (historical)
+
+Preserved for context. Below was the state before resolution.
+
+## Decision 1 — What counts as an "entity" in a transaction? [RESOLVED]
 
 ## Decision 1 — What counts as an "entity" in a transaction?
 
