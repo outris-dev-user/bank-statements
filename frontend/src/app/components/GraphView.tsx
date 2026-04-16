@@ -125,7 +125,8 @@ export function GraphView({ caseId }: GraphViewProps) {
   const [showPersons, setShowPersons] = useState(true);
   const [showAccounts, setShowAccounts] = useState(true);
   const [showEntities, setShowEntities] = useState(true);
-  const [minAmount, setMinAmount] = useState(10_000);
+  const [minAmount, setMinAmount] = useState(50_000);
+  const [hideOrphans, setHideOrphans] = useState(true);
   const [layout, setLayout] = useState<LayoutMode>("layered");
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [layingOut, setLayingOut] = useState(false);
@@ -135,20 +136,31 @@ export function GraphView({ caseId }: GraphViewProps) {
 
   const filtered = useMemo(() => {
     if (!data) return { nodes: [] as GraphNode[], edges: [] as GraphEdge[] };
-    const nodes = data.nodes.filter((n) => {
+    let nodes = data.nodes.filter((n) => {
       if (n.type === "person") return showPersons;
       if (n.type === "account") return showAccounts;
       if (n.type === "entity") return showEntities;
       return true;
     });
-    const nodeIds = new Set(nodes.map((n) => n.id));
+    let nodeIds = new Set(nodes.map((n) => n.id));
     const edges = data.edges.filter((e) => {
       if (!nodeIds.has(e.source) || !nodeIds.has(e.target)) return false;
       if (e.kind === "owns") return true;
       return e.total_amount >= minAmount;
     });
+
+    // Hide orphans: any node with no incident edges after the amount filter.
+    // Persons are always kept if their accounts are visible — otherwise the
+    // case's root disappears even when the money flows out of its accounts.
+    if (hideOrphans) {
+      const incident = new Set<string>();
+      for (const e of edges) { incident.add(e.source); incident.add(e.target); }
+      nodes = nodes.filter((n) => incident.has(n.id));
+      nodeIds = new Set(nodes.map((n) => n.id));
+    }
+
     return { nodes, edges };
-  }, [data, showPersons, showAccounts, showEntities, minAmount]);
+  }, [data, showPersons, showAccounts, showEntities, minAmount, hideOrphans]);
 
   // (Re-)compute ELK layout whenever filtered graph or mode changes.
   useEffect(() => {
@@ -254,6 +266,10 @@ export function GraphView({ caseId }: GraphViewProps) {
             <option value={100000}>₹1L</option>
             <option value={500000}>₹5L</option>
           </select>
+        </label>
+        <label className="flex items-center gap-1.5" title="Hide nodes with no visible connections after filtering">
+          <input type="checkbox" checked={hideOrphans} onChange={(e) => setHideOrphans(e.target.checked)} />
+          <span className="text-foreground">Hide orphans</span>
         </label>
         <div className="ml-auto text-xs text-muted-foreground flex items-center gap-2">
           {layingOut && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
