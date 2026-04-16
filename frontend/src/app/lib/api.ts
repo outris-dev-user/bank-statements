@@ -74,6 +74,50 @@ export const fetchCaseTransactions = (
 export const fetchStatement = (id: string) =>
   request<Statement>(`/api/statements/${encodeURIComponent(id)}`);
 
+export interface MonthlyPoint {
+  month: string;
+  dr_total: number;
+  cr_total: number;
+  count: number;
+}
+
+export interface TopCounterparty {
+  name: string;
+  count: number;
+  total_dr: number;
+  total_cr: number;
+}
+
+export interface CategoryBreakdown {
+  category: string;
+  count: number;
+  total_dr: number;
+  total_cr: number;
+}
+
+export interface CaseSummary {
+  total_dr: number;
+  total_cr: number;
+  net: number;
+  txn_count: number;
+  flag_count: number;
+  reviewed_count: number;
+  unreviewed_count: number;
+  flagged_count: number;
+  monthly: MonthlyPoint[];
+  top_counterparties: TopCounterparty[];
+  categories: CategoryBreakdown[];
+}
+
+export const fetchCaseSummary = (caseId: string) =>
+  request<CaseSummary>(`/api/cases/${encodeURIComponent(caseId)}/summary`);
+
+export const runPatterns = (caseId: string) =>
+  request<{ status: string; flags_added: Record<string, number> }>(
+    `/api/cases/${encodeURIComponent(caseId)}/run-patterns`,
+    { method: "POST" },
+  );
+
 export interface TransactionPatch {
   entities?: Transaction["entities"];
   tags?: string[];

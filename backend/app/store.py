@@ -30,6 +30,7 @@ from app.db import (
 from app.schemas import (
     Case, Person, Account, Statement, Transaction, EntityValue,
     CaseDetail, TransactionPage, TransactionPatch,
+    CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown,
 )
 
 
@@ -258,6 +259,139 @@ def list_transaction_audit(txn_id: str) -> Optional[list[dict]]:
         ]
 
 
+# ───── forensic patterns ─────
+
+def run_patterns_for_case(case_id: str) -> Optional[dict]:
+    """Run all forensic pattern detectors over every transaction in the case
+    and persist the resulting flags into `transactions.flags_json`.
+
+    Returns a summary {flag_name: count} or None if the case doesn't exist.
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
+    from plugins.bank.patterns import run_all
+
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        rows = s.query(TransactionRow).filter_by(case_id=case_id).all()
+        pool = [
+            {"id": r.id, "txn_date": r.txn_date, "amount": float(r.amount),
+             "direction": r.direction, "account_id": r.account_id}
+            for r in rows
+        ]
+        new_flags = run_all(pool)
+
+        counter: dict[str, int] = {}
+        for r in rows:
+            existing = json.loads(r.flags_json or "[]")
+            # Drop any previously-computed pattern flags (our namespace) so
+            # reruns are idempotent; keep extraction-stage flags untouched.
+            pattern_flags = {"STRUCTURING_SUSPECTED", "VELOCITY_SPIKE", "ROUND_AMOUNT_CLUSTER"}
+            preserved = [f for f in existing if f not in pattern_flags]
+            added = new_flags.get(r.id, [])
+            merged = preserved + added
+            r.flags_json = json.dumps(merged)
+            for f in added:
+                counter[f] = counter.get(f, 0) + 1
+        s.commit()
+        return counter
+
+
+# ───── case summary (aggregations) ─────
+
+def case_summary(case_id: str) -> Optional[CaseSummary]:
+    """Aggregate all transactions in a case into dashboard-ready numbers.
+    Returns None if the case doesn't exist."""
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        rows = s.query(TransactionRow).filter_by(case_id=case_id).all()
+
+        total_dr = 0.0
+        total_cr = 0.0
+        flag_count = 0
+        reviewed = 0
+        unreviewed = 0
+        flagged = 0
+
+        monthly: dict[str, dict] = {}
+        cp_agg: dict[str, dict] = {}
+        cat_agg: dict[str, dict] = {}
+
+        for r in rows:
+            amt = float(r.amount)
+            if r.direction == "Dr":
+                total_dr += amt
+            else:
+                total_cr += amt
+
+            flags = json.loads(r.flags_json or "[]")
+            flag_count += len(flags)
+            if r.review_status == "reviewed":
+                reviewed += 1
+            elif r.review_status == "flagged":
+                flagged += 1
+            else:
+                unreviewed += 1
+
+            month = (r.txn_date or "")[:7] or "unknown"
+            m = monthly.setdefault(month, {"dr": 0.0, "cr": 0.0, "count": 0})
+            if r.direction == "Dr":
+                m["dr"] += amt
+            else:
+                m["cr"] += amt
+            m["count"] += 1
+
+            entities = json.loads(r.entities_json or "{}")
+            cp_name = (entities.get("counterparty") or {}).get("value") or "(unknown)"
+            cp = cp_agg.setdefault(cp_name, {"count": 0, "dr": 0.0, "cr": 0.0})
+            cp["count"] += 1
+            if r.direction == "Dr":
+                cp["dr"] += amt
+            else:
+                cp["cr"] += amt
+
+            cat_name = (entities.get("category") or {}).get("value") or "Other"
+            ct = cat_agg.setdefault(cat_name, {"count": 0, "dr": 0.0, "cr": 0.0})
+            ct["count"] += 1
+            if r.direction == "Dr":
+                ct["dr"] += amt
+            else:
+                ct["cr"] += amt
+
+        monthly_list = [
+            MonthlyPoint(month=k, dr_total=round(v["dr"], 2), cr_total=round(v["cr"], 2), count=v["count"])
+            for k, v in sorted(monthly.items())
+        ]
+
+        top_cp = sorted(cp_agg.items(), key=lambda kv: kv[1]["count"], reverse=True)[:15]
+        top_counterparties = [
+            TopCounterparty(name=k, count=v["count"], total_dr=round(v["dr"], 2), total_cr=round(v["cr"], 2))
+            for k, v in top_cp
+        ]
+
+        categories = [
+            CategoryBreakdown(category=k, count=v["count"], total_dr=round(v["dr"], 2), total_cr=round(v["cr"], 2))
+            for k, v in sorted(cat_agg.items(), key=lambda kv: kv[1]["count"], reverse=True)
+        ]
+
+        return CaseSummary(
+            total_dr=round(total_dr, 2),
+            total_cr=round(total_cr, 2),
+            net=round(total_cr - total_dr, 2),
+            txn_count=len(rows),
+            flag_count=flag_count,
+            reviewed_count=reviewed,
+            unreviewed_count=unreviewed,
+            flagged_count=flagged,
+            monthly=monthly_list,
+            top_counterparties=top_counterparties,
+            categories=categories,
+        )
+
+
 # ───── writes: create case / ingest statement ─────
 
 def _next_id(session, prefix: str, row_class) -> str:
@@ -390,7 +524,16 @@ def ingest_statement(
         # Return the persisted statement + its transactions
         stmt_schema = _statement_row_to_schema(stmt)
         txns = s.query(TransactionRow).filter_by(statement_id=sid).order_by(TransactionRow.row_index).all()
-        return stmt_schema, [_txn_row_to_schema(t) for t in txns]
+        out = stmt_schema, [_txn_row_to_schema(t) for t in txns]
+
+    # Run forensic detectors over the whole case now that the new txns are
+    # persisted. Patterns often need cross-statement context (e.g., velocity
+    # across accounts), so we always run case-level.
+    try:
+        run_patterns_for_case(case_id)
+    except Exception:
+        pass
+    return out
 
 
 # ───── seed from benchmark (idempotent) ─────
@@ -487,6 +630,15 @@ def _rename_person(old_id: str, new_id: str) -> None:
 def init_and_seed(reset: bool = False) -> None:
     init_db(reset=reset)
     seed_from_benchmarks()
+    # Detect forensic patterns over every case post-seed. Safe to rerun
+    # (detectors are idempotent and we clear our own flag namespace).
+    with get_session() as s:
+        case_ids = [c.id for c in s.query(CaseRow).all()]
+    for cid in case_ids:
+        try:
+            run_patterns_for_case(cid)
+        except Exception:
+            pass
 
 
 # ───── counts for /api/health ─────

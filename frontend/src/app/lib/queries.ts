@@ -8,10 +8,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchCase,
   fetchCases,
+  fetchCaseSummary,
   fetchCaseTransactions,
   fetchHealth,
   fetchTransactionAudit,
   patchTransaction,
+  runPatterns,
   type TransactionPatch,
 } from "./api";
 
@@ -19,6 +21,7 @@ export const qk = {
   health: () => ["health"] as const,
   cases: () => ["cases"] as const,
   case: (id: string) => ["case", id] as const,
+  caseSummary: (id: string) => ["case", id, "summary"] as const,
   caseTxns: (id: string, accountId?: string) =>
     ["case", id, "transactions", accountId ?? "all"] as const,
   txnAudit: (id: string) => ["transaction", id, "audit"] as const,
@@ -46,6 +49,24 @@ export const useCaseTransactions = (
       fetchCaseTransactions(caseId!, { account_id: accountId, limit }),
     enabled: !!caseId,
   });
+
+export const useCaseSummary = (caseId: string | undefined) =>
+  useQuery({
+    queryKey: qk.caseSummary(caseId ?? ""),
+    queryFn: () => fetchCaseSummary(caseId!),
+    enabled: !!caseId,
+  });
+
+export const useRunPatterns = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (caseId: string) => runPatterns(caseId),
+    onSuccess: (_data, caseId) => {
+      qc.invalidateQueries({ queryKey: ["case", caseId] });
+      qc.invalidateQueries({ queryKey: qk.caseSummary(caseId) });
+    },
+  });
+};
 
 export const useTransactionAudit = (txnId: string | undefined) =>
   useQuery({

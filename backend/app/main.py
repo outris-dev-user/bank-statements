@@ -37,7 +37,7 @@ from pydantic import BaseModel
 from app import store as store_mod
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
-    Statement,
+    Statement, CaseSummary,
 )
 
 # Import the bank parser from plugins/bank (separate tree, no coupling)
@@ -99,6 +99,14 @@ def get_case(case_id: str) -> CaseDetail:
     if not detail:
         raise HTTPException(404, f"Case {case_id} not found")
     return detail
+
+
+@app.get("/api/cases/{case_id}/summary", response_model=CaseSummary)
+def get_case_summary(case_id: str) -> CaseSummary:
+    summary = store_mod.case_summary(case_id)
+    if summary is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return summary
 
 
 @app.get("/api/cases/{case_id}/transactions", response_model=TransactionPage)
@@ -270,6 +278,15 @@ def get_transaction_audit(txn_id: str) -> list[dict]:
 
 
 # ───── dev / admin ─────
+
+@app.post("/api/cases/{case_id}/run-patterns")
+def run_patterns(case_id: str) -> dict:
+    """Run all forensic detectors over the case and persist flags."""
+    result = store_mod.run_patterns_for_case(case_id)
+    if result is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return {"status": "ok", "flags_added": result}
+
 
 @app.post("/api/dev/reset")
 def dev_reset() -> dict:

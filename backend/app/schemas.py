@@ -113,3 +113,39 @@ class TransactionPage(BaseModel):
     offset: int
     limit: int
     items: list[Transaction]
+
+
+class MonthlyPoint(BaseModel):
+    month: str          # YYYY-MM
+    dr_total: float
+    cr_total: float
+    count: int
+
+
+class TopCounterparty(BaseModel):
+    name: str
+    count: int
+    total_dr: float
+    total_cr: float
+
+
+class CategoryBreakdown(BaseModel):
+    category: str
+    count: int
+    total_dr: float
+    total_cr: float
+
+
+class CaseSummary(BaseModel):
+    """Payload for GET /api/cases/:id/summary."""
+    total_dr: float
+    total_cr: float
+    net: float
+    txn_count: int
+    flag_count: int
+    reviewed_count: int
+    unreviewed_count: int
+    flagged_count: int
+    monthly: list[MonthlyPoint]
+    top_counterparties: list[TopCounterparty]
+    categories: list[CategoryBreakdown]
