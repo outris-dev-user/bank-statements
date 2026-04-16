@@ -2,6 +2,7 @@ import { Link, useParams, useNavigate } from "react-router";
 import { ChevronLeft, User, Upload, Plus, CheckCircle, AlertTriangle, Trash2, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { UploadModal } from "./UploadModal";
+import { AddPersonDialog } from "./AddPersonDialog";
 import { useCase, useDeleteStatement } from "../lib/queries";
 import { statementPdfUrl } from "../lib/api";
 
@@ -9,6 +10,7 @@ export function CaseOverview() {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const [showUpload, setShowUpload] = useState(false);
+  const [showAddPerson, setShowAddPerson] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadPersonId, setUploadPersonId] = useState<string | undefined>(undefined);
 
@@ -58,7 +60,10 @@ export function CaseOverview() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-foreground">Persons in this case</h3>
-            <button className="px-4 py-2 border border-border rounded-lg hover:bg-background flex items-center gap-2 text-sm">
+            <button
+              onClick={() => setShowAddPerson(true)}
+              className="px-4 py-2 border border-border rounded-lg hover:bg-background flex items-center gap-2 text-sm"
+            >
               <Plus className="w-4 h-4" />
               Add person
             </button>
@@ -209,6 +214,13 @@ export function CaseOverview() {
           caseId={caseId!}
           personId={uploadPersonId}
           persons={persons}
+        />
+      )}
+
+      {showAddPerson && (
+        <AddPersonDialog
+          caseId={caseId!}
+          onClose={() => setShowAddPerson(false)}
         />
       )}
     </div>

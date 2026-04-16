@@ -1,8 +1,9 @@
-import { X, Check, Loader2, AlertCircle, Upload } from "lucide-react";
+import { X, Check, Loader2, AlertCircle, Upload, UserPlus, Sparkles } from "lucide-react";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Person } from "../data";
+import { AddPersonDialog } from "./AddPersonDialog";
 
 interface UploadModalProps {
   onClose: () => void;
@@ -16,6 +17,8 @@ interface PreviewResult {
   bank_label: string;
   account_type: string;
   account_number_guess: string | null;
+  holder_name_guess: string | null;
+  suggested_person_id: string | null;
   period_start: string;
   period_end: string;
   transaction_count: number;
@@ -46,10 +49,12 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAddPerson, setShowAddPerson] = useState(false);
+  const [autoMatched, setAutoMatched] = useState(false);
 
-  // Explicit person choice — required. "" means "not chosen yet", and we
-  // default to the `personId` prop only if it was passed (i.e. the user
-  // clicked a specific person's Upload button). Otherwise force them to pick.
+  // Explicit person choice. If a personId was passed in (user clicked a
+  // person's Upload button) use it; otherwise leave blank and let detection
+  // suggest one after the PDF is analysed.
   const [selectedPerson, setSelectedPerson] = useState<string>(personId ?? "");
 
   // Detected values the user can override before committing
@@ -66,6 +71,7 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     setError(null);
     const fd = new FormData();
     fd.append("file", f);
+    fd.append("case_id", caseId);
     try {
       const res = await fetch(`${API_BASE}/api/statements/preview`, { method: "POST", body: fd });
       if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
@@ -74,7 +80,19 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
       setBank(data.bank_label);
       setAccountType(data.account_type);
       setAccountNumber(data.account_number_guess ?? "");
-      setHolderName(persons.find((p) => p.id === selectedPerson)?.name ?? "");
+      // If the user didn't pre-pick a person, accept the suggested match.
+      if (!selectedPerson && data.suggested_person_id) {
+        setSelectedPerson(data.suggested_person_id);
+        setAutoMatched(true);
+      } else {
+        setAutoMatched(false);
+      }
+      // Holder name — prefer detected value, fall back to person's name.
+      setHolderName(
+        data.holder_name_guess ||
+        persons.find((p) => p.id === (selectedPerson || data.suggested_person_id))?.name ||
+        "",
+      );
       setStatus("preview_ready");
     } catch (e: any) {
       setError(e.message || "Preview failed");
@@ -85,6 +103,17 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
   const onFilePicked = async (f: File | null) => {
     setFile(f);
     if (f) await runPreview(f);
+  };
+
+  const onPersonCreated = (p: Person) => {
+    // A newly-created person doesn't show up in `persons` (that prop is
+    // stale until react-query refetches the case), but we can still select
+    // it by id — the backend knows about it.
+    setSelectedPerson(p.id);
+    setAutoMatched(false);
+    if (!holderName && preview?.holder_name_guess) setHolderName(preview.holder_name_guess);
+    else if (!holderName) setHolderName(p.name);
+    qc.invalidateQueries({ queryKey: ["case", caseId] });
   };
 
   const commitUpload = async () => {
@@ -123,7 +152,10 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     onClose();
   };
 
-  const personName = persons.find((p) => p.id === selectedPerson)?.name;
+  // Selected person may be a freshly-created one not yet in `persons` —
+  // derive displayed name from the list first, fall back to the preview
+  // holder value.
+  const selectedPersonName = persons.find((p) => p.id === selectedPerson)?.name;
   const canCommit = !!file && !!selectedPerson && !!accountNumber.trim() && status === "preview_ready";
 
   return (
@@ -144,66 +176,40 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-          {/* Step 1: who is this for? Always visible. */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1">
-              Person <span className="text-destructive">*</span>
-            </label>
-            <select
-              value={selectedPerson}
-              onChange={(e) => setSelectedPerson(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm bg-card ${
-                selectedPerson ? "border-border" : "border-amber-400 bg-amber-50"
-              }`}
-            >
-              <option value="">— Pick a person —</option>
-              {persons.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-            {!selectedPerson && (
-              <div className="text-xs text-amber-700 mt-1 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Statements are attached to a person's accounts — pick the right one.
-              </div>
-            )}
-          </div>
-
-          {/* Step 2: file picker */}
+          {/* Step 1: file picker. Person selection is resolved below after preview. */}
           {status === "pick" && (
-            <div
-              onClick={selectedPerson ? handlePick : undefined}
-              className={`border-2 border-dashed rounded-lg p-10 text-center transition-colors ${
-                selectedPerson
-                  ? "border-border hover:border-primary cursor-pointer"
-                  : "border-border/50 opacity-50 cursor-not-allowed"
-              }`}
-              title={selectedPerson ? "" : "Pick a person first"}
-            >
-              <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-              <div className="text-foreground">{file ? file.name : "Click to choose a PDF"}</div>
-              {file && <div className="text-sm text-muted-foreground mt-1">{(file.size / 1024).toFixed(0)} KB</div>}
-              <input
-                ref={inputRef}
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-                onChange={(e) => onFilePicked(e.target.files?.[0] ?? null)}
-              />
-            </div>
+            <>
+              <p className="text-sm text-muted-foreground">
+                Drop a PDF in and we'll detect the bank, account, and holder name. You'll confirm who it belongs to before it's saved.
+              </p>
+              <div
+                onClick={handlePick}
+                className="border-2 border-dashed border-border hover:border-primary rounded-lg p-10 text-center cursor-pointer transition-colors"
+              >
+                <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                <div className="text-foreground">{file ? file.name : "Click to choose a PDF"}</div>
+                {file && <div className="text-sm text-muted-foreground mt-1">{(file.size / 1024).toFixed(0)} KB</div>}
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={(e) => onFilePicked(e.target.files?.[0] ?? null)}
+                />
+              </div>
+            </>
           )}
 
-          {/* Step 3: analyse */}
           {status === "previewing" && (
             <div className="flex items-center gap-3 py-6 text-foreground">
               <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              Detecting bank and extracting transactions…
+              Detecting bank, account, and holder name…
             </div>
           )}
 
-          {/* Step 4: preview → confirm */}
+          {/* Step 2: preview → person assignment + confirm */}
           {status === "preview_ready" && preview && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm">
                 <div className="flex items-center gap-2 text-emerald-900">
                   <Check className="w-4 h-4" />
@@ -212,13 +218,70 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
                 <div className="text-xs text-emerald-900/80 mt-0.5">
                   Bank detected: <span className="font-mono">{preview.bank_detected}</span> · Period {preview.period_start} → {preview.period_end}
                 </div>
+                {preview.holder_name_guess && (
+                  <div className="text-xs text-emerald-900/80 mt-0.5">
+                    Holder detected: <span className="font-medium">{preview.holder_name_guess}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="bg-background border border-border rounded-lg p-4 space-y-3">
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Will add to</div>
-                <div className="text-sm font-medium text-foreground">
-                  {personName || "— no person selected —"}
+              {/* Person assignment */}
+              <div className="bg-background border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Attach to person <span className="text-destructive">*</span>
+                  </label>
+                  <button
+                    onClick={() => setShowAddPerson(true)}
+                    className="text-xs px-2 py-1 text-primary hover:bg-primary/10 rounded flex items-center gap-1"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Add new person
+                  </button>
                 </div>
+                <select
+                  value={selectedPerson}
+                  onChange={(e) => { setSelectedPerson(e.target.value); setAutoMatched(false); }}
+                  className={`w-full px-3 py-2 border rounded text-sm bg-card ${
+                    selectedPerson ? "border-border" : "border-amber-400 bg-amber-50"
+                  }`}
+                >
+                  <option value="">— Pick a person —</option>
+                  {persons.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                  {/* If the user just created a new person, they won't be in
+                      `persons` yet (props are stale until the case refetches).
+                      Show the freshly-selected id as a placeholder option. */}
+                  {selectedPerson && !persons.find((p) => p.id === selectedPerson) && (
+                    <option value={selectedPerson}>
+                      {selectedPersonName ?? `(newly created — ${selectedPerson})`}
+                    </option>
+                  )}
+                </select>
+                {autoMatched && selectedPerson && (
+                  <div className="text-xs text-primary mt-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Auto-matched by holder name. Change if wrong.
+                  </div>
+                )}
+                {!selectedPerson && preview.holder_name_guess && (
+                  <div className="text-xs text-amber-700 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    No existing person matches "{preview.holder_name_guess}" — pick one, or add them as a new person.
+                  </div>
+                )}
+                {!selectedPerson && !preview.holder_name_guess && (
+                  <div className="text-xs text-amber-700 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    Couldn't detect the holder name from this PDF — pick a person manually.
+                  </div>
+                )}
+              </div>
+
+              {/* Account details */}
+              <div className="bg-background border border-border rounded-lg p-4 space-y-3">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">Account details</div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-muted-foreground block mb-1">Bank</label>
@@ -255,12 +318,12 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
                     />
                     {!preview.account_number_guess && (
                       <div className="text-xs text-amber-700 mt-1">
-                        Couldn't auto-detect. Type the last 4 digits so this account can be identified.
+                        Couldn't auto-detect. Type the last 4 digits.
                       </div>
                     )}
                   </div>
                   <div>
-                    <label className="text-xs text-muted-foreground block mb-1">Holder name</label>
+                    <label className="text-xs text-muted-foreground block mb-1">Holder name on statement</label>
                     <input
                       value={holderName}
                       onChange={(e) => setHolderName(e.target.value)}
@@ -329,6 +392,15 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
           )}
         </div>
       </div>
+
+      {showAddPerson && (
+        <AddPersonDialog
+          caseId={caseId}
+          initialName={preview?.holder_name_guess ?? ""}
+          onClose={() => setShowAddPerson(false)}
+          onCreated={onPersonCreated}
+        />
+      )}
     </div>
   );
 }

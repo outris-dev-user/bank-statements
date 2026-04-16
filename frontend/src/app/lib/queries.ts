@@ -6,6 +6,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createPerson,
   deleteStatement,
   fetchCase,
   fetchCases,
@@ -20,6 +21,7 @@ import {
   resolveEntities,
   runPatterns,
   unlinkTransactionEntity,
+  type PersonCreate,
   type TransactionPatch,
 } from "./api";
 
@@ -120,6 +122,17 @@ export const useUnlinkEntity = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["entity"] });
       qc.invalidateQueries({ queryKey: ["case"] });
+    },
+  });
+};
+
+export const useCreatePerson = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ caseId, body }: { caseId: string; body: PersonCreate }) =>
+      createPerson(caseId, body),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["case", vars.caseId] });
     },
   });
 };

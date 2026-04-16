@@ -51,6 +51,18 @@ export interface CaseDetail {
 export const fetchCase = (caseId: string) =>
   request<CaseDetail>(`/api/cases/${encodeURIComponent(caseId)}`);
 
+export interface PersonCreate {
+  name: string;
+  pan?: string;
+  phone?: string;
+}
+
+export const createPerson = (caseId: string, body: PersonCreate) =>
+  request<Person>(`/api/cases/${encodeURIComponent(caseId)}/persons`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
 export interface TransactionPage {
   total: number;
   offset: number;

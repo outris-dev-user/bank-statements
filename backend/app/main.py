@@ -190,6 +190,130 @@ def _guess_account_number(text: str) -> str | None:
     return None
 
 
+_HOLDER_LABEL_RX = [
+    re.compile(r"(?:Customer|Account Holder|Holder|Primary Holder)\s*Name\s*[:\-]\s*([A-Z][A-Za-z\s\.\-]{2,80})", re.I),
+    re.compile(r"Statement\s+(?:for|of)\s+([A-Z][A-Za-z\s\.\-]{2,80})", re.I),
+    re.compile(r"\bDear\s+(?:Mr\.?|Mrs\.?|Ms\.?|Miss)?\s*([A-Z][A-Za-z\s\.\-]{2,80})", re.I),
+]
+
+# Words that disqualify an all-caps line from being a person's name.
+_HOLDER_BLOCKLIST = re.compile(
+    r"\b(BANK|LTD|LIMITED|PVT|PRIVATE|STATEMENT|ACCOUNT|BRANCH|ADDRESS|CUSTOMER"
+    r"|NOMIN|IFSC|MICR|CITY|STATE|INDIA|EMAIL|PHONE|MOBILE|DATE|PERIOD|PAGE"
+    r"|FROM|TO|CURRENCY|INR|OPENING|CLOSING|BALANCE|DEBIT|CREDIT|WITHDRAWAL"
+    r"|DEPOSIT|TRANSACTION|REGISTERED|ENTERPRISES|COMPANY|ROAD|STREET|FLOOR"
+    r"|NAGAR|MUMBAI|DELHI|BANGALORE|BENGALURU|CHENNAI|KOLKATA|HYDERABAD|PUNE"
+    r"|THANE|GURGAON|NOIDA|MAHARASHTRA|KARNATAKA|GUJARAT|RAJASTHAN|PUNJAB"
+    r"|HARYANA|ORISSA|ODISHA|BIHAR|GMAIL|YAHOO|HOTMAIL|OUTLOOK|COM|WWW|HTTP"
+    r"|JOINT|HOLDERS?|NOMINEE|CHEQUE|REF|SUMMARY|OPERATIVE|TYPE|NUMBER|CENTER"
+    r"|ANDHERI|VIKHROLI|POWAI|SAKI|VIHAR|BHILWARA|AJMER|GANDHI)\b",
+    re.I,
+)
+
+_PREFIX_RX = re.compile(r"^(MR|MRS|MS|MISS|DR|SHRI|SMT|M/S)\.?\s*", re.I)
+
+# Substrings that indicate an address line even when concatenated without
+# whitespace (e.g., "MAHAKALICAVESROAD", "ANDHERIWEST"). Checked without
+# word boundaries so concatenated tokens still match.
+_ADDRESS_SUBSTRING = re.compile(
+    r"(ROAD|STREET|NAGAR|PURAM|MANZIL|CENTER|CENTRE|BUILDING|HOUSE|APARTMENT"
+    r"|COMPLEX|ESTATES?|MARKET|CHOWK|GALI|PARK|GARDEN|PLAZA|TOWER|MALL|SOCIETY"
+    r"|COLONY|LAYOUT|PHASE|SECTOR|BLOCK|FLAT|FLOOR|WING|GROUND|LANE|CROSS|MAIN"
+    r"|EAST|WEST|NORTH|SOUTH|DWAR|BAZAAR|BAZAR|COURT|VILLA|HEIGHTS|HILLS)",
+    re.I,
+)
+
+
+def _clean_holder_candidate(line: str) -> str:
+    name = _PREFIX_RX.sub("", line).strip(" .-,:")
+    return name
+
+
+def _is_holder_candidate(line: str) -> bool:
+    """True if `line` looks like a plausible account-holder name."""
+    line = line.strip()
+    if not (5 <= len(line) <= 80):
+        return False
+    if any(c.isdigit() for c in line):
+        return False
+    alpha = [c for c in line if c.isalpha()]
+    if len(alpha) < 4:
+        return False
+    if sum(1 for c in alpha if c.isupper()) / len(alpha) < 0.85:
+        return False
+    if _HOLDER_BLOCKLIST.search(line):
+        return False
+    parts = line.split()
+    # A single token is only OK if it's long (e.g. "BILALABDULKUDDUSKHANMOHAMMED")
+    if len(parts) == 1 and len(line.replace(".", "")) < 14:
+        return False
+    return True
+
+
+def _guess_holder_name(text: str) -> str | None:
+    """Best-effort holder-name extraction. First tries labeled patterns, then
+    falls back to scanning all-caps lines in the top of the statement."""
+    # Pass 1 — explicit labels
+    for rx in _HOLDER_LABEL_RX:
+        m = rx.search(text)
+        if m:
+            raw = re.split(r"\s{2,}|\n|,", m.group(1).strip(), maxsplit=1)[0].strip(" .-")
+            if 3 <= len(raw) < 80 and not _HOLDER_BLOCKLIST.search(raw):
+                return _clean_holder_candidate(raw)
+
+    # Pass 2 — lines with an honorific prefix. Strongest bare-name signal.
+    lines = [l.rstrip() for l in text.splitlines() if l.strip()][:40]
+    for line in lines:
+        if not _PREFIX_RX.match(line):
+            continue
+        probe = _PREFIX_RX.sub("", line).strip()
+        if _is_holder_candidate(probe):
+            return _clean_holder_candidate(line)
+
+    # Pass 3 — first plausible all-caps line in the header, skipping
+    # anything that looks like an address.
+    for line in lines:
+        if _ADDRESS_SUBSTRING.search(line):
+            continue
+        probe = _PREFIX_RX.sub("", line).strip()
+        if _is_holder_candidate(probe):
+            return _clean_holder_candidate(line)
+
+    return None
+
+
+def _normalise_name(name: str) -> str:
+    import re as _re
+    return _re.sub(r"[^a-z0-9]+", " ", (name or "").lower()).strip()
+
+
+def _suggest_person_match(holder: str | None, persons: list[dict]) -> str | None:
+    """Given a detected holder name and the list of persons in a case, return
+    the best-matching person's id if any. Matches by normalised substring
+    containment in either direction.
+    """
+    if not holder:
+        return None
+    h = _normalise_name(holder)
+    if not h or len(h) < 3:
+        return None
+    best_id = None
+    best_score = 0
+    for p in persons:
+        n = _normalise_name(p.get("name", ""))
+        if not n:
+            continue
+        if n == h:
+            return p["id"]
+        if n in h or h in n:
+            # score = length of shorter, so longer matches win ties
+            score = min(len(n), len(h))
+            if score > best_score:
+                best_score = score
+                best_id = p["id"]
+    return best_id
+
+
 @app.post("/api/cases/{case_id}/statements", status_code=201)
 async def upload_statement(
     case_id: str,
@@ -253,9 +377,13 @@ async def upload_statement(
 
 
 @app.post("/api/statements/preview")
-async def preview_statement(file: UploadFile = File(...)) -> dict:
-    """Detect bank / account number / period from a PDF without persisting it.
-    The frontend shows these to the investigator before committing the upload.
+async def preview_statement(
+    file: UploadFile = File(...),
+    case_id: str | None = Form(default=None),
+) -> dict:
+    """Detect bank / account number / period / holder name from a PDF without
+    persisting it. If `case_id` is provided, also suggest a matching existing
+    person whose name is close to the detected holder.
     """
     if not file.filename:
         raise HTTPException(400, "Missing file")
@@ -269,11 +397,22 @@ async def preview_statement(file: UploadFile = File(...)) -> dict:
         txns = parse_text(text)
         defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
         period_start, period_end = _guess_period(text)
+        holder = _guess_holder_name(text)
+
+        suggested_person_id = None
+        if case_id:
+            detail = store_mod.get_case(case_id)
+            if detail is not None:
+                persons_for_match = [p.model_dump() for p in detail.persons]
+                suggested_person_id = _suggest_person_match(holder, persons_for_match)
+
         return {
             "bank_detected": bank_key,
             "bank_label": defaults["display"],
             "account_type": defaults["account_type"],
             "account_number_guess": _guess_account_number(text),
+            "holder_name_guess": holder,
+            "suggested_person_id": suggested_person_id,
             "period_start": period_start,
             "period_end": period_end,
             "transaction_count": len(txns),
