@@ -1,6 +1,7 @@
-import { X, FileText, Info } from "lucide-react";
+import { X, FileText, Info, Loader2, AlertCircle } from "lucide-react";
 import type { Transaction } from "../data";
 import { useState } from "react";
+import { usePatchTransaction } from "../lib/queries";
 
 interface EditDrawerProps {
   transaction: Transaction;
@@ -13,10 +14,21 @@ export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
   const [amount, setAmount] = useState(transaction.amount.toString());
   const [date, setDate] = useState(transaction.txn_date);
 
+  const patchMut = usePatchTransaction();
+
   const handleSave = () => {
-    // In a real app, this would save to backend
-    console.log('Saving transaction:', { entities, tags, amount, date });
-    onClose();
+    patchMut.mutate(
+      {
+        id: transaction.id,
+        patch: {
+          entities,
+          tags,
+          amount: Number(amount) || transaction.amount,
+          txn_date: date,
+        },
+      },
+      { onSuccess: () => onClose() },
+    );
   };
 
   return (
@@ -240,10 +252,25 @@ export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
 
       {/* Footer */}
       <div className="border-t border-border px-6 py-4 flex items-center justify-end gap-3">
-        <button onClick={onClose} className="px-4 py-2 border border-border rounded-lg hover:bg-background">
+        {patchMut.isError && (
+          <div className="flex items-center gap-1.5 text-sm text-destructive mr-auto">
+            <AlertCircle className="w-4 h-4" />
+            {String(patchMut.error)}
+          </div>
+        )}
+        <button
+          onClick={onClose}
+          disabled={patchMut.isPending}
+          className="px-4 py-2 border border-border rounded-lg hover:bg-background disabled:opacity-50"
+        >
           Cancel
         </button>
-        <button onClick={handleSave} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+        <button
+          onClick={handleSave}
+          disabled={patchMut.isPending}
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2 disabled:opacity-50"
+        >
+          {patchMut.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
           Save
         </button>
       </div>

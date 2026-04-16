@@ -1,21 +1,23 @@
 import { Link, useParams, useNavigate } from "react-router";
-import { mockCases, mockPersons, mockAccounts } from "../data";
 import { ChevronLeft, User, Upload, Plus, CheckCircle, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { UploadModal } from "./UploadModal";
+import { useCase } from "../lib/queries";
 
 export function CaseOverview() {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const [showUpload, setShowUpload] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadPersonId, setUploadPersonId] = useState<string | undefined>(undefined);
 
-  const caseItem = mockCases.find((c) => c.id === caseId);
-  const persons = mockPersons.filter((p) => p.case_id === caseId);
+  const { data: detail, isLoading, error } = useCase(caseId);
 
-  if (!caseItem) {
-    return <div>Case not found</div>;
-  }
+  if (isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
+  if (error) return <div className="p-8 text-destructive">Failed to load: {String(error)}</div>;
+  if (!detail) return <div>Case not found</div>;
+
+  const { case: caseItem, persons, accounts } = detail;
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -65,7 +67,7 @@ export function CaseOverview() {
 
           <div className="space-y-6">
             {persons.map((person) => {
-              const personAccounts = mockAccounts.filter((a) => a.person_id === person.id);
+              const personAccounts = accounts.filter((a) => a.person_id === person.id);
               return (
                 <div key={person.id} className="bg-card rounded-lg border border-border p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -74,7 +76,7 @@ export function CaseOverview() {
                       <h4 className="font-semibold text-foreground">{person.name}</h4>
                     </div>
                     <button
-                      onClick={() => setShowUpload(true)}
+                      onClick={() => { setUploadPersonId(person.id); setShowUpload(true); }}
                       className="px-4 py-2 border border-border rounded-lg hover:bg-background flex items-center gap-2 text-sm"
                     >
                       <Upload className="w-4 h-4" />
@@ -104,9 +106,7 @@ export function CaseOverview() {
                             ) : (
                               <CheckCircle className="w-4 h-4 text-green-500" />
                             )}
-                            <span>
-                              {account.transaction_count} txns · 1 statement
-                            </span>
+                            <span>{account.transaction_count} txns</span>
                           </div>
                         </div>
                       ))}
@@ -134,7 +134,7 @@ export function CaseOverview() {
             Auto-detects bank + account holder. Supports HDFC, IDFC, ICICI, Kotak, SBI, Axis…
           </p>
           <button
-            onClick={() => setShowUpload(true)}
+            onClick={() => { setUploadPersonId(persons[0]?.id); setShowUpload(true); }}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
           >
             Choose files
@@ -151,7 +151,14 @@ export function CaseOverview() {
         </div>
       </main>
 
-      {showUpload && <UploadModal onClose={() => setShowUpload(false)} caseId={caseId!} />}
+      {showUpload && (
+        <UploadModal
+          onClose={() => setShowUpload(false)}
+          caseId={caseId!}
+          personId={uploadPersonId ?? persons[0]?.id}
+          persons={persons}
+        />
+      )}
     </div>
   );
 }

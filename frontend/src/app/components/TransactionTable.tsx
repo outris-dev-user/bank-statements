@@ -2,7 +2,6 @@ import { useState } from "react";
 import React from "react";
 import { ChevronDown, ChevronUp, Flag, FileText, CheckCircle } from "lucide-react";
 import type { Transaction } from "../data";
-import { mockStatements } from "../data";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -46,34 +45,30 @@ export function TransactionTable({ transactions, accountId, onEditTransaction }:
     return null;
   };
 
-  // Group transactions by statement
-  const groupedTransactions: Array<{ statement: any; transactions: Transaction[] }> = [];
-  let currentStatement: any = null;
-  let currentGroup: Transaction[] = [];
-
-  transactions.forEach((txn, idx) => {
-    if (accountId) {
-      const statement = mockStatements.find(s => s.id === txn.statement_id);
-      if (statement !== currentStatement) {
-        if (currentStatement && currentGroup.length > 0) {
-          groupedTransactions.push({ statement: currentStatement, transactions: currentGroup });
+  // Group transactions by statement_id when viewing a single account so we
+  // can show a separator between statements. Without the Statement lookup
+  // table we just use the stable statement_id as the group key.
+  const displayGroups: Array<{ statementId: string | null; transactions: Transaction[] }> = [];
+  if (accountId) {
+    let currentId: string | null = null;
+    let currentGroup: Transaction[] = [];
+    transactions.forEach((txn) => {
+      if (txn.statement_id !== currentId) {
+        if (currentGroup.length > 0) {
+          displayGroups.push({ statementId: currentId, transactions: currentGroup });
         }
-        currentStatement = statement;
+        currentId = txn.statement_id;
         currentGroup = [txn];
       } else {
         currentGroup.push(txn);
       }
-    } else {
-      currentGroup.push(txn);
+    });
+    if (currentGroup.length > 0) {
+      displayGroups.push({ statementId: currentId, transactions: currentGroup });
     }
-  });
-
-  if (currentGroup.length > 0) {
-    groupedTransactions.push({ statement: currentStatement, transactions: currentGroup });
+  } else {
+    displayGroups.push({ statementId: null, transactions });
   }
-
-  // If not filtered by account, just show all transactions
-  const displayGroups = accountId ? groupedTransactions : [{ statement: null, transactions }];
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
@@ -234,9 +229,7 @@ export function TransactionTable({ transactions, accountId, onEditTransaction }:
                 {groupIdx < displayGroups.length - 1 && accountId && (
                   <tr className="bg-muted border-y border-border">
                     <td colSpan={9} className="px-4 py-2 text-center text-xs text-muted-foreground">
-                      ── {new Date(group.statement.period_end).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} statement ends │{' '}
-                      {new Date(displayGroups[groupIdx + 1].statement.period_start).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} statement begins ──
-                      <button className="ml-3 text-primary hover:text-primary/80">⋯ file</button>
+                      ── statement {group.statementId} ends │ statement {displayGroups[groupIdx + 1].statementId} begins ──
                     </td>
                   </tr>
                 )}

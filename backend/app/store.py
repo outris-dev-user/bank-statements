@@ -1,201 +1,462 @@
-"""In-memory store seeded from the benchmark parser output.
+"""SQLite-backed store.
 
-Phase 1 stub — not a real database. Replace with SQLite/SQLAlchemy when
-we wire persistence. The shape of the store (cases, persons, accounts,
-statements, transactions dicts keyed by id) matches what SQLAlchemy
-models will look like one layer up.
+Public API mirrors what main.py needs:
+
+    store.list_cases() -> list[Case]
+    store.get_case(case_id) -> CaseDetail | None
+    store.list_case_transactions(case_id, account_id=None, offset=0, limit=100)
+    store.get_statement(statement_id) -> Statement | None
+    store.get_transaction(txn_id) -> Transaction | None
+    store.patch_transaction(txn_id, patch) -> Transaction | None
+    store.list_transaction_audit(txn_id) -> list[AuditEvent]
+    store.create_case(fir_number, title, officer_name) -> Case
+    store.ingest_statement(case_id, person_id, pdf_path, ...) -> (Statement, list[Transaction])
+    store.seed_from_benchmarks()   # idempotent — re-runs the static seed if tables are empty
+
+Data flows through Pydantic schemas at every external boundary; the
+ORM rows stay inside this module.
 """
 from __future__ import annotations
 import json
-from pathlib import Path
-from typing import Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Optional, Tuple
 
+from app.db import (
+    Base, engine, get_session,
+    CaseRow, PersonRow, AccountRow, StatementRow, TransactionRow, EditEventRow,
+    init_db,
+)
 from app.schemas import (
     Case, Person, Account, Statement, Transaction, EntityValue,
+    CaseDetail, TransactionPage, TransactionPatch,
 )
 
-# Paths
-BACKEND = Path(__file__).parent.parent
-REPO = BACKEND.parent
-BENCHMARK_RESULTS = REPO / "benchmarks" / "results" / "pdfplumber_text"
+
+# ───── row → schema conversion ─────
+
+def _case_row_to_schema(row: CaseRow, counts: Optional[dict] = None) -> Case:
+    counts = counts or {}
+    return Case(
+        id=row.id,
+        fir_number=row.fir_number,
+        title=row.title,
+        officer_name=row.officer_name,
+        status=row.status,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        statement_count=counts.get("statements", 0),
+        transaction_count=counts.get("transactions", 0),
+        flag_count=counts.get("flags", 0),
+    )
 
 
-class Store:
-    def __init__(self) -> None:
-        self.cases: dict[str, Case] = {}
-        self.persons: dict[str, Person] = {}
-        self.accounts: dict[str, Account] = {}
-        self.statements: dict[str, Statement] = {}
-        self.transactions: dict[str, Transaction] = {}
-        # audit log: per-transaction list of edit events
-        self.audit: dict[str, list[dict]] = {}
+def _person_row_to_schema(row: PersonRow) -> Person:
+    return Person(
+        id=row.id, case_id=row.case_id, name=row.name,
+        aliases=json.loads(row.aliases_json or "[]"),
+        pan=row.pan, phone=row.phone, notes=row.notes,
+    )
 
-    # ───── seed from export ─────
-    def seed_from_export(self, export_json_path: Optional[Path] = None) -> None:
-        """Seed from the realData.ts the export script produces — via a
-        sibling JSON the export writes for us.
 
-        For the stub we instead duplicate the seeding logic inline by
-        reading the same benchmark JSON files the export-for-frontend
-        script uses. That keeps this backend independent of the
-        TypeScript file (which is what the frontend consumes).
-        """
-        # Re-seed: clear
-        self.__init__()
+def _account_row_to_schema(row: AccountRow) -> Account:
+    return Account(
+        id=row.id, person_id=row.person_id, bank=row.bank,
+        account_type=row.account_type, account_number=row.account_number,
+        holder_name=row.holder_name, currency=row.currency,
+        transaction_count=row.transaction_count, has_warnings=row.has_warnings,
+    )
 
-        # Import declarations from the export script, which is the SoT for
-        # "which PDFs feed which cases with what declared totals".
-        import sys
-        sys.path.insert(0, str(REPO / "tools"))
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "export_for_frontend", REPO / "tools" / "export-for-frontend.py"
+
+def _statement_row_to_schema(row: StatementRow) -> Statement:
+    return Statement(
+        id=row.id, account_id=row.account_id,
+        source_file_name=row.source_file_name,
+        period_start=row.period_start, period_end=row.period_end,
+        opening_balance=row.opening_balance,
+        closing_balance=row.closing_balance,
+        extracted_txn_count=row.extracted_txn_count,
+        sum_check_debits_pct=row.sum_check_debits_pct,
+        sum_check_credits_pct=row.sum_check_credits_pct,
+        uploaded_at=row.uploaded_at, uploaded_by=row.uploaded_by,
+    )
+
+
+def _txn_row_to_schema(row: TransactionRow) -> Transaction:
+    entities_raw = json.loads(row.entities_json or "{}")
+    entities = {k: EntityValue(**v) for k, v in entities_raw.items()}
+    return Transaction(
+        id=row.id, statement_id=row.statement_id, account_id=row.account_id,
+        case_id=row.case_id, row_index=row.row_index, txn_date=row.txn_date,
+        amount=row.amount, direction=row.direction, running_balance=row.running_balance,
+        raw_description=row.raw_description, entities=entities,
+        tags=json.loads(row.tags_json or "[]"),
+        confidence=row.confidence,
+        flags=json.loads(row.flags_json or "[]"),
+        review_status=row.review_status, edit_count=row.edit_count,
+    )
+
+
+# ───── per-case aggregate counts ─────
+
+def _case_counts(session, case_id: str) -> dict:
+    from sqlalchemy import func, select
+    stmt_count = session.scalar(
+        select(func.count(StatementRow.id)).join(AccountRow, StatementRow.account_id == AccountRow.id)
+        .join(PersonRow, AccountRow.person_id == PersonRow.id)
+        .where(PersonRow.case_id == case_id)
+    ) or 0
+    txn_count = session.scalar(
+        select(func.count(TransactionRow.id)).where(TransactionRow.case_id == case_id)
+    ) or 0
+    # flags: count transactions with non-empty flags_json
+    flag_txns = session.execute(
+        select(TransactionRow.flags_json).where(TransactionRow.case_id == case_id)
+    ).scalars().all()
+    flag_count = sum(len(json.loads(f or "[]")) for f in flag_txns)
+    return {"statements": stmt_count, "transactions": txn_count, "flags": flag_count}
+
+
+# ───── public API ─────
+
+def list_cases() -> list[Case]:
+    with get_session() as s:
+        rows = s.query(CaseRow).all()
+        return [_case_row_to_schema(r, _case_counts(s, r.id)) for r in rows]
+
+
+def get_case(case_id: str) -> Optional[CaseDetail]:
+    with get_session() as s:
+        row = s.get(CaseRow, case_id)
+        if not row:
+            return None
+        persons = s.query(PersonRow).filter_by(case_id=case_id).all()
+        person_ids = [p.id for p in persons]
+        accounts = s.query(AccountRow).filter(AccountRow.person_id.in_(person_ids)).all() if person_ids else []
+        return CaseDetail(
+            case=_case_row_to_schema(row, _case_counts(s, case_id)),
+            persons=[_person_row_to_schema(p) for p in persons],
+            accounts=[_account_row_to_schema(a) for a in accounts],
         )
-        if spec is None or spec.loader is None:
-            raise RuntimeError("Cannot locate tools/export-for-frontend.py")
-        export_mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(export_mod)
 
-        PDFS = export_mod.PDFS
-        CASES = export_mod.CASES
-        iso_date = export_mod.iso_date
-        infer_channel = export_mod.infer_channel
-        infer_category = export_mod.infer_category
-        infer_counterparty = export_mod.infer_counterparty
 
-        for case_seed in CASES:
-            case_id = case_seed["id"]
-            seen_accounts: dict[tuple, str] = {}
-            case_stmt_count = 0
-            case_txn_count = 0
-            case_flag_count = 0
+def list_case_transactions(
+    case_id: str, account_id: Optional[str] = None, offset: int = 0, limit: int = 100,
+) -> Optional[TransactionPage]:
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        q = s.query(TransactionRow).filter_by(case_id=case_id)
+        if account_id:
+            q = q.filter_by(account_id=account_id)
+        q = q.order_by(TransactionRow.statement_id.asc(), TransactionRow.row_index.asc())
+        total = q.count()
+        items = q.offset(offset).limit(limit).all()
+        return TransactionPage(
+            total=total, offset=offset, limit=limit,
+            items=[_txn_row_to_schema(r) for r in items],
+        )
 
-            for person in case_seed["persons"]:
-                pid = person["id"]
-                self.persons[pid] = Person(
-                    id=pid,
-                    case_id=case_id,
-                    name=person["name"],
-                    aliases=[],
-                    pan=person.get("pan"),
-                    phone=person.get("phone"),
-                )
 
-            for pdf_name, person_id in case_seed["pdfs"]:
-                meta = PDFS.get(pdf_name)
-                if not meta:
-                    continue
-                acc_key = (meta["bank"], meta["account_number"], person_id)
-                if acc_key not in seen_accounts:
-                    acc_id = f"a{len(self.accounts) + 1}"
-                    seen_accounts[acc_key] = acc_id
-                    self.accounts[acc_id] = Account(
-                        id=acc_id,
-                        person_id=person_id,
-                        bank=meta["bank"],
-                        account_type=meta["account_type"],
-                        account_number=meta["account_number"],
-                        holder_name=meta["holder"],
-                        currency="INR",
-                    )
-                acc_id = seen_accounts[acc_key]
+def get_statement(statement_id: str) -> Optional[Statement]:
+    with get_session() as s:
+        row = s.get(StatementRow, statement_id)
+        return _statement_row_to_schema(row) if row else None
 
-                stem = Path(pdf_name).stem
-                json_path = BENCHMARK_RESULTS / f"{stem}.json"
-                if not json_path.exists():
-                    continue
-                data = json.loads(json_path.read_text(encoding="utf-8"))
-                parser_txns = data.get("txns", [])
 
-                stmt_id = f"s{len(self.statements) + 1}"
-                sum_dr = sum(t["amount"] for t in parser_txns if t["type"] == "Dr")
-                sum_cr = sum(t["amount"] for t in parser_txns if t["type"] == "Cr")
-                dec_dr = meta["declared_dr"]
-                dec_cr = meta["declared_cr"]
-                dr_pct = (sum_dr / dec_dr * 100) if dec_dr else 100.0
-                cr_pct = (sum_cr / dec_cr * 100) if dec_cr else 100.0
+def get_transaction(txn_id: str) -> Optional[Transaction]:
+    with get_session() as s:
+        row = s.get(TransactionRow, txn_id)
+        return _txn_row_to_schema(row) if row else None
 
-                self.statements[stmt_id] = Statement(
-                    id=stmt_id,
-                    account_id=acc_id,
-                    source_file_name=pdf_name,
-                    period_start=meta["period_start"],
-                    period_end=meta["period_end"],
-                    opening_balance=float(meta.get("opening", 0)),
-                    closing_balance=float(meta.get("closing", 0)),
-                    extracted_txn_count=len(parser_txns),
-                    sum_check_debits_pct=round(dr_pct, 2),
-                    sum_check_credits_pct=round(cr_pct, 2),
-                    uploaded_at=datetime.utcnow().isoformat(timespec="seconds"),
-                    uploaded_by="Saurabh",
-                )
-                case_stmt_count += 1
 
-                running_balance = float(meta.get("opening", 0))
-                for idx, t in enumerate(parser_txns, start=1):
-                    raw = t.get("description", "")
-                    channel = infer_channel(raw)
-                    category = infer_category(raw)
-                    counterparty = infer_counterparty(raw, channel)
-                    amount = float(t["amount"])
-                    direction = t["type"]
-                    running_balance += amount if direction == "Cr" else -amount
+def patch_transaction(txn_id: str, patch: TransactionPatch) -> Optional[Transaction]:
+    with get_session() as s:
+        row = s.get(TransactionRow, txn_id)
+        if not row:
+            return None
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        updates = patch.model_dump(exclude_unset=True)
+        # Record each changed field in the audit log
+        for field, new_val in updates.items():
+            if field == "entities":
+                old_val = row.entities_json
+                new_json = {k: v.model_dump() if hasattr(v, "model_dump") else v for k, v in new_val.items()}
+                row.entities_json = json.dumps(new_json)
+            elif field == "tags":
+                old_val = row.tags_json
+                row.tags_json = json.dumps(new_val)
+            elif field == "amount":
+                old_val = str(row.amount)
+                row.amount = float(new_val)
+            elif field == "txn_date":
+                old_val = row.txn_date
+                row.txn_date = new_val
+            elif field == "review_status":
+                old_val = row.review_status
+                row.review_status = new_val
+            else:
+                continue
+            s.add(EditEventRow(
+                transaction_id=txn_id, actor="unknown",
+                field=field, old_value=str(old_val)[:500], new_value=str(new_val)[:500], at=now,
+            ))
+        row.edit_count += 1
+        s.commit()
+        s.refresh(row)
+        return _txn_row_to_schema(row)
 
-                    conf: str = "high"
-                    flags: list[str] = []
-                    if counterparty.startswith("(unknown") or len(counterparty) < 3:
-                        conf = "low"
-                        flags.append("NEEDS_REVIEW")
-                    elif channel == "OTHER":
-                        conf = "medium"
 
-                    tid = f"t{len(self.transactions) + 1}"
-                    self.transactions[tid] = Transaction(
-                        id=tid,
-                        statement_id=stmt_id,
-                        account_id=acc_id,
-                        case_id=case_id,
-                        row_index=idx,
-                        txn_date=iso_date(t.get("date", "")),
-                        amount=amount,
-                        direction=direction,
-                        running_balance=round(running_balance, 2),
-                        raw_description=raw,
-                        entities={
-                            "channel":      EntityValue(value=channel,      source="extracted",     confidence=1.0 if channel != "OTHER" else 0.4),
-                            "counterparty": EntityValue(value=counterparty, source="extracted",     confidence=0.9 if conf == "high" else 0.5 if conf == "medium" else 0.25),
-                            "category":     EntityValue(value=category,     source="auto_resolved", confidence=0.7),
-                        },
-                        tags=[],
-                        confidence=conf,
-                        flags=flags,
-                        review_status="unreviewed",
-                        edit_count=0,
-                    )
-                    case_txn_count += 1
-                    case_flag_count += len(flags)
+def list_transaction_audit(txn_id: str) -> Optional[list[dict]]:
+    with get_session() as s:
+        if not s.get(TransactionRow, txn_id):
+            return None
+        events = s.query(EditEventRow).filter_by(transaction_id=txn_id).order_by(EditEventRow.id.asc()).all()
+        return [
+            {"field": e.field, "old": e.old_value, "new": e.new_value, "at": e.at, "by": e.actor}
+            for e in events
+        ]
 
-                # update account totals
-                acc = self.accounts[acc_id]
-                acc.transaction_count += len(parser_txns)
-                if dr_pct != 100.0 or cr_pct != 100.0:
-                    acc.has_warnings = True
 
-            self.cases[case_id] = Case(
-                id=case_id,
-                fir_number=case_seed["fir_number"],
-                title=case_seed["title"],
-                officer_name=case_seed["officer_name"],
-                status=case_seed["status"],
-                created_at="2026-04-13T10:30:00",
-                updated_at=datetime.utcnow().isoformat(timespec="seconds"),
-                statement_count=case_stmt_count,
-                transaction_count=case_txn_count,
-                flag_count=case_flag_count,
+# ───── writes: create case / ingest statement ─────
+
+def _next_id(session, prefix: str, row_class) -> str:
+    """Generate next id of the form {prefix}{N} based on existing rows —
+    flushes pending inserts first so multiple calls within a single
+    transaction don't collide."""
+    session.flush()
+    n = session.query(row_class).count() + 1
+    while session.get(row_class, f"{prefix}{n}") is not None:
+        n += 1
+    return f"{prefix}{n}"
+
+
+def create_case(fir_number: str, title: str, officer_name: str) -> Case:
+    with get_session() as s:
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        cid = _next_id(s, "c", CaseRow)
+        row = CaseRow(
+            id=cid, fir_number=fir_number, title=title, officer_name=officer_name,
+            status="active", created_at=now, updated_at=now,
+        )
+        s.add(row)
+        s.commit()
+        return _case_row_to_schema(row, {"statements": 0, "transactions": 0, "flags": 0})
+
+
+def create_person(case_id: str, name: str, pan: Optional[str] = None, phone: Optional[str] = None) -> Optional[Person]:
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        pid = _next_id(s, "p", PersonRow)
+        row = PersonRow(id=pid, case_id=case_id, name=name, aliases_json="[]", pan=pan, phone=phone)
+        s.add(row)
+        s.commit()
+        return _person_row_to_schema(row)
+
+
+def ingest_statement(
+    *, case_id: str, person_id: str, source_file_name: str, source_file_path: Optional[str],
+    bank: str, account_type: str, account_number: str, holder_name: str,
+    period_start: str, period_end: str, opening_balance: float, closing_balance: float,
+    declared_dr: Optional[float], declared_cr: Optional[float],
+    parser_txns: list[dict], uploaded_by: str = "unknown",
+) -> Optional[Tuple[Statement, list[Transaction]]]:
+    """Persist a parsed statement + its transactions. Used by the upload endpoint."""
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        if not s.get(PersonRow, person_id):
+            return None
+
+        # Find or create the account (identified by bank + account_number + person)
+        acc = s.query(AccountRow).filter_by(
+            person_id=person_id, bank=bank, account_number=account_number,
+        ).first()
+        if not acc:
+            aid = _next_id(s, "a", AccountRow)
+            acc = AccountRow(
+                id=aid, person_id=person_id, bank=bank, account_type=account_type,
+                account_number=account_number, holder_name=holder_name, currency="INR",
+                transaction_count=0, has_warnings=False,
+            )
+            s.add(acc)
+            s.flush()
+
+        # Sum check
+        sum_dr = sum(t["amount"] for t in parser_txns if t["type"] == "Dr")
+        sum_cr = sum(t["amount"] for t in parser_txns if t["type"] == "Cr")
+        dr_pct = (sum_dr / declared_dr * 100.0) if declared_dr else 100.0
+        cr_pct = (sum_cr / declared_cr * 100.0) if declared_cr else 100.0
+
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        sid = _next_id(s, "s", StatementRow)
+        stmt = StatementRow(
+            id=sid, account_id=acc.id, source_file_name=source_file_name,
+            source_file_path=source_file_path,
+            period_start=period_start, period_end=period_end,
+            opening_balance=opening_balance, closing_balance=closing_balance,
+            extracted_txn_count=len(parser_txns),
+            sum_check_debits_pct=round(dr_pct, 2), sum_check_credits_pct=round(cr_pct, 2),
+            uploaded_at=now, uploaded_by=uploaded_by,
+        )
+        s.add(stmt)
+        s.flush()
+
+        # Transactions
+        from app.entity_inference import infer_channel, infer_category, infer_counterparty, iso_date
+        running_balance = float(opening_balance)
+        for idx, t in enumerate(parser_txns, start=1):
+            raw = t.get("description", "")
+            channel = infer_channel(raw)
+            category = infer_category(raw)
+            counterparty = infer_counterparty(raw, channel)
+            amount = float(t["amount"])
+            direction = t["type"]
+            running_balance += amount if direction == "Cr" else -amount
+            conf = "high"
+            flags: list[str] = []
+            if counterparty.startswith("(unknown") or len(counterparty) < 3:
+                conf = "low"; flags.append("NEEDS_REVIEW")
+            elif channel == "OTHER":
+                conf = "medium"
+            tid = _next_id(s, "t", TransactionRow)
+            s.add(TransactionRow(
+                id=tid, statement_id=sid, account_id=acc.id, case_id=case_id,
+                row_index=idx, txn_date=iso_date(t.get("date", "")),
+                amount=amount, direction=direction, running_balance=round(running_balance, 2),
+                raw_description=raw,
+                entities_json=json.dumps({
+                    "channel":      {"value": channel,      "source": "extracted",     "confidence": 1.0 if channel != "OTHER" else 0.4},
+                    "counterparty": {"value": counterparty, "source": "extracted",     "confidence": 0.9 if conf == "high" else 0.5 if conf == "medium" else 0.25},
+                    "category":     {"value": category,     "source": "auto_resolved", "confidence": 0.7},
+                }),
+                tags_json="[]", confidence=conf, flags_json=json.dumps(flags),
+                review_status="unreviewed", edit_count=0,
+            ))
+
+        # Update account totals
+        acc.transaction_count += len(parser_txns)
+        if abs(dr_pct - 100) > 0.01 or abs(cr_pct - 100) > 0.01:
+            acc.has_warnings = True
+
+        # Update case updated_at
+        case = s.get(CaseRow, case_id)
+        case.updated_at = now
+
+        s.commit()
+        s.refresh(stmt)
+
+        # Return the persisted statement + its transactions
+        stmt_schema = _statement_row_to_schema(stmt)
+        txns = s.query(TransactionRow).filter_by(statement_id=sid).order_by(TransactionRow.row_index).all()
+        return stmt_schema, [_txn_row_to_schema(t) for t in txns]
+
+
+# ───── seed from benchmark (idempotent) ─────
+
+def seed_from_benchmarks() -> None:
+    """If the DB is empty, seed the same case/person/account structure the
+    export-for-frontend script produces. Idempotent: no-op once seeded.
+    """
+    with get_session() as s:
+        if s.query(CaseRow).count() > 0:
+            return
+    _do_seed()
+
+
+def _do_seed() -> None:
+    from pathlib import Path as _Path
+    import importlib.util, json as _json, sys as _sys
+    REPO = _Path(__file__).parent.parent.parent
+    spec = importlib.util.spec_from_file_location(
+        "export_for_frontend", REPO / "tools" / "export-for-frontend.py"
+    )
+    if spec is None or spec.loader is None:
+        return
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    PDFS = mod.PDFS
+    CASES = mod.CASES
+    BENCH = REPO / "benchmarks" / "results" / "pdfplumber_text"
+
+    for case_seed in CASES:
+        case = create_case(case_seed["fir_number"], case_seed["title"], case_seed["officer_name"])
+        # Replace generated id with the seed's id for stable references
+        _rename_case(case.id, case_seed["id"])
+        case_id = case_seed["id"]
+
+        # Persons
+        person_map: dict[str, str] = {}
+        for person_seed in case_seed["persons"]:
+            p = create_person(case_id=case_id, name=person_seed["name"],
+                              pan=person_seed.get("pan"), phone=person_seed.get("phone"))
+            if p:
+                _rename_person(p.id, person_seed["id"])
+                person_map[person_seed["id"]] = person_seed["id"]
+
+        for pdf_name, person_id in case_seed["pdfs"]:
+            meta = PDFS.get(pdf_name)
+            if not meta:
+                continue
+            stem = _Path(pdf_name).stem
+            json_path = BENCH / f"{stem}.json"
+            if not json_path.exists():
+                continue
+            data = _json.loads(json_path.read_text(encoding="utf-8"))
+            parser_txns = data.get("txns", [])
+            ingest_statement(
+                case_id=case_id, person_id=person_id,
+                source_file_name=pdf_name, source_file_path=str((REPO / "data" / "pdf" / pdf_name).resolve()),
+                bank=meta["bank"], account_type=meta["account_type"],
+                account_number=meta["account_number"], holder_name=meta["holder"],
+                period_start=meta["period_start"], period_end=meta["period_end"],
+                opening_balance=float(meta.get("opening", 0)),
+                closing_balance=float(meta.get("closing", 0)),
+                declared_dr=meta.get("declared_dr"), declared_cr=meta.get("declared_cr"),
+                parser_txns=parser_txns, uploaded_by="seed",
             )
 
 
-# module-level singleton
-store = Store()
-store.seed_from_export()
+def _rename_case(old_id: str, new_id: str) -> None:
+    """Rename a case id (and cascade to all tables that reference it)."""
+    if old_id == new_id:
+        return
+    with get_session() as s:
+        # The SQL is explicit because SQLAlchemy doesn't propagate PK rename.
+        from sqlalchemy import text
+        s.execute(text("UPDATE cases SET id = :new WHERE id = :old"), {"new": new_id, "old": old_id})
+        s.execute(text("UPDATE persons SET case_id = :new WHERE case_id = :old"), {"new": new_id, "old": old_id})
+        s.execute(text("UPDATE transactions SET case_id = :new WHERE case_id = :old"), {"new": new_id, "old": old_id})
+        s.commit()
+
+
+def _rename_person(old_id: str, new_id: str) -> None:
+    if old_id == new_id:
+        return
+    with get_session() as s:
+        from sqlalchemy import text
+        s.execute(text("UPDATE persons SET id = :new WHERE id = :old"), {"new": new_id, "old": old_id})
+        s.execute(text("UPDATE accounts SET person_id = :new WHERE person_id = :old"), {"new": new_id, "old": old_id})
+        s.commit()
+
+
+# ───── bootstrap helpers ─────
+
+def init_and_seed(reset: bool = False) -> None:
+    init_db(reset=reset)
+    seed_from_benchmarks()
+
+
+# ───── counts for /api/health ─────
+
+def counts() -> dict:
+    with get_session() as s:
+        return {
+            "cases": s.query(CaseRow).count(),
+            "persons": s.query(PersonRow).count(),
+            "accounts": s.query(AccountRow).count(),
+            "statements": s.query(StatementRow).count(),
+            "transactions": s.query(TransactionRow).count(),
+        }
