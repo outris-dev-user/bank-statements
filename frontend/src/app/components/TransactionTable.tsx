@@ -1,8 +1,8 @@
 import { useState } from "react";
 import React from "react";
 import { ChevronDown, ChevronUp, Flag, FileText, CheckCircle } from "lucide-react";
-import type { Transaction } from "../data/mockData";
-import { mockStatements } from "../data/mockData";
+import type { Transaction } from "../data";
+import { mockStatements } from "../data";
 
 interface TransactionTableProps {
   transactions: Transaction[];

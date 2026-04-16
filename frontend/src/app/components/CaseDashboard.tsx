@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { mockCases } from "../data/mockData";
+import { mockCases } from "../data";
 import { Search, Plus, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 

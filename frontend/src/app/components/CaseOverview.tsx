@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router";
-import { mockCases, mockPersons, mockAccounts } from "../data/mockData";
+import { mockCases, mockPersons, mockAccounts } from "../data";
 import { ChevronLeft, User, Upload, Plus, CheckCircle, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { UploadModal } from "./UploadModal";

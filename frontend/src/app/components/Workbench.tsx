@@ -1,10 +1,24 @@
 import { Link, useParams, useSearchParams } from "react-router";
-import { mockCases, mockAccounts, mockTransactions, mockStatements } from "../data/mockData";
+import { mockCases, mockAccounts, mockTransactions, mockStatements, mockPersons } from "../data";
 import { ChevronLeft, User, Search, Filter, Flag, Info } from "lucide-react";
 import { useState } from "react";
 import { TransactionTable } from "./TransactionTable";
 import { EditDrawer } from "./EditDrawer";
-import type { Transaction } from "../data/mockData";
+import type { Transaction } from "../data";
+
+function shortBankLabel(bank: string, accountType: string): string {
+  // Compact label for the workbench tab — "HDFC SA", "HDFC CC", "Kotak SA", "ICICI CA", "IDFC CA"
+  const b = bank.toLowerCase();
+  const short =
+    b.includes('hdfc') ? 'HDFC' :
+    b.includes('kotak') ? 'Kotak' :
+    b.includes('icici') ? 'ICICI' :
+    b.includes('idfc') ? 'IDFC' :
+    b.includes('sbi') ? 'SBI' :
+    b.includes('axis') ? 'Axis' :
+    bank.split(' ')[0];
+  return `${short} ${accountType}`;
+}
 
 export function Workbench() {
   const { caseId } = useParams();
@@ -12,7 +26,13 @@ export function Workbench() {
   const accountId = searchParams.get('account');
 
   const caseItem = mockCases.find((c) => c.id === caseId);
-  const accounts = mockAccounts;
+  // Scope accounts + transactions to this case only — persons under this
+  // case own accounts, which in turn own transactions.
+  const casePersonIds = new Set(mockPersons.filter((p) => p.case_id === caseId).map((p) => p.id));
+  const accounts = mockAccounts.filter((a) => casePersonIds.has(a.person_id));
+  const caseAccountIds = new Set(accounts.map((a) => a.id));
+  const caseTransactions = mockTransactions.filter((t) => caseAccountIds.has(t.account_id));
+
   const [activeTab, setActiveTab] = useState(accountId || 'all');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
@@ -22,9 +42,9 @@ export function Workbench() {
 
   const getTransactionsForTab = () => {
     if (activeTab === 'all') {
-      return mockTransactions;
+      return caseTransactions;
     }
-    return mockTransactions.filter((t) => t.account_id === activeTab);
+    return caseTransactions.filter((t) => t.account_id === activeTab);
   };
 
   const getAccountInfo = (accId: string) => {
@@ -90,7 +110,7 @@ export function Workbench() {
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {account.bank === 'Kotak Mahindra' ? 'Kotak' : 'HDFC Sav'} {account.account_number.slice(-4)}
+              {shortBankLabel(account.bank, account.account_type)} {account.account_number.slice(-4)}
               {activeTab === account.id && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}

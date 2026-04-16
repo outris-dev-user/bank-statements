@@ -1,5 +1,5 @@
 import { X, FileText, Info } from "lucide-react";
-import type { Transaction } from "../data/mockData";
+import type { Transaction } from "../data";
 import { useState } from "react";
 
 interface EditDrawerProps {
