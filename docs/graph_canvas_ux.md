@@ -284,31 +284,32 @@ Known risk: react-flow's default rendering gets slow above ~1,000 visible edges.
 
 ---
 
-## 12. What's shipped vs. what's not (as of commit 7a1bc7d)
+## 12. What's shipped vs. what's not (as of commit post-f816e2f)
 
 ### Shipped
-- ELK layout with 3 algorithms (layered default)
-- Draggable nodes, zoom/pan, minimap
-- Colour-coded edges (direction), log-scaled thickness, arrowheads
-- Click-to-inspect with 520px split-pane side panel
-- Inspector shows type, meta, KPIs, all incident edges (sorted by amount)
-- Inspector edge rows expand inline to show up to 20 contributing txns (date + amount + description)
-- Filters: node type, min-flow, hide orphans, layout
-- Search bar with dim-on-miss
-- Entity type classification (merchant / salary / finance / gov / bank / utility) via the `core/` import
+- ELK layout with 3 algorithms (layered default, stress organic, radial). Draggable nodes, zoom/pan, minimap (colour-mapped by node type).
+- **Custom node renderers per type** (`graph/PersonNode.tsx`, `AccountNode.tsx`, `EntityNode.tsx`) — 10 entity sub-types with per-type bg / border / min-width / font-size. Utility and salary nodes are deliberately smaller and muted.
+- **Custom edge renderer** (`graph/FlowEdge.tsx`) — smooth-step routing, log-scaled thickness (1–6px), direction colour, invisible hit-area for click, END_BIAS=0.62 label placement so parallel opposite-direction edges don't collide.
+- **Node badges** — flagged / needs-review / high-value. Data wired from the backend (`case_graph` computes `flagged` / `needs_review` / `high_value` / `total_amount` per node from incident transactions). Priority: flagged > needs-review > high-value.
+- **Edge click** — opens a dedicated `EdgeInspector` scoped to that edge, independent of node selection.
+- **Node click** — opens `NodeInspector` with type-specific metadata, flow-in/out KPIs, all incident edges sorted by amount, expandable edge rows with up to 20 contributing txns (date + ±amount + description).
+- Filters: node type (persons / accounts / entities), min-flow amount, hide orphans, layout.
+- Search bar with dim-on-miss across both nodes and incident edges.
+- Entity type classification (merchant / salary / finance / government / bank / utility) via the `core/analysis/entity_classification` sync.
 
 ### Not shipped (sprint output)
-- Node visual hierarchy by entity sub-type (sizes, shapes, muted utility nodes)
-- In/Out stacked view
-- Date-range filter
-- Flagged-only filter
-- Multi-select via Shift-click
-- Edge-click selection and floating popover
-- Hover tooltips with rich content
-- Inspector tabs (Overview / Flows / Transactions / Pattern hits / Related)
-- Inspector resize handle
-- Smart-mode auto layout
-- "Fit all" button
-- Export to PNG / SVG
-- Saved filter presets
-- Level-of-detail rendering for large graphs
+- Click-through from an inspector edge into a filtered transaction list in the Workbench.
+- Hover tooltips with rich content on nodes and edges.
+- In/Out stacked view (ux §4.2).
+- Date-range filter (brushable month bars).
+- Flagged-only filter toggle.
+- Multi-select via Shift-click; compare-two-nodes side-by-side.
+- "+N hidden entities" chip when orphans are hidden (ux §4.3).
+- "Fit all" button + Enter-in-search zoom-to-match.
+- Inspector tabs (Overview / Flows / Transactions / Pattern hits / Related).
+- Inspector resize handle (today 520px is fixed).
+- Smart-mode auto-layout that picks algorithm by graph density.
+- Saved filter presets.
+- Export to PNG / SVG / PDF.
+- Level-of-detail rendering for graphs > 1,000 edges (label/node culling by zoom).
+- Keyboard nav (tab to focus, arrow keys to walk, Enter/Esc).

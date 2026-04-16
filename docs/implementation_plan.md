@@ -103,18 +103,30 @@ Working checklist grouped by phase. Tick items (`[x]`) as they ship. Items marke
 
 ## Phase 3 — Graph canvas, advanced patterns, enrichment  *(not started)*
 
-### Graph canvas
-- [x] Backend `GET /api/cases/{id}/graph` — returns nodes (persons, accounts, entities) + edges (owns, flow_in, flow_out) with aggregated amounts
+### Graph canvas (~70% complete)
+- [x] Backend `GET /api/cases/{id}/graph` — persons / accounts / entities + owns / flow_in / flow_out edges with aggregated amounts and per-edge sample txns (up to 20)
+- [x] Backend per-node badge stats — flagged / needs_review / high_value / total_amount
 - [x] Graph tab in Workbench — react-flow (`@xyflow/react`) canvas
-- [x] ELK layout via `elkjs` — three algorithms (layered / force / radial), user-switchable from the filter bar
-- [x] Draggable nodes, zoom/pan controls, minimap
-- [x] Edge thickness scales with log(amount); colour-coded by direction; dimmed when a non-incident node is selected
-- [x] Filter by node type (persons / accounts / entities) + minimum flow amount
-- [x] Click a node → inspector drawer opens on the right (canvas + inspector share the tab as a split layout)
-- [x] Inspector shows: type, ID, meta fields, flow-in/out KPIs, all incident edges (with amounts), "Open in Workbench" link
-- [ ] Click-through from an inspector edge into a filtered transaction list
-- [ ] Date-range filter on the graph
-- [ ] Export graph view to PNG / PDF for case reports
+- [x] ELK layout via `elkjs` — three algorithms (layered / stress / radial), user-switchable
+- [x] Custom node components per type: `PersonNode`, `AccountNode`, `EntityNode` (10 sub-type visual treatments matching `docs/graph_canvas_ux.md §2.2`)
+- [x] Custom `FlowEdge` with log-scaled thickness, direction colour, invisible hit-area, smooth-step routing, END_BIAS label placement for parallel opposite-direction edges
+- [x] Draggable nodes, zoom/pan controls, minimap (colour-mapped by node type)
+- [x] Node click → inspector on the right (520px split-pane, resizable grid)
+- [x] Edge click → dedicated `EdgeInspector` scoped to that edge
+- [x] Inspector: type-specific metadata, flow-in/out KPIs, all incident edges sorted by amount, expandable edge rows with up to 20 contributing txns (date + amount + description)
+- [x] Node badges (flagged / needs-review / high-value) — data wired from backend
+- [x] Hide orphans toggle + min-flow filter + node-type filters
+- [x] Search bar with dim-on-miss across nodes and edges
+- [ ] Click-through from an inspector edge into a filtered transaction list in the Workbench
+- [ ] Hover tooltips on nodes and edges (rich preview)
+- [ ] Date-range filter (brushable month bars)
+- [ ] Flagged-only filter toggle
+- [ ] Multi-select (shift-click) and compare-two-nodes inspector
+- [ ] "Fit all" button + Enter-in-search zooms to match
+- [ ] In/Out stacked view mode (ux requirements §4.2)
+- [ ] "+N hidden entities" chip when orphans are hidden (ux requirements §4.3)
+- [ ] Smart-mode layout that auto-picks algorithm by graph density
+- [ ] Export graph view to PNG / SVG / PDF
 - [ ] Wire `core/graph/graph_store.py` Protocol — swap our ad-hoc aggregation for the shared `NetworkXStore` (and Neo4j for the online SaaS target)
 - [ ] Wire `core/graph/bfs_trace.py` — multi-hop expansion UI ("show accounts within 3 hops of this one")
 

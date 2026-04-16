@@ -733,15 +733,71 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                 size=int(a.transaction_count),
                 meta={"holder_name": a.holder_name, "bank": a.bank, "type": a.account_type},
             ))
-        entity_count: dict[str, int] = {}
+        # Per-node badge stats: flagged / needs_review / high_value. Node
+        # renderers surface the highest-priority badge (flagged > needs-review
+        # > high-value).
+        PATTERN_FLAG_NAMES = {
+            "STRUCTURING_SUSPECTED", "VELOCITY_SPIKE", "ROUND_AMOUNT_CLUSTER",
+            "FUND_THROUGH_FLOW", "DORMANT_THEN_ACTIVE", "SAME_DAY_ROUND_TRIP",
+        }
+        HIGH_VALUE_THRESHOLD = 1_000_000.0  # ₹10L
+
+        txn_by_id = {t.id: t for t in txns}
+
+        def _stats_from_txn_ids(txn_ids: list[str]) -> dict:
+            flagged = False
+            needs_review = False
+            total = 0.0
+            for tid in txn_ids:
+                t = txn_by_id.get(tid)
+                if not t:
+                    continue
+                flags = set(json.loads(t.flags_json or "[]"))
+                if t.review_status == "flagged" or (flags & PATTERN_FLAG_NAMES):
+                    flagged = True
+                if "NEEDS_REVIEW" in flags:
+                    needs_review = True
+                total += float(t.amount)
+            return {
+                "flagged": flagged,
+                "needs_review": needs_review,
+                "high_value": total >= HIGH_VALUE_THRESHOLD,
+                "total_amount": round(total, 2),
+            }
+
+        entity_txns: dict[str, list[str]] = {}
         for l in links:
-            entity_count[l.entity_id] = entity_count.get(l.entity_id, 0) + 1
+            entity_txns.setdefault(l.entity_id, []).append(l.transaction_id)
+        entity_count = {k: len(v) for k, v in entity_txns.items()}
+
         for e in entities:
+            stats = _stats_from_txn_ids(entity_txns.get(e.id, []))
             nodes.append(GraphNode(
                 id=f"entity:{e.id}", label=e.name, type="entity",
                 size=entity_count.get(e.id, 0),
-                meta={"canonical_key": e.canonical_key, "aliases": json.loads(e.aliases_json or "[]")},
+                meta={
+                    "canonical_key": e.canonical_key,
+                    "aliases": json.loads(e.aliases_json or "[]"),
+                    "entity_type": e.entity_type or "counterparty",
+                    "flagged": stats["flagged"],
+                    "needs_review": stats["needs_review"],
+                    "high_value": stats["high_value"],
+                    "total_amount": stats["total_amount"],
+                },
             ))
+
+        # Account-level stats: flagged if any of its txns is flagged.
+        account_txns: dict[str, list[str]] = {}
+        for t in txns:
+            account_txns.setdefault(t.account_id, []).append(t.id)
+        for n in nodes:
+            if n.type == "account":
+                bare = n.id.split(":", 1)[1]
+                stats = _stats_from_txn_ids(account_txns.get(bare, []))
+                n.meta["flagged"] = stats["flagged"]
+                n.meta["needs_review"] = stats["needs_review"]
+                n.meta["high_value"] = stats["high_value"]
+                n.meta["total_amount"] = stats["total_amount"]
 
         edges: list[GraphEdge] = []
 
