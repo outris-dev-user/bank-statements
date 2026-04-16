@@ -39,6 +39,7 @@ from app import store as store_mod
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
     Statement, CaseSummary, Entity, EntityDetail, EntityCreate, EntityLinkRequest,
+    CaseGraph,
 )
 
 # Import the bank parser from plugins/bank (separate tree, no coupling)
@@ -102,6 +103,14 @@ def get_case(case_id: str) -> CaseDetail:
     return detail
 
 
+@app.get("/api/cases/{case_id}/graph", response_model=CaseGraph)
+def get_case_graph(case_id: str) -> CaseGraph:
+    graph = store_mod.case_graph(case_id)
+    if graph is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return graph
+
+
 @app.get("/api/cases/{case_id}/summary", response_model=CaseSummary)
 def get_case_summary(case_id: str) -> CaseSummary:
     summary = store_mod.case_summary(case_id)
@@ -161,16 +170,34 @@ _PERIOD_RX = [
 ]
 
 
-def _guess_period(text: str) -> tuple[str, str]:
+def _guess_period(text: str) -> tuple[str | None, str | None]:
+    """Return the period printed on the statement header, if detectable.
+    Returns (None, None) when no pattern matches — callers should fall back
+    to deriving the period from the extracted transaction dates rather than
+    inserting today's date, which would be meaningless.
+    """
     for rx in _PERIOD_RX:
         m = rx.search(text)
         if m:
             s, e = m.group(1), m.group(2)
-            s_iso = _to_iso_date(s)
-            e_iso = _to_iso_date(e)
-            return s_iso, e_iso
-    today = datetime.utcnow().date().isoformat()
-    return today, today
+            return _to_iso_date(s), _to_iso_date(e)
+    return None, None
+
+
+def _period_from_txns(txns: list[dict]) -> tuple[str | None, str | None]:
+    """Derive the period from parsed transactions. Assumes dates are already
+    ISO-8601 or can be coerced via _to_iso_date."""
+    iso_dates: list[str] = []
+    for t in txns:
+        raw = t.get("date") or ""
+        iso = _to_iso_date(raw)
+        # `_to_iso_date` returns the raw string unchanged if it can't parse;
+        # accept only values that look ISO-ish (YYYY-MM-DD).
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", iso):
+            iso_dates.append(iso)
+    if not iso_dates:
+        return None, None
+    return min(iso_dates), max(iso_dates)
 
 
 def _to_iso_date(raw: str) -> str:
@@ -349,7 +376,16 @@ async def upload_statement(
     bank_label = bank or BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])["display"]
     acc_type = account_type or BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])["account_type"]
     acc_num = account_number or _guess_account_number(text) or "****????"
+
+    # Period: header text first, then the envelope of the parsed transactions
+    # (which is what the investigator actually sees). If both fail, leave it
+    # unknown rather than writing today's date — that was the bug where
+    # April-2021 CC statements showed "2026-04-16 → 2026-04-16".
     period_start, period_end = _guess_period(text)
+    if not period_start or not period_end:
+        txn_start, txn_end = _period_from_txns(parser_txns)
+        period_start = period_start or txn_start
+        period_end = period_end or txn_end
 
     # Ingest
     result = store_mod.ingest_statement(
@@ -359,7 +395,7 @@ async def upload_statement(
         bank=bank_label, account_type=acc_type,
         account_number=acc_num,
         holder_name=holder_name or "Unknown",
-        period_start=period_start, period_end=period_end,
+        period_start=period_start or "", period_end=period_end or "",
         opening_balance=0.0, closing_balance=0.0,
         declared_dr=None, declared_cr=None,
         parser_txns=[{"date": t["date"], "description": t["description"],
@@ -396,7 +432,15 @@ async def preview_statement(
         bank_key = detect_bank(text)
         txns = parse_text(text)
         defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
+
         period_start, period_end = _guess_period(text)
+        if not period_start or not period_end:
+            txn_start, txn_end = _period_from_txns(
+                [{"date": t["date"]} for t in txns]
+            )
+            period_start = period_start or txn_start
+            period_end = period_end or txn_end
+
         holder = _guess_holder_name(text)
 
         suggested_person_id = None

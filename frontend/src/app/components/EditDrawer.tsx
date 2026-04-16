@@ -1,21 +1,36 @@
 import { X, FileText, Info, Loader2, AlertCircle } from "lucide-react";
 import type { Transaction } from "../data";
 import { useState } from "react";
-import { usePatchTransaction } from "../lib/queries";
+import { usePatchTransaction, useTransactionAudit, useEntities, useLinkEntity } from "../lib/queries";
 import { statementPdfUrl } from "../lib/api";
 
 interface EditDrawerProps {
   transaction: Transaction;
   onClose: () => void;
+  caseId?: string;
 }
 
-export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
+export function EditDrawer({ transaction, onClose, caseId }: EditDrawerProps) {
   const [entities, setEntities] = useState(transaction.entities);
   const [tags, setTags] = useState(transaction.tags);
   const [amount, setAmount] = useState(transaction.amount.toString());
   const [date, setDate] = useState(transaction.txn_date);
 
   const patchMut = usePatchTransaction();
+  const { data: auditEvents } = useTransactionAudit(transaction.id);
+  const { data: caseEntities } = useEntities(caseId);
+  const linkMut = useLinkEntity();
+
+  // Fuzzy-find entities that already mention this counterparty (exact name
+  // or alias). If we find one, offer a one-click link.
+  const cpValue = entities.counterparty?.value?.trim() ?? "";
+  const cpLower = cpValue.toLowerCase();
+  const suggestion = caseEntities?.find((e) => {
+    if (!cpLower) return false;
+    if (e.name.toLowerCase() === cpLower) return true;
+    if (e.aliases.some((a) => a.toLowerCase() === cpLower)) return true;
+    return false;
+  });
 
   const handleSave = () => {
     patchMut.mutate(
@@ -180,34 +195,41 @@ export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
           </div>
         </div>
 
-        {/* Linked entity */}
+        {/* Linked entity (live, from entity resolver) */}
         <div>
-          <label className="text-sm font-medium text-foreground block mb-3">Linked person / entity</label>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="link" defaultChecked className="text-primary" />
-              <span>Not linked</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="link" className="text-primary" />
-              <span>Link to existing…</span>
-            </label>
-            {entities.counterparty && (
-              <div className="ml-6 text-xs text-muted-foreground flex items-start gap-1.5">
-                <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                <div>
-                  "{entities.counterparty.value}" appears in 3 other rows
-                  <button className="block text-primary hover:text-primary/80 mt-1">
-                    Link all 4 to same entity
-                  </button>
+          <label className="text-sm font-medium text-foreground block mb-2">Linked entity</label>
+          {suggestion ? (
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-sm space-y-1">
+              <div className="flex items-start gap-2">
+                <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
+                <div className="flex-1">
+                  <div className="text-foreground">
+                    Matches entity <span className="font-medium">{suggestion.name}</span>
+                    <span className="text-muted-foreground"> · {suggestion.txn_count} txns</span>
+                  </div>
+                  {suggestion.aliases.length > 0 && (
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      aliases: {suggestion.aliases.slice(0, 3).join(", ")}
+                      {suggestion.aliases.length > 3 && ` +${suggestion.aliases.length - 3}`}
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="link" className="text-primary" />
-              <span>Create new counterparty entity</span>
-            </label>
-          </div>
+              <button
+                onClick={() => linkMut.mutate({ txnId: transaction.id, entityId: suggestion.id })}
+                disabled={linkMut.isPending}
+                className="text-xs text-primary hover:text-primary/80 font-medium ml-5"
+              >
+                {linkMut.isPending ? "Linking…" : linkMut.isSuccess ? "Linked ✓" : "Link this transaction →"}
+              </button>
+            </div>
+          ) : cpValue ? (
+            <div className="text-xs text-muted-foreground">
+              No existing entity matches "{cpValue}". Use the Entities tab to resolve manually.
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">Set a counterparty to see entity matches.</div>
+          )}
         </div>
 
         {/* Amount & date */}
@@ -249,10 +271,32 @@ export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
           />
         </div>
 
-        {/* Audit */}
-        <div className="text-xs text-muted-foreground">
-          <div>Audit: extracted {new Date(transaction.txn_date).toLocaleDateString('en-GB')} 12:04</div>
-          <div>Last edited: never</div>
+        {/* Audit trail */}
+        <div>
+          <label className="text-sm font-medium text-foreground block mb-2">Audit trail</label>
+          {auditEvents === undefined ? (
+            <div className="text-xs text-muted-foreground">Loading…</div>
+          ) : auditEvents.length === 0 ? (
+            <div className="text-xs text-muted-foreground">No edits yet.</div>
+          ) : (
+            <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+              {auditEvents.map((ev, idx) => (
+                <div key={idx} className="text-xs border-l-2 border-border pl-2 py-0.5">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>
+                      <span className="font-mono text-foreground">{ev.field}</span> · by <span className="text-foreground">{ev.by}</span>
+                    </span>
+                    <span>{new Date(ev.at).toLocaleString("en-GB", { hour12: false })}</span>
+                  </div>
+                  <div className="text-muted-foreground mt-0.5">
+                    <span className="line-through opacity-70">{String(ev.old).slice(0, 80)}</span>
+                    {" → "}
+                    <span className="text-foreground">{String(ev.new).slice(0, 80)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

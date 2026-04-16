@@ -185,6 +185,30 @@ class PatternHit(BaseModel):
     sample_txn_ids: list[str] = Field(default_factory=list)
 
 
+class GraphNode(BaseModel):
+    id: str                 # namespaced: "person:p1" / "account:a1" / "entity:e12"
+    label: str
+    type: Literal["person", "account", "entity"]
+    size: int = 1           # for visual weighting — derived from txn count
+    meta: dict = Field(default_factory=dict)
+
+
+class GraphEdge(BaseModel):
+    id: str
+    source: str
+    target: str
+    kind: Literal["owns", "flow_in", "flow_out"]
+    total_amount: float = 0.0
+    txn_count: int = 0
+    sample_txn_ids: list[str] = Field(default_factory=list)
+
+
+class CaseGraph(BaseModel):
+    case_id: str
+    nodes: list[GraphNode]
+    edges: list[GraphEdge]
+
+
 class CaseSummary(BaseModel):
     """Payload for GET /api/cases/:id/summary."""
     total_dr: float

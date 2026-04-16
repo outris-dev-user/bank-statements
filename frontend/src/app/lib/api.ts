@@ -96,6 +96,33 @@ export const deleteStatement = (statementId: string) =>
     { method: "DELETE" },
   );
 
+export interface GraphNode {
+  id: string;
+  label: string;
+  type: "person" | "account" | "entity";
+  size: number;
+  meta: Record<string, any>;
+}
+
+export interface GraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  kind: "owns" | "flow_in" | "flow_out";
+  total_amount: number;
+  txn_count: number;
+  sample_txn_ids: string[];
+}
+
+export interface CaseGraph {
+  case_id: string;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
+export const fetchCaseGraph = (caseId: string) =>
+  request<CaseGraph>(`/api/cases/${encodeURIComponent(caseId)}/graph`);
+
 export interface MonthlyPoint {
   month: string;
   dr_total: number;

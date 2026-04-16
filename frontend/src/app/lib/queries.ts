@@ -9,6 +9,7 @@ import {
   createPerson,
   deleteStatement,
   fetchCase,
+  fetchCaseGraph,
   fetchCases,
   fetchCaseSummary,
   fetchCaseTransactions,
@@ -33,6 +34,7 @@ export const qk = {
   caseTxns: (id: string, accountId?: string) =>
     ["case", id, "transactions", accountId ?? "all"] as const,
   caseEntities: (id: string) => ["case", id, "entities"] as const,
+  caseGraph: (id: string) => ["case", id, "graph"] as const,
   entity: (id: string) => ["entity", id] as const,
   txnAudit: (id: string) => ["transaction", id, "audit"] as const,
 };
@@ -77,6 +79,13 @@ export const useRunPatterns = () => {
     },
   });
 };
+
+export const useCaseGraph = (caseId: string | undefined) =>
+  useQuery({
+    queryKey: qk.caseGraph(caseId ?? ""),
+    queryFn: () => fetchCaseGraph(caseId!),
+    enabled: !!caseId,
+  });
 
 export const useEntities = (caseId: string | undefined) =>
   useQuery({

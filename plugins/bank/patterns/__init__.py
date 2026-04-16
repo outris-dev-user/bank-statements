@@ -13,8 +13,15 @@ from __future__ import annotations
 from .structuring import detect_structuring
 from .velocity import detect_velocity_spike
 from .round_amount import detect_round_amounts
+from .fund_through import detect_fund_through
+from .dormant_active import detect_dormant_active
+from .round_trip import detect_round_trip
 
-__all__ = ["detect_structuring", "detect_velocity_spike", "detect_round_amounts", "run_all"]
+__all__ = [
+    "detect_structuring", "detect_velocity_spike", "detect_round_amounts",
+    "detect_fund_through", "detect_dormant_active", "detect_round_trip",
+    "run_all",
+]
 
 
 def run_all(txns: list[dict]) -> dict[str, list[str]]:
@@ -23,8 +30,16 @@ def run_all(txns: list[dict]) -> dict[str, list[str]]:
     `txns` is a list of dicts with at least: id, txn_date, amount,
     direction, account_id (optional). Detectors tolerate extra keys.
     """
+    detectors = (
+        detect_structuring,
+        detect_velocity_spike,
+        detect_round_amounts,
+        detect_fund_through,
+        detect_dormant_active,
+        detect_round_trip,
+    )
     out: dict[str, list[str]] = {}
-    for detector in (detect_structuring, detect_velocity_spike, detect_round_amounts):
+    for detector in detectors:
         result = detector(txns)
         for txn_id, flags in result.items():
             out.setdefault(txn_id, [])

@@ -6,6 +6,7 @@ import { EditDrawer } from "./EditDrawer";
 import { MultiSelect } from "./MultiSelect";
 import { SummaryView } from "./SummaryView";
 import { EntitiesView } from "./EntitiesView";
+import { GraphView } from "./GraphView";
 import type { Transaction } from "../data";
 import { useCase, useCaseTransactions, usePatchTransaction } from "../lib/queries";
 
@@ -230,12 +231,14 @@ export function Workbench() {
             Entities
             {activeTab === 'entities' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
           </button>
-          <button className="px-4 py-2 font-medium text-sm text-muted-foreground relative flex items-center gap-1.5 group">
+          <button
+            onClick={() => setActiveTab('graph')}
+            className={`px-4 py-2 font-medium text-sm transition-colors relative ${
+              activeTab === 'graph' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
             Graph
-            <Info className="w-3.5 h-3.5" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Coming in Phase 3
-            </div>
+            {activeTab === 'graph' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
           </button>
         </div>
 
@@ -243,6 +246,8 @@ export function Workbench() {
           <SummaryView caseId={caseId!} />
         ) : activeTab === 'entities' ? (
           <EntitiesView caseId={caseId!} />
+        ) : activeTab === 'graph' ? (
+          <GraphView caseId={caseId!} />
         ) : (<>
         {currentAccount && (
           <div className="bg-card border border-border rounded-lg p-4 mb-4">
@@ -416,6 +421,7 @@ export function Workbench() {
         <EditDrawer
           transaction={selectedTransaction}
           onClose={() => setSelectedTransaction(null)}
+          caseId={caseId}
         />
       )}
     </div>

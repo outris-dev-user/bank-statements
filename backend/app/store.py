@@ -33,6 +33,7 @@ from app.schemas import (
     CaseDetail, TransactionPage, TransactionPatch,
     CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown, PatternHit,
     Entity, EntityDetail, EntityCreate,
+    GraphNode, GraphEdge, CaseGraph,
 )
 
 
@@ -41,6 +42,21 @@ PATTERN_META = {
         "label": "Structuring suspected",
         "description": "≥3 transactions between ₹9L and ₹10L within 30 days — classic attempt to dodge FIU-IND CTR reporting.",
         "severity": "high",
+    },
+    "FUND_THROUGH_FLOW": {
+        "label": "Fund-through flow",
+        "description": "Credit followed by a similar-amount debit on the same account within 2 days — mule-like movement.",
+        "severity": "high",
+    },
+    "SAME_DAY_ROUND_TRIP": {
+        "label": "Same-day round trip",
+        "description": "Identical credit and debit with the same counterparty on the same day — classic wash / layering signal.",
+        "severity": "high",
+    },
+    "DORMANT_THEN_ACTIVE": {
+        "label": "Dormant-then-active",
+        "description": "Account goes quiet for 60+ days, then a burst of ≥5 transactions within a week.",
+        "severity": "medium",
     },
     "VELOCITY_SPIKE": {
         "label": "Velocity spike",
@@ -653,6 +669,115 @@ def list_entities_for_transaction(txn_id: str) -> Optional[list[Entity]]:
         return [_entity_row_to_schema(r, _entity_stats(s, r.id)) for r in rows]
 
 
+# ───── graph (Phase 3 scaffolding) ─────
+
+def case_graph(case_id: str) -> Optional[CaseGraph]:
+    """Build a case-scoped graph:
+      - person nodes (one per person)
+      - account nodes (one per account; edge person→account for ownership)
+      - entity nodes (one per resolved counterparty)
+      - flow edges: account→entity (debit flow out) and entity→account
+        (credit flow in), aggregating total_amount + txn_count
+    Leaves layout to the frontend — we just produce a topology.
+    """
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+
+        persons = s.query(PersonRow).filter_by(case_id=case_id).all()
+        person_ids = [p.id for p in persons]
+        accounts = (
+            s.query(AccountRow).filter(AccountRow.person_id.in_(person_ids)).all()
+            if person_ids else []
+        )
+        entities = s.query(EntityRow).filter_by(case_id=case_id).all()
+        txns = s.query(TransactionRow).filter_by(case_id=case_id).all()
+        links = (
+            s.query(TransactionEntityLinkRow)
+            .filter(TransactionEntityLinkRow.transaction_id.in_([t.id for t in txns]))
+            .all()
+        ) if txns else []
+
+        nodes: list[GraphNode] = []
+        for p in persons:
+            nodes.append(GraphNode(
+                id=f"person:{p.id}", label=p.name, type="person",
+                size=sum(1 for a in accounts if a.person_id == p.id),
+                meta={"pan": p.pan, "phone": p.phone},
+            ))
+        for a in accounts:
+            nodes.append(GraphNode(
+                id=f"account:{a.id}",
+                label=f"{a.bank} {a.account_type} {a.account_number}",
+                type="account",
+                size=int(a.transaction_count),
+                meta={"holder_name": a.holder_name, "bank": a.bank, "type": a.account_type},
+            ))
+        entity_count: dict[str, int] = {}
+        for l in links:
+            entity_count[l.entity_id] = entity_count.get(l.entity_id, 0) + 1
+        for e in entities:
+            nodes.append(GraphNode(
+                id=f"entity:{e.id}", label=e.name, type="entity",
+                size=entity_count.get(e.id, 0),
+                meta={"canonical_key": e.canonical_key, "aliases": json.loads(e.aliases_json or "[]")},
+            ))
+
+        edges: list[GraphEdge] = []
+
+        # person → account ownership
+        for a in accounts:
+            edges.append(GraphEdge(
+                id=f"owns:{a.person_id}:{a.id}",
+                source=f"person:{a.person_id}",
+                target=f"account:{a.id}",
+                kind="owns",
+                txn_count=int(a.transaction_count),
+            ))
+
+        # Build {txn_id: entity_id} — first link wins (most txns have one)
+        txn_entity: dict[str, str] = {}
+        for l in links:
+            if l.transaction_id not in txn_entity:
+                txn_entity[l.transaction_id] = l.entity_id
+
+        # Aggregate account ↔ entity flows
+        flow: dict[tuple[str, str, str], dict] = {}  # (account, entity, direction)
+        for t in txns:
+            ent = txn_entity.get(t.id)
+            if not ent:
+                continue
+            if t.direction == "Dr":
+                key = (t.account_id, ent, "out")
+            else:
+                key = (t.account_id, ent, "in")
+            bucket = flow.setdefault(key, {"total": 0.0, "count": 0, "samples": []})
+            bucket["total"] += float(t.amount)
+            bucket["count"] += 1
+            if len(bucket["samples"]) < 5:
+                bucket["samples"].append(t.id)
+
+        for (acc_id, ent_id, direction), v in flow.items():
+            if direction == "out":
+                edges.append(GraphEdge(
+                    id=f"out:{acc_id}:{ent_id}",
+                    source=f"account:{acc_id}", target=f"entity:{ent_id}",
+                    kind="flow_out",
+                    total_amount=round(v["total"], 2), txn_count=v["count"],
+                    sample_txn_ids=v["samples"],
+                ))
+            else:
+                edges.append(GraphEdge(
+                    id=f"in:{ent_id}:{acc_id}",
+                    source=f"entity:{ent_id}", target=f"account:{acc_id}",
+                    kind="flow_in",
+                    total_amount=round(v["total"], 2), txn_count=v["count"],
+                    sample_txn_ids=v["samples"],
+                ))
+
+        return CaseGraph(case_id=case_id, nodes=nodes, edges=edges)
+
+
 # ───── forensic patterns ─────
 
 def run_patterns_for_case(case_id: str) -> Optional[dict]:
@@ -670,11 +795,19 @@ def run_patterns_for_case(case_id: str) -> Optional[dict]:
         if not s.get(CaseRow, case_id):
             return None
         rows = s.query(TransactionRow).filter_by(case_id=case_id).all()
-        pool = [
-            {"id": r.id, "txn_date": r.txn_date, "amount": float(r.amount),
-             "direction": r.direction, "account_id": r.account_id}
-            for r in rows
-        ]
+        pool = []
+        for r in rows:
+            ents = json.loads(r.entities_json or "{}")
+            cp = (ents.get("counterparty") or {}).get("value") or ""
+            pool.append({
+                "id": r.id,
+                "txn_date": r.txn_date,
+                "amount": float(r.amount),
+                "direction": r.direction,
+                "account_id": r.account_id,
+                "counterparty": cp,
+                "raw_description": r.raw_description,
+            })
         new_flags = run_all(pool)
 
         counter: dict[str, int] = {}
@@ -682,7 +815,10 @@ def run_patterns_for_case(case_id: str) -> Optional[dict]:
             existing = json.loads(r.flags_json or "[]")
             # Drop any previously-computed pattern flags (our namespace) so
             # reruns are idempotent; keep extraction-stage flags untouched.
-            pattern_flags = {"STRUCTURING_SUSPECTED", "VELOCITY_SPIKE", "ROUND_AMOUNT_CLUSTER"}
+            pattern_flags = {
+                "STRUCTURING_SUSPECTED", "VELOCITY_SPIKE", "ROUND_AMOUNT_CLUSTER",
+                "FUND_THROUGH_FLOW", "DORMANT_THEN_ACTIVE", "SAME_DAY_ROUND_TRIP",
+            }
             preserved = [f for f in existing if f not in pattern_flags]
             added = new_flags.get(r.id, [])
             merged = preserved + added
