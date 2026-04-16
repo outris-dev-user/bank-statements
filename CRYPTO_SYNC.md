@@ -13,39 +13,46 @@ Every copied file gets a header:
 # upstream first if possible. Local changes documented at the bottom of this file.
 ```
 
-## Status after crypto team response (2026-04-15)
+## Status after crypto team delivery (2026-04-16)
 
-The crypto team [accepted the proposal in principle](docs/from-crypto-team.md) but flagged accurate corrections about module readiness. Most items we asked for aren't "copy zero-change" yet — they need small refactors first. Crypto team is committing to those refactors over 2-4 weeks as opportunistic cleanup (benefits them too).
+**All cleanup shipped in one day.** Crypto team delivered [for-bank-team-2026-04-15.md](../crypto/india-le-platform/docs/for-bank-team-2026-04-15.md) — all Phase 1 grey-zone items refactored with injection points, plus the two Phase 2 extractions we'd asked about. Every change is additive/non-breaking on their side.
 
-**Our sync plan now has three readiness tiers:**
+**Our sync plan now has two readiness tiers** (the AWAITING-CLEANUP bucket emptied):
 - **READY** — can copy today, zero changes on either side
-- **AWAITING CLEANUP** — crypto team has committed to refactor; sync after they ship
-- **FORK** — will diverge meaningfully from upstream; copy once, maintain locally
+- **FORK** — frontend pieces that will diverge meaningfully; copy once, maintain locally
 
 ## What we plan to copy
 
-### Phase 1 — Backend: Models and analysis framework
+### Phase 1 — Backend: Models and analysis framework (ALL READY)
 
-| Crypto path | Local path | Readiness | Notes |
-|---|---|---|---|
-| `backend/app/models/case.py` | `core/models/case.py` | **READY** | Rename `address`→`account` semantics on our side |
-| `backend/app/models/investigation.py` | `core/models/investigation.py` | **READY** | Rename `root_address`→`root_account`, `root_chain`→`root_bank` |
-| `backend/app/analysis/velocity_analyzer.py` | `core/analysis/velocity_analyzer.py` | **READY** | Confirmed generic by crypto team — pure ratio math |
-| `backend/app/analysis/transaction_pool.py` | `core/analysis/transaction_pool.py` | **READY** | Per-investigation cache + dedup |
-| `backend/app/utils/auth.py` | `core/auth/jwt.py` | **READY** | Online deployment only |
-| `backend/app/analysis/signal_assembler.py` | `core/analysis/signal_assembler.py` | **AWAITING CLEANUP** | Scaffold is clean, but EXPOSURE family assessor hardcodes crypto category names. Crypto team adding "inject domain" hook. |
-| `backend/app/analysis/pattern_detector.py` | `core/analysis/pattern_framework.py` | **AWAITING CLEANUP** | Framework is clean, 19 crypto patterns live in same file. Crypto team splitting into `pattern_framework.py` + `patterns/crypto/*.py`. Already on their tech debt list. |
-| `backend/app/analysis/entity_constants.py` | `core/analysis/entity_classification.py` | **AWAITING CLEANUP** | `resolve_entity_type()` is generic; `EXCHANGE_BRAND_KEYWORDS` is crypto-only. Crypto team renaming module + moving crypto keywords out. |
-| `backend/app/analysis/exposure_analyzer.py` | `core/analysis/multi_hop_exposure.py` | **AWAITING CLEANUP** | Hardcoded to crypto entity types (mixer, exchange, DEX). Crypto team injecting `stop_entity_types` as a parameter. |
-| `backend/app/analysis/counterparty_triage.py` | `core/analysis/counterparty_triage.py` | **AWAITING CLEANUP** | `_select_for_canvas()` has crypto-specific ranking. Crypto team extracting scoring as strategy callback. |
-| `backend/app/services/investigation_orchestrator.py` (SSE pipeline) | `core/orchestration/pipeline.py` | **AWAITING CLEANUP** | Step names `backward_trace`/`forward_trace` are crypto-flavoured; SSE machinery is generic. Crypto team renaming to `upstream`/`downstream`. |
+**Tier 1 — safe to copy as-is** (carry `# PLATFORM` header upstream):
 
-### Phase 2 — Backend: Graph and persistence
+| Crypto path | Local path | Notes |
+|---|---|---|
+| `backend/app/models/case.py` | `core/models/case.py` | Rename `address`→`account` semantics on our side |
+| `backend/app/models/investigation.py` | `core/models/investigation.py` | Rename `root_address`→`root_account`, `root_chain`→`root_bank` |
+| `backend/app/analysis/velocity_analyzer.py` | `core/analysis/velocity_analyzer.py` | Pure ratio math, zero changes |
+| `backend/app/analysis/transaction_pool.py` | `core/analysis/transaction_pool.py` | Per-investigation cache + dedup |
+| `backend/app/analysis/signal_assembler.py` | `core/analysis/signal_assembler.py` | Now takes `transaction_fetcher=...` and `exposure_high_risk_categories=...` as constructor args — pass our bank versions |
+| `backend/app/analysis/entity_classification.py` | `core/analysis/entity_classification.py` | **NEW** — extracted from entity_constants, keyword maps as parameters. `infer_category_from_name`, `resolve_entity_type`, `name_matches_keywords`, `enrich_path_edge`. |
+| `backend/app/analysis/pattern_framework.py` | `core/analysis/pattern_framework.py` | **NEW** — scaffolding only (`parse_datetime`, `classify_direction`, `aggregate_risk_boost`, `severity_bucket`). We build BFSI patterns on top in `plugins/bank/patterns/` |
+| `backend/app/utils/auth.py` | `core/auth/jwt.py` | Online deployment only |
 
-| Crypto path | Local path | Readiness | Notes |
-|---|---|---|---|
-| `backend/app/services/graph_service.py` (BFS only) | `core/graph/bfs_trace.py` | **AWAITING CLEANUP** | `graph_service.py` is a 3,200-line monolith. Crypto team offered to extract `bfs_trace.py` (~300 lines) as a focused module. Benefits both sides. |
-| `backend/app/services/graph_storage.py` | `core/graph/graph_store.py` | **AWAITING CLEANUP** | Currently Neo4j-only. Crypto team offered to define abstract `GraphStore` protocol so we can plug in NetworkX-backed implementation for offline. |
+**Tier 2 — copy + construct with bank-domain args** (still grey-zone but now injectable):
+
+| Crypto path | Local path | Injection point |
+|---|---|---|
+| `backend/app/analysis/exposure_analyzer.py` | `core/analysis/multi_hop_exposure.py` | `ExposureAnalyzer(category_risk={bank_risk_categories}, skip_counterparty_addresses={bank_ignored_accounts})` |
+| `backend/app/analysis/counterparty_triage.py` | `core/analysis/counterparty_triage.py` | `CounterpartyTriager(canvas_selector=<our callable>)` — strategy pattern |
+| `backend/app/services/investigation_orchestrator.py` | `core/orchestration/pipeline.py` | `InvestigationOrchestrator(steps=[bank_step_list], step_budgets={...})`. Subclass + override `_build_step_fns()` for bank steps. |
+| `backend/app/analysis/entity_constants.py` | skip | Crypto team says: import directly from `entity_classification.py` with our own keyword map. entity_constants is now a thin wrapper for crypto's own callers. |
+
+### Phase 2 — Backend: Graph and persistence (READY)
+
+| Crypto path | Local path | Notes |
+|---|---|---|
+| `backend/app/analysis/bfs_trace.py` | `core/graph/bfs_trace.py` | **NEW** — `should_stop_at_entity`, `BFSExpansionContext`, `expand_one_hop`. Full `trace_address()` is *not* extracted (500-line entangled); we assemble our own BFS from these primitives. |
+| `backend/app/analysis/graph_store.py` | `core/graph/graph_store.py` | **NEW** — `GraphStore` `@runtime_checkable` Protocol. Their `GraphStorageService` satisfies it structurally. Our NetworkX/SQLite implementation just needs matching method signatures; no inheritance. |
 
 ### Phase 3 — Frontend
 
@@ -64,11 +71,13 @@ Frontend coupling is **higher** than initially scoped. Most UI pieces will be **
 | `frontend/src/components/NodeInspector/*` | `core/ui/NodeInspector/*` | **FORK** | Tab structure clean, tab contents heavily crypto. We'll reskin ~70% of tab content, and (per our UX direction) may not use the right-side inspector layout at all — see [docs/ux-phases.md](docs/ux-phases.md). |
 | `frontend/src/components/AutoInvestigateReport.tsx` | `core/ui/InvestigationReport.tsx` | **FORK** | 3,000+ lines of HTML. Skeleton reusable, ~60% content our own. |
 
-## Open offers from the crypto team (accepted)
+## Shipped crypto-team offers (2026-04-16)
 
-- **`bfs_trace.py` extraction** — split the 3,200-line `graph_service.py` so we can copy a focused BFS module. Offered by them; tech debt for them anyway.
-- **`GraphStore` protocol** — abstract Neo4j and NetworkX behind one interface. Offered; lets them future-proof, lets us go offline.
-- **R23-R27 walk-through** — they added 6 central hooks recently (AdaptiveFetcher in `trace_path`, Arkham fallback, auto chain-probe, viewport preservation, common-attribution edges). Scheduled 30 min before first sync.
+- **Tier 1 modules tagged `# PLATFORM`** in their repo, lint script prevents crypto imports leaking into them
+- **`bfs_trace.py` primitives** shipped — full `trace_address` deliberately not extracted (500 lines, fetcher-entangled). We assemble our BFS from the three primitives.
+- **`GraphStore` Protocol** shipped — structural-typing, no inheritance required
+- **All Tier 2 grey zones now injectable** via constructor args; default construction preserves crypto behavior
+- **R23-R27 walk-through** — still pending a calendar slot before first sync
 
 ## Parked for later
 
@@ -78,7 +87,8 @@ Frontend coupling is **higher** than initially scoped. Most UI pieces will be **
 
 | Date | Commit synced from | Files synced | Notes |
 |---|---|---|---|
-| 2026-04-15 | (initial) | none yet | Repo skeleton created. Waiting on Phase 1 crypto-team cleanup (~2-3 days of their time over next 2-4 weeks). |
+| 2026-04-15 | (initial) | none yet | Repo skeleton created. Waiting on Phase 1 crypto-team cleanup. |
+| 2026-04-16 | (crypto shipped all cleanup) | none yet | Crypto team delivered faster than expected. Ready to begin Tier 1 sync. Next step: R23-R27 walk-through, then copy 10 READY files. |
 
 ## Local divergence (things we changed after syncing)
 
