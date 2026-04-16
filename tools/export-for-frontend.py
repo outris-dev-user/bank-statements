@@ -37,39 +37,48 @@ PDFS = {
     "Feb 2021.PDF":   dict(bank="HDFC Bank",       account_type="CC", account_number="****1234",
                            holder="Demo Cardholder",        case_label="HDFC CC Feb 2021",
                            period_start="2021-02-01", period_end="2021-02-28",
-                           declared_dr=1659.80,   declared_cr=23902.00),
+                           declared_dr=1659.80,   declared_cr=23902.00,
+                           opening=0, closing=0),  # CC stmt, no balance concept
     "March 2021.PDF": dict(bank="HDFC Bank",       account_type="CC", account_number="****1234",
                            holder="Demo Cardholder",        case_label="HDFC CC Mar 2021",
                            period_start="2021-03-01", period_end="2021-03-31",
-                           declared_dr=1792.52,   declared_cr=1660.00),
+                           declared_dr=1792.52,   declared_cr=1660.00,
+                           opening=0, closing=0),
     "April 2021.PDF": dict(bank="HDFC Bank",       account_type="CC", account_number="****1234",
                            holder="Demo Cardholder",        case_label="HDFC CC Apr 2021",
                            period_start="2021-04-01", period_end="2021-04-30",
-                           declared_dr=13101.00,  declared_cr=1792.00),
+                           declared_dr=13101.00,  declared_cr=1792.00,
+                           opening=0, closing=0),
     "May 2021.PDF":   dict(bank="HDFC Bank",       account_type="CC", account_number="****1234",
                            holder="Demo Cardholder",        case_label="HDFC CC May 2021",
                            period_start="2021-05-01", period_end="2021-05-31",
-                           declared_dr=19449.93,  declared_cr=13761.00),
+                           declared_dr=19449.93,  declared_cr=13761.00,
+                           opening=0, closing=0),
     "June 2021.PDF":  dict(bank="HDFC Bank",       account_type="CC", account_number="****1234",
                            holder="Demo Cardholder",        case_label="HDFC CC Jun 2021",
                            period_start="2021-06-01", period_end="2021-06-30",
-                           declared_dr=121448.00, declared_cr=21730.00),
+                           declared_dr=121448.00, declared_cr=21730.00,
+                           opening=0, closing=0),
     "IDFC Apr 2026.PDF": dict(bank="IDFC First Bank", account_type="CA", account_number="****5126",
                               holder="IDFC CA Holder",     case_label="IDFC CA Apr 2026",
                               period_start="2026-04-01", period_end="2026-04-30",
-                              declared_dr=25000.00, declared_cr=0.00),
+                              declared_dr=25000.00, declared_cr=0.00,
+                              opening=1154791.51, closing=1129791.51),  # from "Opening Balance 1,154,791.51 CR" in PDF
     "Acct Statement_XX3584_29042024.pdf": dict(bank="HDFC Bank", account_type="SA", account_number="****3584",
                               holder="Bilal A. K. Mohammed", case_label="HDFC Sav Oct23-Mar24",
                               period_start="2023-10-01", period_end="2024-03-31",
-                              declared_dr=2302984.36, declared_cr=2282075.51),
+                              declared_dr=2302984.36, declared_cr=2282075.51,
+                              opening=69422.10, closing=48513.25),
     "ICICI_Bank_Statement_New.pdf": dict(bank="ICICI Bank",   account_type="CA", account_number="****2451",
                               holder="Atul Kabra",          case_label="ICICI CA Jul 2019",
                               period_start="2019-07-01", period_end="2019-07-31",
-                              declared_dr=115000.00, declared_cr=125640.00),
+                              declared_dr=115000.00, declared_cr=125640.00,
+                              opening=16674.45, closing=27314.45),
     "Statement April-Aug 2021.pdf": dict(bank="Kotak Mahindra", account_type="SA", account_number="****1652",
                               holder="Suraj Shyam More",    case_label="Kotak Apr-Aug 2021",
                               period_start="2021-04-01", period_end="2021-08-25",
-                              declared_dr=700583.11, declared_cr=614301.24),
+                              declared_dr=700583.11, declared_cr=614301.24,
+                              opening=89610.50, closing=3328.63),
 }
 
 # Cases: group PDFs. A case is an investigation; multiple statements (from one or
@@ -240,8 +249,8 @@ def build():
                 "source_file_name": pdf_name,
                 "period_start": meta["period_start"],
                 "period_end": meta["period_end"],
-                "opening_balance": 0,  # parser doesn't expose this currently
-                "closing_balance": 0,
+                "opening_balance": meta.get("opening", 0),
+                "closing_balance": meta.get("closing", 0),
                 "extracted_txn_count": len(parser_txns),
                 "sum_check_debits_pct": round(dr_pct, 2),
                 "sum_check_credits_pct": round(cr_pct, 2),
@@ -250,8 +259,11 @@ def build():
             })
             case_stmt_count += 1
 
-            # Convert each parser txn → frontend Transaction
-            running_balance = 0.0
+            # Convert each parser txn → frontend Transaction. Start the
+            # running balance at the statement's declared opening (from
+            # sum_check.py DECLARED); for CC statements with no balance
+            # concept, we start at 0 and build a directional cumsum.
+            running_balance = float(meta.get("opening", 0))
             for idx, t in enumerate(parser_txns, start=1):
                 raw = t.get("description", "")
                 channel = infer_channel(raw)

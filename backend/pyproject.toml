@@ -1,0 +1,16 @@
+[project]
+name = "ledgerflow-backend"
+version = "0.1.0"
+description = "LedgerFlow backend — FastAPI service hosting the bank-plugin parser + case persistence."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "pydantic>=2.6",
+  "python-multipart>=0.0.9",
+  "pdfplumber>=0.11",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

@@ -64,6 +64,12 @@ bank-analyser/
 │   │   ├── parser.py                # 5-bank router + parser
 │   │   └── extractors.py            # 12 PDF extractor wrappers
 │   └── README.md
+├── backend/                         # FastAPI stub — serves 858 txns from memory
+│   ├── app/main.py                  # 7 endpoints (cases, transactions, audit)
+│   ├── app/schemas.py               # Pydantic mirrors of frontend types
+│   ├── app/store.py                 # in-memory store, seeded from benchmark JSON
+│   ├── pyproject.toml
+│   └── README.md
 ├── core/                            # synced from crypto @ 9e7d7b8
 │   ├── models/case.py, investigation.py
 │   ├── analysis/velocity, signal, pattern_framework,
@@ -95,8 +101,7 @@ bank-analyser/
 
 ## What's NOT in the repo yet
 
-- **Backend service** (FastAPI). No `/api/cases/`, `/api/statements/`, `/api/transactions/` endpoints yet. The frontend reads static `realData.ts` for now.
-- **Persistence layer** (SQLite / Postgres). No database migrations, no ORM wiring.
+- **Persistence layer** (SQLite / Postgres). Backend stub is in-memory, lost on reload. No database migrations, no ORM wiring.
 - **Real upload pipeline**. UploadModal is UI only — clicking upload doesn't actually ingest a PDF.
 - **Edit writeback**. EditDrawer's Save button is a `console.log`. Audit log is not persisted.
 - **Graph canvas**. `Graph` tab in Workbench is disabled with "Coming in Phase 3" tooltip.
@@ -118,17 +123,14 @@ eb07c0d  Incorporate crypto team feedback + add phased UX plan
 
 ## Immediate next steps (in priority order)
 
-1. **Browser smoke test** — open `http://localhost:5173`, walk through Cases → Overview → Workbench → expand a row → open EditDrawer. Just to feel the UX. (User can do this; `npm run dev`.)
+1. **Browser smoke test** — open `http://localhost:5173`, walk through Cases → Overview → Workbench → expand a row → open EditDrawer. Just to feel the UX. (User can do this; `npm run dev`.) ← *current bottleneck for further UX iteration.*
 2. **Fix whatever breaks / looks wrong** from the smoke test — typical issues: overflow in narrow columns, flag icon placement, category colors.
-3. **Back-fill opening/closing balance** in `realData.ts` — currently 0 because our parser doesn't yet expose them. Add a small routine to `plugins/bank/extraction/parser.py` to pull those from the "Opening Balance" / "Closing Balance" strings each bank prints.
-4. **Wire the Python backend** (FastAPI). Minimal endpoints:
-   - `GET /api/cases` (read)
-   - `GET /api/cases/:id/transactions` (read)
-   - `PATCH /api/transactions/:id` (edit + audit)
-   - `POST /api/statements` (upload + parse)
-   - Behind the scenes uses `plugins/bank/extraction/` + SQLite.
-5. **Replace the `realData.ts` static data** with a thin HTTP client (`src/app/lib/api.ts`) — delete the facade's magic once real endpoints are up.
-6. **Schedule R23-R27 walk-through with crypto team** — needed before we actually use synced `core/` code in the backend (we synced the files but haven't imported them yet, so no blocker today).
+3. ~~**Back-fill opening/closing balance**~~ — done. Running balance now starts from the declared opening for HDFC Savings (₹69,422.10), ICICI (₹16,674.45), Kotak (₹89,610.50), IDFC (₹11,54,791.51). HDFC CC stays at 0 (no balance concept on a card statement).
+4. ~~**Wire the Python backend**~~ — **stub shipped**. 7 endpoints live in `backend/` (FastAPI + uvicorn). In-memory store seeded from the benchmark output — same 858 transactions the frontend currently reads statically.
+5. **Replace `realData.ts` with HTTP fetch** — create `frontend/src/app/lib/api.ts` with the same shape the facade re-exports, then flip `data/index.ts` from `./realData` to `./lib/api`. Components don't change.
+6. **Wire POST endpoints** — `/api/cases` (create case), `/api/cases/{id}/statements` (upload PDF + parse + persist). Needed before the UploadModal and "New Case" buttons do real work.
+7. **Persistence — SQLite** — promote the in-memory `store` to SQLAlchemy models. Alembic migrations. Edits + audit persist across restart.
+8. **Schedule R23-R27 walk-through with crypto team** — needed before we actually use synced `core/` code in the backend.
 
 ## Open UX decisions still to validate
 

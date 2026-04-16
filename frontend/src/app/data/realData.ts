@@ -133,8 +133,8 @@ export const realStatements = [
     "source_file_name": "Statement April-Aug 2021.pdf",
     "period_start": "2021-04-01",
     "period_end": "2021-08-25",
-    "opening_balance": 0,
-    "closing_balance": 0,
+    "opening_balance": 89610.5,
+    "closing_balance": 3328.63,
     "extracted_txn_count": 240,
     "sum_check_debits_pct": 100.0,
     "sum_check_credits_pct": 100.0,
@@ -147,8 +147,8 @@ export const realStatements = [
     "source_file_name": "Acct Statement_XX3584_29042024.pdf",
     "period_start": "2023-10-01",
     "period_end": "2024-03-31",
-    "opening_balance": 0,
-    "closing_balance": 0,
+    "opening_balance": 69422.1,
+    "closing_balance": 48513.25,
     "extracted_txn_count": 552,
     "sum_check_debits_pct": 100.87,
     "sum_check_credits_pct": 100.0,
@@ -231,8 +231,8 @@ export const realStatements = [
     "source_file_name": "IDFC Apr 2026.PDF",
     "period_start": "2026-04-01",
     "period_end": "2026-04-30",
-    "opening_balance": 0,
-    "closing_balance": 0,
+    "opening_balance": 1154791.51,
+    "closing_balance": 1129791.51,
     "extracted_txn_count": 1,
     "sum_check_debits_pct": 100.0,
     "sum_check_credits_pct": 100.0,
@@ -245,8 +245,8 @@ export const realStatements = [
     "source_file_name": "ICICI_Bank_Statement_New.pdf",
     "period_start": "2019-07-01",
     "period_end": "2019-07-31",
-    "opening_balance": 0,
-    "closing_balance": 0,
+    "opening_balance": 16674.45,
+    "closing_balance": 27314.45,
     "extracted_txn_count": 37,
     "sum_check_debits_pct": 100.0,
     "sum_check_credits_pct": 100.0,
@@ -265,7 +265,7 @@ export const realTransactions = [
     "txn_date": "2021-08-24",
     "amount": 11000.0,
     "direction": "Dr",
-    "running_balance": -11000.0,
+    "running_balance": 78610.5,
     "raw_description": "UPI/EXCELL AUTOVIST/123624113976/U PI",
     "entities": {
       "channel": {
@@ -299,7 +299,7 @@ export const realTransactions = [
     "txn_date": "2021-08-24",
     "amount": 11000.0,
     "direction": "Cr",
-    "running_balance": 0.0,
+    "running_balance": 89610.5,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -333,7 +333,7 @@ export const realTransactions = [
     "txn_date": "2021-08-23",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -30.0,
+    "running_balance": 89580.5,
     "raw_description": "UPI/Nilesh Singh/123510096004/UPI",
     "entities": {
       "channel": {
@@ -367,7 +367,7 @@ export const realTransactions = [
     "txn_date": "2021-08-23",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": -110.0,
+    "running_balance": 89500.5,
     "raw_description": "UPI/Rajnath Yadav/123510024146/UPI",
     "entities": {
       "channel": {
@@ -401,7 +401,7 @@ export const realTransactions = [
     "txn_date": "2021-08-23",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": -121.0,
+    "running_balance": 89489.5,
     "raw_description": "UPI/Sitaram Rose Gr/123509897070/UPI",
     "entities": {
       "channel": {
@@ -435,7 +435,7 @@ export const realTransactions = [
     "txn_date": "2021-08-22",
     "amount": 550.0,
     "direction": "Cr",
-    "running_balance": 429.0,
+    "running_balance": 90039.5,
     "raw_description": "UPI/MARIA FELIX DSO/123419075035/UPI",
     "entities": {
       "channel": {
@@ -469,7 +469,7 @@ export const realTransactions = [
     "txn_date": "2021-08-22",
     "amount": 2.0,
     "direction": "Cr",
-    "running_balance": 431.0,
+    "running_balance": 90041.5,
     "raw_description": "UPI/GOOGLEPAY/12340886 4000/Rewarded for ma",
     "entities": {
       "channel": {
@@ -503,7 +503,7 @@ export const realTransactions = [
     "txn_date": "2021-08-21",
     "amount": 530.0,
     "direction": "Dr",
-    "running_balance": -99.0,
+    "running_balance": 89511.5,
     "raw_description": "UPI/s s chicken sho/123394406509/UPI",
     "entities": {
       "channel": {
@@ -537,7 +537,7 @@ export const realTransactions = [
     "txn_date": "2021-08-20",
     "amount": 1350.0,
     "direction": "Dr",
-    "running_balance": -1449.0,
+    "running_balance": 88161.5,
     "raw_description": "PCD/1535/CHETAN WINE V/VIRAR200821/20:02",
     "entities": {
       "channel": {
@@ -571,7 +571,7 @@ export const realTransactions = [
     "txn_date": "2021-08-20",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -1469.0,
+    "running_balance": 88141.5,
     "raw_description": "UPI/Ragini pan shop/123283124061/UPI",
     "entities": {
       "channel": {
@@ -605,7 +605,7 @@ export const realTransactions = [
     "txn_date": "2021-08-20",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -2469.0,
+    "running_balance": 87141.5,
     "raw_description": "MB SENT TO 0197104000040521 IMPS Ref 123209545028",
     "entities": {
       "channel": {
@@ -639,7 +639,7 @@ export const realTransactions = [
     "txn_date": "2021-08-16",
     "amount": 6.0,
     "direction": "Cr",
-    "running_balance": -2463.0,
+    "running_balance": 87147.5,
     "raw_description": "UPI/GOOGLEPAY/12281651 0039/Earned for usin",
     "entities": {
       "channel": {
@@ -673,7 +673,7 @@ export const realTransactions = [
     "txn_date": "2021-08-16",
     "amount": 1510.0,
     "direction": "Dr",
-    "running_balance": -3973.0,
+    "running_balance": 85637.5,
     "raw_description": "UPI/AMAZON/122816837371 /Request from Am",
     "entities": {
       "channel": {
@@ -707,7 +707,7 @@ export const realTransactions = [
     "txn_date": "2021-08-15",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -3993.0,
+    "running_balance": 85617.5,
     "raw_description": "UPI/Mr JAYESH VIRES/122721495627/UPI",
     "entities": {
       "channel": {
@@ -741,7 +741,7 @@ export const realTransactions = [
     "txn_date": "2021-08-15",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -4013.0,
+    "running_balance": 85597.5,
     "raw_description": "UPI/Chai Ka Adda/122719907967/UPI",
     "entities": {
       "channel": {
@@ -775,7 +775,7 @@ export const realTransactions = [
     "txn_date": "2021-08-15",
     "amount": 614.0,
     "direction": "Dr",
-    "running_balance": -4627.0,
+    "running_balance": 84983.5,
     "raw_description": "UPI/UBER INDIA SYST/122713671259/UberRi de",
     "entities": {
       "channel": {
@@ -809,7 +809,7 @@ export const realTransactions = [
     "txn_date": "2021-08-15",
     "amount": 16934.0,
     "direction": "Dr",
-    "running_balance": -21561.0,
+    "running_balance": 68049.5,
     "raw_description": "NACH-LEG-DR-HDFCLTD- 289164524",
     "entities": {
       "channel": {
@@ -843,7 +843,7 @@ export const realTransactions = [
     "txn_date": "2021-08-15",
     "amount": 3540.0,
     "direction": "Dr",
-    "running_balance": -25101.0,
+    "running_balance": 64509.5,
     "raw_description": "NACH-10-DR-HDFCLTD- 289307799 Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -877,7 +877,7 @@ export const realTransactions = [
     "txn_date": "2021-08-12",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -28101.0,
+    "running_balance": 61509.5,
     "raw_description": "UPI/MOHDOSWAIS SIRA/122479033530/UPI",
     "entities": {
       "channel": {
@@ -911,7 +911,7 @@ export const realTransactions = [
     "txn_date": "2021-08-11",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -29101.0,
+    "running_balance": 60509.5,
     "raw_description": "AP:BILLPAY FOR BSEMF 0299328720",
     "entities": {
       "channel": {
@@ -945,7 +945,7 @@ export const realTransactions = [
     "txn_date": "2021-08-10",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -34101.0,
+    "running_balance": 55509.5,
     "raw_description": "UPI/AVINASH BABURAO/122256543264/U PI",
     "entities": {
       "channel": {
@@ -979,7 +979,7 @@ export const realTransactions = [
     "txn_date": "2021-08-10",
     "amount": 39.0,
     "direction": "Dr",
-    "running_balance": -34140.0,
+    "running_balance": 55470.5,
     "raw_description": "UPI/UBER INDIA SYST/122247571302/UberRi de",
     "entities": {
       "channel": {
@@ -1013,7 +1013,7 @@ export const realTransactions = [
     "txn_date": "2021-08-10",
     "amount": 5959.0,
     "direction": "Dr",
-    "running_balance": -40099.0,
+    "running_balance": 49511.5,
     "raw_description": "Ins Debit A\\c SPLN 62888541 dt 10/08/21",
     "entities": {
       "channel": {
@@ -1047,7 +1047,7 @@ export const realTransactions = [
     "txn_date": "2021-08-08",
     "amount": 1144.0,
     "direction": "Dr",
-    "running_balance": -41243.0,
+    "running_balance": 48367.5,
     "raw_description": "UPI/OLA Postpaid/122027261389/UPI",
     "entities": {
       "channel": {
@@ -1081,7 +1081,7 @@ export const realTransactions = [
     "txn_date": "2021-08-07",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -41253.0,
+    "running_balance": 48357.5,
     "raw_description": "UPI/Sitaram Rose Gr/121917226114/UPI",
     "entities": {
       "channel": {
@@ -1115,7 +1115,7 @@ export const realTransactions = [
     "txn_date": "2021-08-07",
     "amount": 180.0,
     "direction": "Dr",
-    "running_balance": -41433.0,
+    "running_balance": 48177.5,
     "raw_description": "UPI/Rajnath Yadav/121910033652/UPI",
     "entities": {
       "channel": {
@@ -1149,7 +1149,7 @@ export const realTransactions = [
     "txn_date": "2021-08-07",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": -41444.0,
+    "running_balance": 48166.5,
     "raw_description": "UPI/Sitaram Rose Gr/121909093272/UPI",
     "entities": {
       "channel": {
@@ -1183,7 +1183,7 @@ export const realTransactions = [
     "txn_date": "2021-08-06",
     "amount": 425.0,
     "direction": "Dr",
-    "running_balance": -41869.0,
+    "running_balance": 47741.5,
     "raw_description": "UPI/MANOJ WINE/121805076027/UPI",
     "entities": {
       "channel": {
@@ -1217,7 +1217,7 @@ export const realTransactions = [
     "txn_date": "2021-08-06",
     "amount": 23088.0,
     "direction": "Dr",
-    "running_balance": -64957.0,
+    "running_balance": 24653.5,
     "raw_description": "NACH-10-DR-HDFC BANK LIMITED-0000098244796",
     "entities": {
       "channel": {
@@ -1251,7 +1251,7 @@ export const realTransactions = [
     "txn_date": "2021-08-05",
     "amount": 3800.0,
     "direction": "Cr",
-    "running_balance": -61157.0,
+    "running_balance": 28453.5,
     "raw_description": "UPI/MARIA FELIX DSO/121713398942/Avinash wedding",
     "entities": {
       "channel": {
@@ -1285,7 +1285,7 @@ export const realTransactions = [
     "txn_date": "2021-08-04",
     "amount": 74.0,
     "direction": "Dr",
-    "running_balance": -61231.0,
+    "running_balance": 28379.5,
     "raw_description": "UPI/BILLDESK/12164008386 0/DMART",
     "entities": {
       "channel": {
@@ -1319,7 +1319,7 @@ export const realTransactions = [
     "txn_date": "2021-08-04",
     "amount": 271.0,
     "direction": "Dr",
-    "running_balance": -61502.0,
+    "running_balance": 28108.5,
     "raw_description": "UPI/Nilesh Singh/121677228040/UPI",
     "entities": {
       "channel": {
@@ -1353,7 +1353,7 @@ export const realTransactions = [
     "txn_date": "2021-08-04",
     "amount": 800.0,
     "direction": "Dr",
-    "running_balance": -62302.0,
+    "running_balance": 27308.5,
     "raw_description": "UPI/LANKESH DILIP M/121674461205/16 bottles X 50",
     "entities": {
       "channel": {
@@ -1387,7 +1387,7 @@ export const realTransactions = [
     "txn_date": "2021-08-04",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -63302.0,
+    "running_balance": 26308.5,
     "raw_description": "AP:BILLPAY FOR INVESCOMF 0298089226",
     "entities": {
       "channel": {
@@ -1421,7 +1421,7 @@ export const realTransactions = [
     "txn_date": "2021-08-02",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -66302.0,
+    "running_balance": 23308.5,
     "raw_description": "ATL/1535/800001/+TCG FINANCIAL CENTERM020821/21:01",
     "entities": {
       "channel": {
@@ -1455,7 +1455,7 @@ export const realTransactions = [
     "txn_date": "2021-08-02",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -67302.0,
+    "running_balance": 22308.5,
     "raw_description": "AP:BILLPAY FOR BSEMF 0297707212",
     "entities": {
       "channel": {
@@ -1489,7 +1489,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 723.0,
     "direction": "Dr",
-    "running_balance": -68025.0,
+    "running_balance": 21585.5,
     "raw_description": "UPI/AMAZONPAY/12131399 4871/Request from Am",
     "entities": {
       "channel": {
@@ -1523,7 +1523,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -68225.0,
+    "running_balance": 21385.5,
     "raw_description": "UPI/TRILOK SAXENA/121330964330/UPI",
     "entities": {
       "channel": {
@@ -1557,7 +1557,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 6.0,
     "direction": "Cr",
-    "running_balance": -68219.0,
+    "running_balance": 21391.5,
     "raw_description": "UPI/GOOGLEPAY/12131328 4897/Earned for usin",
     "entities": {
       "channel": {
@@ -1591,7 +1591,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 15819.04,
     "direction": "Dr",
-    "running_balance": -84038.04,
+    "running_balance": 5572.46,
     "raw_description": "UPI/CredClub/121330750311 /payment on CRED",
     "entities": {
       "channel": {
@@ -1625,7 +1625,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 2132.0,
     "direction": "Dr",
-    "running_balance": -86170.04,
+    "running_balance": 3440.46,
     "raw_description": "UPI/CredClub/121330738638 /payment on CRED",
     "entities": {
       "channel": {
@@ -1659,7 +1659,7 @@ export const realTransactions = [
     "txn_date": "2021-08-01",
     "amount": 13345.19,
     "direction": "Dr",
-    "running_balance": -99515.23,
+    "running_balance": -9904.73,
     "raw_description": "UPI/CredClub/121330651329 /payment on CRED",
     "entities": {
       "channel": {
@@ -1693,7 +1693,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 101182.0,
     "direction": "Cr",
-    "running_balance": 1666.77,
+    "running_balance": 91277.27,
     "raw_description": "ECW SALARY FOR JUL",
     "entities": {
       "channel": {
@@ -1727,7 +1727,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 800.0,
     "direction": "Dr",
-    "running_balance": 866.77,
+    "running_balance": 90477.27,
     "raw_description": "UPI/Khushabu Handlo/121224783025/UPI",
     "entities": {
       "channel": {
@@ -1761,7 +1761,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": 616.77,
+    "running_balance": 90227.27,
     "raw_description": "UPI/ABDUL REHMAN KA/121221811800/UPI",
     "entities": {
       "channel": {
@@ -1795,7 +1795,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": 586.77,
+    "running_balance": 90197.27,
     "raw_description": "UPI/DESHMUKH NAREND/121221503473/UPI Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -1829,7 +1829,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 576.77,
+    "running_balance": 90187.27,
     "raw_description": "UPI/NIBEDITA SAHU/121215998874/UPI",
     "entities": {
       "channel": {
@@ -1863,7 +1863,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 710.0,
     "direction": "Dr",
-    "running_balance": -133.23,
+    "running_balance": 89477.27,
     "raw_description": "UPI/ROYSTON PAUL SE/121241933375/Oid20210 7311210",
     "entities": {
       "channel": {
@@ -1897,7 +1897,7 @@ export const realTransactions = [
     "txn_date": "2021-07-31",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": -193.23,
+    "running_balance": 89417.27,
     "raw_description": "UPI/Radhe Tea Stall/121213610403/UPI",
     "entities": {
       "channel": {
@@ -1931,7 +1931,7 @@ export const realTransactions = [
     "txn_date": "2021-07-30",
     "amount": 834.5,
     "direction": "Dr",
-    "running_balance": -1027.73,
+    "running_balance": 88582.77,
     "raw_description": "UPI/BPCL BILLDESK/121163162514/B PCL",
     "entities": {
       "channel": {
@@ -1965,7 +1965,7 @@ export const realTransactions = [
     "txn_date": "2021-07-29",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": -1107.73,
+    "running_balance": 88502.77,
     "raw_description": "UPI/Rajnath Yadav/121089915816/UPI",
     "entities": {
       "channel": {
@@ -1999,7 +1999,7 @@ export const realTransactions = [
     "txn_date": "2021-07-29",
     "amount": 79.0,
     "direction": "Dr",
-    "running_balance": -1186.73,
+    "running_balance": 88423.77,
     "raw_description": "UPI/Radhe Tea Stall/121089691459/UPI",
     "entities": {
       "channel": {
@@ -2033,7 +2033,7 @@ export const realTransactions = [
     "txn_date": "2021-07-29",
     "amount": 642.0,
     "direction": "Dr",
-    "running_balance": -1828.73,
+    "running_balance": 87781.77,
     "raw_description": "UPI/DelightfulGourm/121088 988386/Licious",
     "entities": {
       "channel": {
@@ -2067,7 +2067,7 @@ export const realTransactions = [
     "txn_date": "2021-07-28",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -2328.73,
+    "running_balance": 87281.77,
     "raw_description": "UPI/bbdaily/120980228584/U PI",
     "entities": {
       "channel": {
@@ -2101,7 +2101,7 @@ export const realTransactions = [
     "txn_date": "2021-07-22",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -2428.73,
+    "running_balance": 87181.77,
     "raw_description": "OS WWW.LENSKART.COM 13614545909",
     "entities": {
       "channel": {
@@ -2135,7 +2135,7 @@ export const realTransactions = [
     "txn_date": "2021-07-22",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": 2571.27,
+    "running_balance": 92181.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -2169,7 +2169,7 @@ export const realTransactions = [
     "txn_date": "2021-07-19",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -22428.73,
+    "running_balance": 67181.77,
     "raw_description": "MB DOWNPAYMENT Ref 120015878058",
     "entities": {
       "channel": {
@@ -2203,7 +2203,7 @@ export const realTransactions = [
     "txn_date": "2021-07-19",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": 2571.27,
+    "running_balance": 92181.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -2237,7 +2237,7 @@ export const realTransactions = [
     "txn_date": "2021-07-19",
     "amount": 400.0,
     "direction": "Dr",
-    "running_balance": 2171.27,
+    "running_balance": 91781.77,
     "raw_description": "UPI/Sai Collection/120080041205/UPI",
     "entities": {
       "channel": {
@@ -2271,7 +2271,7 @@ export const realTransactions = [
     "txn_date": "2021-07-17",
     "amount": 130.0,
     "direction": "Dr",
-    "running_balance": 2041.27,
+    "running_balance": 91651.77,
     "raw_description": "UPI/GANESH LALMAN S/119859259023/UPI",
     "entities": {
       "channel": {
@@ -2305,7 +2305,7 @@ export const realTransactions = [
     "txn_date": "2021-07-17",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": 1981.27,
+    "running_balance": 91591.77,
     "raw_description": "UPI/Rajnath Yadav/119856274230/UPI",
     "entities": {
       "channel": {
@@ -2339,7 +2339,7 @@ export const realTransactions = [
     "txn_date": "2021-07-17",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": 1970.27,
+    "running_balance": 91580.77,
     "raw_description": "UPI/Sitaram Rose Gr/119856205572/UPI",
     "entities": {
       "channel": {
@@ -2373,7 +2373,7 @@ export const realTransactions = [
     "txn_date": "2021-07-16",
     "amount": 85.0,
     "direction": "Dr",
-    "running_balance": 1885.27,
+    "running_balance": 91495.77,
     "raw_description": "UPI/Health And Beyo/119753012825/UPI",
     "entities": {
       "channel": {
@@ -2407,7 +2407,7 @@ export const realTransactions = [
     "txn_date": "2021-07-16",
     "amount": 75.0,
     "direction": "Dr",
-    "running_balance": 1810.27,
+    "running_balance": 91420.77,
     "raw_description": "UPI/Rajnath Yadav/119752940647/UPI",
     "entities": {
       "channel": {
@@ -2441,7 +2441,7 @@ export const realTransactions = [
     "txn_date": "2021-07-15",
     "amount": 3540.0,
     "direction": "Dr",
-    "running_balance": -1729.73,
+    "running_balance": 87880.77,
     "raw_description": "NACH-10-DR-HDFCLTD- 286931184",
     "entities": {
       "channel": {
@@ -2475,7 +2475,7 @@ export const realTransactions = [
     "txn_date": "2021-07-15",
     "amount": 16934.0,
     "direction": "Dr",
-    "running_balance": -18663.73,
+    "running_balance": 70946.77,
     "raw_description": "NACH-LEG-DR-HDFCLTD- 286786218",
     "entities": {
       "channel": {
@@ -2509,7 +2509,7 @@ export const realTransactions = [
     "txn_date": "2021-07-15",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": -18674.73,
+    "running_balance": 70935.77,
     "raw_description": "UPI/Sitaram Rose Gr/119631539160/UPI",
     "entities": {
       "channel": {
@@ -2543,7 +2543,7 @@ export const realTransactions = [
     "txn_date": "2021-07-12",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -19674.73,
+    "running_balance": 69935.77,
     "raw_description": "AP:BILLPAY FOR BSEMF 0294364301",
     "entities": {
       "channel": {
@@ -2577,7 +2577,7 @@ export const realTransactions = [
     "txn_date": "2021-07-12",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": -19685.73,
+    "running_balance": 69924.77,
     "raw_description": "UPI/Yash 1 Store/119396070858/UPI",
     "entities": {
       "channel": {
@@ -2611,7 +2611,7 @@ export const realTransactions = [
     "txn_date": "2021-07-11",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -22685.73,
+    "running_balance": 66924.77,
     "raw_description": "MB SENT TO 0197104000040521 IMPS Ref 119222223628",
     "entities": {
       "channel": {
@@ -2645,7 +2645,7 @@ export const realTransactions = [
     "txn_date": "2021-07-11",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": -20685.73,
+    "running_balance": 68924.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -2679,7 +2679,7 @@ export const realTransactions = [
     "txn_date": "2021-07-11",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": -20696.73,
+    "running_balance": 68913.77,
     "raw_description": "UPI/Sitaram Rose Gr/119293661307/UPI",
     "entities": {
       "channel": {
@@ -2713,7 +2713,7 @@ export const realTransactions = [
     "txn_date": "2021-07-11",
     "amount": 8000.0,
     "direction": "Cr",
-    "running_balance": -12696.73,
+    "running_balance": 76913.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -2747,7 +2747,7 @@ export const realTransactions = [
     "txn_date": "2021-07-11",
     "amount": 7500.0,
     "direction": "Dr",
-    "running_balance": -20196.73,
+    "running_balance": 69413.77,
     "raw_description": "UPI/LEKHRAJSING MOO/119289050870/UPI",
     "entities": {
       "channel": {
@@ -2781,7 +2781,7 @@ export const realTransactions = [
     "txn_date": "2021-07-10",
     "amount": 5959.0,
     "direction": "Dr",
-    "running_balance": -26155.73,
+    "running_balance": 63454.77,
     "raw_description": "Ins Debit A\\c SPLN 62888541 dt 10/07/21",
     "entities": {
       "channel": {
@@ -2815,7 +2815,7 @@ export const realTransactions = [
     "txn_date": "2021-07-08",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -21155.73,
+    "running_balance": 68454.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223 Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -2849,7 +2849,7 @@ export const realTransactions = [
     "txn_date": "2021-07-08",
     "amount": 2958.0,
     "direction": "Dr",
-    "running_balance": -24113.73,
+    "running_balance": 65496.77,
     "raw_description": "DIRECT DEBIT-DR-BAJAJ FINANCE LTD- 405SPFEX123527",
     "entities": {
       "channel": {
@@ -2883,7 +2883,7 @@ export const realTransactions = [
     "txn_date": "2021-07-08",
     "amount": 120.0,
     "direction": "Dr",
-    "running_balance": -24233.73,
+    "running_balance": 65376.77,
     "raw_description": "UPI/Rajnath Yadav/118949054346/UPI",
     "entities": {
       "channel": {
@@ -2917,7 +2917,7 @@ export const realTransactions = [
     "txn_date": "2021-07-08",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -24243.73,
+    "running_balance": 65366.77,
     "raw_description": "UPI/Sitaram Rose Gr/118948904057/UPI",
     "entities": {
       "channel": {
@@ -2951,7 +2951,7 @@ export const realTransactions = [
     "txn_date": "2021-07-06",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -25243.73,
+    "running_balance": 64366.77,
     "raw_description": "AP:BILLPAY FOR INVESCOMF 0293384253",
     "entities": {
       "channel": {
@@ -2985,7 +2985,7 @@ export const realTransactions = [
     "txn_date": "2021-07-06",
     "amount": 23088.0,
     "direction": "Dr",
-    "running_balance": -48331.73,
+    "running_balance": 41278.77,
     "raw_description": "NACH-10-DR-HDFC BANK LIMITED-0000098244796",
     "entities": {
       "channel": {
@@ -3019,7 +3019,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 379.0,
     "direction": "Dr",
-    "running_balance": -48710.73,
+    "running_balance": 40899.77,
     "raw_description": "UPI/magicpin/118621951293/ UPI",
     "entities": {
       "channel": {
@@ -3053,7 +3053,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 129.0,
     "direction": "Dr",
-    "running_balance": -48839.73,
+    "running_balance": 40770.77,
     "raw_description": "NACH-10-DR-CTRAZORPAY - CAPITALFLOHULVRZJZD6D",
     "entities": {
       "channel": {
@@ -3087,7 +3087,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 950.0,
     "direction": "Dr",
-    "running_balance": -49789.73,
+    "running_balance": 39820.77,
     "raw_description": "UPI/VISHAL ELECTRIC/118613243925/U PI",
     "entities": {
       "channel": {
@@ -3121,7 +3121,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 22000.0,
     "direction": "Cr",
-    "running_balance": -27789.73,
+    "running_balance": 61820.77,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -3155,7 +3155,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -32789.73,
+    "running_balance": 56820.77,
     "raw_description": "UPI/Nextbillion Tec/118610855739/Groww",
     "entities": {
       "channel": {
@@ -3189,7 +3189,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -37789.73,
+    "running_balance": 51820.77,
     "raw_description": "UPI/Nextbillion Tec/118610853613/Groww",
     "entities": {
       "channel": {
@@ -3223,7 +3223,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -42789.73,
+    "running_balance": 46820.77,
     "raw_description": "UPI/Nextbillion Tec/118610851701/Groww",
     "entities": {
       "channel": {
@@ -3257,7 +3257,7 @@ export const realTransactions = [
     "txn_date": "2021-07-05",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -47789.73,
+    "running_balance": 41820.77,
     "raw_description": "UPI/Nextbillion Tec/118610850337/Groww",
     "entities": {
       "channel": {
@@ -3291,7 +3291,7 @@ export const realTransactions = [
     "txn_date": "2021-07-03",
     "amount": 905.55,
     "direction": "Dr",
-    "running_balance": -48695.28,
+    "running_balance": 40915.22,
     "raw_description": "UPI/magicpin/118416992527/ Oid359133660e07",
     "entities": {
       "channel": {
@@ -3325,7 +3325,7 @@ export const realTransactions = [
     "txn_date": "2021-07-02",
     "amount": 16820.0,
     "direction": "Dr",
-    "running_balance": -65515.28,
+    "running_balance": 24095.22,
     "raw_description": "UPI/CREDRENT/118385975 423/payment via CRE",
     "entities": {
       "channel": {
@@ -3359,7 +3359,7 @@ export const realTransactions = [
     "txn_date": "2021-07-02",
     "amount": 255.0,
     "direction": "Dr",
-    "running_balance": -65770.28,
+    "running_balance": 23840.22,
     "raw_description": "UPI/Delightful Gour/118382053628/PayVia Razorpay",
     "entities": {
       "channel": {
@@ -3393,7 +3393,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 742.15,
     "direction": "Dr",
-    "running_balance": -66512.43,
+    "running_balance": 23098.07,
     "raw_description": "UPI/bigbasket/118268624220 /UPI",
     "entities": {
       "channel": {
@@ -3427,7 +3427,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 5400.0,
     "direction": "Dr",
-    "running_balance": -71912.43,
+    "running_balance": 17698.07,
     "raw_description": "UPI/SHINGE SACHIN S/118268195024/UPI",
     "entities": {
       "channel": {
@@ -3461,7 +3461,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 2745.0,
     "direction": "Dr",
-    "running_balance": -74657.43,
+    "running_balance": 14953.07,
     "raw_description": "UPI/OLA Postpaid/118263860349/UPI",
     "entities": {
       "channel": {
@@ -3495,7 +3495,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -74857.43,
+    "running_balance": 14753.07,
     "raw_description": "UPI/TRILOK SAXENA/118263805507/UPI",
     "entities": {
       "channel": {
@@ -3529,7 +3529,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 9074.16,
     "direction": "Dr",
-    "running_balance": -83931.59,
+    "running_balance": 5678.91,
     "raw_description": "UPI/Cred/118263640198/pay ment on CRED",
     "entities": {
       "channel": {
@@ -3563,7 +3563,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 4999.0,
     "direction": "Dr",
-    "running_balance": -88930.59,
+    "running_balance": 679.91,
     "raw_description": "UPI/CRED/118263611230/pa yment on CRED",
     "entities": {
       "channel": {
@@ -3597,7 +3597,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 1178.82,
     "direction": "Dr",
-    "running_balance": -90109.41,
+    "running_balance": -498.91,
     "raw_description": "UPI/AMAZON/118208486926 /Request from Am",
     "entities": {
       "channel": {
@@ -3631,7 +3631,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 1880.0,
     "direction": "Dr",
-    "running_balance": -91989.41,
+    "running_balance": -2378.91,
     "raw_description": "UPI/AMAZON/118208676262 /Request from Am",
     "entities": {
       "channel": {
@@ -3665,7 +3665,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 70000.0,
     "direction": "Dr",
-    "running_balance": -161989.41,
+    "running_balance": -72378.91,
     "raw_description": "MB:SENT MONEY TO OWN 3511614223",
     "entities": {
       "channel": {
@@ -3699,7 +3699,7 @@ export const realTransactions = [
     "txn_date": "2021-07-01",
     "amount": 164276.0,
     "direction": "Cr",
-    "running_balance": 2286.59,
+    "running_balance": 91897.09,
     "raw_description": "ECW SALARY FOR JUN",
     "entities": {
       "channel": {
@@ -3733,7 +3733,7 @@ export const realTransactions = [
     "txn_date": "2021-06-30",
     "amount": 227.0,
     "direction": "Cr",
-    "running_balance": 2513.59,
+    "running_balance": 92124.09,
     "raw_description": "Int.Pd:3511611017:01-04- 2021 to 30-06-2021 Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -3767,7 +3767,7 @@ export const realTransactions = [
     "txn_date": "2021-06-30",
     "amount": 296.0,
     "direction": "Dr",
-    "running_balance": 2217.59,
+    "running_balance": 91828.09,
     "raw_description": "UPI/Payu Payments P/118133796807/Upi Transaction",
     "entities": {
       "channel": {
@@ -3801,7 +3801,7 @@ export const realTransactions = [
     "txn_date": "2021-06-29",
     "amount": 750.0,
     "direction": "Dr",
-    "running_balance": 1467.59,
+    "running_balance": 91078.09,
     "raw_description": "UPI/MOHD FAIYAZ KHA/118045492277/UPI",
     "entities": {
       "channel": {
@@ -3835,7 +3835,7 @@ export const realTransactions = [
     "txn_date": "2021-06-28",
     "amount": 11.0,
     "direction": "Dr",
-    "running_balance": 1456.59,
+    "running_balance": 91067.09,
     "raw_description": "UPI/Sitaram Rose Gr/117930799778/UPI",
     "entities": {
       "channel": {
@@ -3869,7 +3869,7 @@ export const realTransactions = [
     "txn_date": "2021-06-27",
     "amount": 436.0,
     "direction": "Dr",
-    "running_balance": 1020.59,
+    "running_balance": 90631.09,
     "raw_description": "PCD/1535/MR D I Y BIG SHOPPING/C THAN270621/20:12",
     "entities": {
       "channel": {
@@ -3903,7 +3903,7 @@ export const realTransactions = [
     "txn_date": "2021-06-26",
     "amount": 286.0,
     "direction": "Dr",
-    "running_balance": 734.59,
+    "running_balance": 90345.09,
     "raw_description": "UPI/Nilesh Singh/117717554976/UPI",
     "entities": {
       "channel": {
@@ -3937,7 +3937,7 @@ export const realTransactions = [
     "txn_date": "2021-06-26",
     "amount": 270.0,
     "direction": "Dr",
-    "running_balance": 464.59,
+    "running_balance": 90075.09,
     "raw_description": "UPI/SAFEEN SORATHIY/117708811043/N A",
     "entities": {
       "channel": {
@@ -3971,7 +3971,7 @@ export const realTransactions = [
     "txn_date": "2021-06-26",
     "amount": 59.18,
     "direction": "Dr",
-    "running_balance": 405.41,
+    "running_balance": 90015.91,
     "raw_description": "UPI/Cred/117711581798/pay ment on CRED",
     "entities": {
       "channel": {
@@ -4005,7 +4005,7 @@ export const realTransactions = [
     "txn_date": "2021-06-23",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -594.59,
+    "running_balance": 89015.91,
     "raw_description": "ATW/1535/Manikpur Vasai- WThaneMHIN230621/10:53",
     "entities": {
       "channel": {
@@ -4039,7 +4039,7 @@ export const realTransactions = [
     "txn_date": "2021-06-19",
     "amount": 348.0,
     "direction": "Dr",
-    "running_balance": -942.59,
+    "running_balance": 88667.91,
     "raw_description": "UPI/Urban Company/117032730617/Pay ment for Urb",
     "entities": {
       "channel": {
@@ -4073,7 +4073,7 @@ export const realTransactions = [
     "txn_date": "2021-06-18",
     "amount": 526.55,
     "direction": "Dr",
-    "running_balance": -1469.14,
+    "running_balance": 88141.36,
     "raw_description": "UPI/AMAZON/116919511496 /Request from Am",
     "entities": {
       "channel": {
@@ -4107,7 +4107,7 @@ export const realTransactions = [
     "txn_date": "2021-06-18",
     "amount": 49.0,
     "direction": "Dr",
-    "running_balance": -1518.14,
+    "running_balance": 88092.36,
     "raw_description": "UPI/Urban Company/116913341835/Pay ment for Urb",
     "entities": {
       "channel": {
@@ -4141,7 +4141,7 @@ export const realTransactions = [
     "txn_date": "2021-06-15",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -2018.14,
+    "running_balance": 87592.36,
     "raw_description": "UPI/bbdaily/116703982879/U PI (Value Date:16/06/2021)",
     "entities": {
       "channel": {
@@ -4175,7 +4175,7 @@ export const realTransactions = [
     "txn_date": "2021-06-15",
     "amount": 1907.0,
     "direction": "Dr",
-    "running_balance": -3925.14,
+    "running_balance": 85685.36,
     "raw_description": "UPI/POLICYBAZAARCOM/1 16622626881/UPI Transaction",
     "entities": {
       "channel": {
@@ -4209,7 +4209,7 @@ export const realTransactions = [
     "txn_date": "2021-06-15",
     "amount": 5500.0,
     "direction": "Dr",
-    "running_balance": -9425.14,
+    "running_balance": 80185.36,
     "raw_description": "UPI/Red Dot Interio/116698633722/A2WIN G4 1108",
     "entities": {
       "channel": {
@@ -4243,7 +4243,7 @@ export const realTransactions = [
     "txn_date": "2021-06-15",
     "amount": 3540.0,
     "direction": "Dr",
-    "running_balance": -12965.14,
+    "running_balance": 76645.36,
     "raw_description": "NACH-10-DR-HDFCLTD- 284575472",
     "entities": {
       "channel": {
@@ -4277,7 +4277,7 @@ export const realTransactions = [
     "txn_date": "2021-06-15",
     "amount": 16934.0,
     "direction": "Dr",
-    "running_balance": -29899.14,
+    "running_balance": 59711.36,
     "raw_description": "NACH-LEG-DR-HDFCLTD- 284428515",
     "entities": {
       "channel": {
@@ -4311,7 +4311,7 @@ export const realTransactions = [
     "txn_date": "2021-06-14",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -30899.14,
+    "running_balance": 58711.36,
     "raw_description": "AP:BILLPAY FOR BSEMF 0289914435",
     "entities": {
       "channel": {
@@ -4345,7 +4345,7 @@ export const realTransactions = [
     "txn_date": "2021-06-13",
     "amount": 51.0,
     "direction": "Dr",
-    "running_balance": -30950.14,
+    "running_balance": 58660.36,
     "raw_description": "UPI/Paytm/116493019567/Oi d13903949255@",
     "entities": {
       "channel": {
@@ -4379,7 +4379,7 @@ export const realTransactions = [
     "txn_date": "2021-06-13",
     "amount": 411.0,
     "direction": "Dr",
-    "running_balance": -31361.14,
+    "running_balance": 58249.36,
     "raw_description": "UPI/UBER INDIA SYST/116477379524/UberRi de",
     "entities": {
       "channel": {
@@ -4413,7 +4413,7 @@ export const realTransactions = [
     "txn_date": "2021-06-13",
     "amount": 351.0,
     "direction": "Dr",
-    "running_balance": -31712.14,
+    "running_balance": 57898.36,
     "raw_description": "UPI/Zomato/116477356376/Z omato payment",
     "entities": {
       "channel": {
@@ -4447,7 +4447,7 @@ export const realTransactions = [
     "txn_date": "2021-06-13",
     "amount": 341.0,
     "direction": "Dr",
-    "running_balance": -32053.14,
+    "running_balance": 57557.36,
     "raw_description": "UPI/UBER INDIA SYST/116475749373/UberRi de",
     "entities": {
       "channel": {
@@ -4481,7 +4481,7 @@ export const realTransactions = [
     "txn_date": "2021-06-10",
     "amount": 5959.0,
     "direction": "Dr",
-    "running_balance": -38012.14,
+    "running_balance": 51598.36,
     "raw_description": "Ins Debit A\\c SPLN 62888541 dt 10/06/21",
     "entities": {
       "channel": {
@@ -4515,7 +4515,7 @@ export const realTransactions = [
     "txn_date": "2021-06-09",
     "amount": 217.35,
     "direction": "Dr",
-    "running_balance": -38229.49,
+    "running_balance": 51381.01,
     "raw_description": "UPI/Zomato/116041733390/Z omatoOnlineOrd",
     "entities": {
       "channel": {
@@ -4549,7 +4549,7 @@ export const realTransactions = [
     "txn_date": "2021-06-09",
     "amount": 1800.0,
     "direction": "Dr",
-    "running_balance": -40029.49,
+    "running_balance": 49581.01,
     "raw_description": "UPI/ANKIT DHARAMSHI/116033382359/ UPI",
     "entities": {
       "channel": {
@@ -4583,7 +4583,7 @@ export const realTransactions = [
     "txn_date": "2021-06-07",
     "amount": 23088.0,
     "direction": "Dr",
-    "running_balance": -63117.49,
+    "running_balance": 26493.01,
     "raw_description": "NACH-10-DR-HDFC BANK LIMITED-0000098244796",
     "entities": {
       "channel": {
@@ -4617,7 +4617,7 @@ export const realTransactions = [
     "txn_date": "2021-06-06",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -64117.49,
+    "running_balance": 25493.01,
     "raw_description": "AP:BILLPAY FOR INVESCOMF 0288632138 Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -4651,7 +4651,7 @@ export const realTransactions = [
     "txn_date": "2021-06-03",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -64317.49,
+    "running_balance": 25293.01,
     "raw_description": "UPI/TRILOK SAXENA/115407305093/june",
     "entities": {
       "channel": {
@@ -4685,7 +4685,7 @@ export const realTransactions = [
     "txn_date": "2021-06-03",
     "amount": 600.0,
     "direction": "Dr",
-    "running_balance": -64917.49,
+    "running_balance": 24693.01,
     "raw_description": "UPI/LANKESH DILIP M/115407301644/May 4 x 3 bottl",
     "entities": {
       "channel": {
@@ -4719,7 +4719,7 @@ export const realTransactions = [
     "txn_date": "2021-06-03",
     "amount": 14500.0,
     "direction": "Dr",
-    "running_balance": -79417.49,
+    "running_balance": 10193.01,
     "raw_description": "UPI/CREDRENT/115407288 101/payment via CRE",
     "entities": {
       "channel": {
@@ -4753,7 +4753,7 @@ export const realTransactions = [
     "txn_date": "2021-06-03",
     "amount": 8000.0,
     "direction": "Dr",
-    "running_balance": -87417.49,
+    "running_balance": 2193.01,
     "raw_description": "MB LEAKAGE Ref 115407700447",
     "entities": {
       "channel": {
@@ -4787,7 +4787,7 @@ export const realTransactions = [
     "txn_date": "2021-06-01",
     "amount": 252.0,
     "direction": "Dr",
-    "running_balance": -87669.49,
+    "running_balance": 1941.01,
     "raw_description": "UPI/Zomato/115215152198/Z omatoOnlineOrd",
     "entities": {
       "channel": {
@@ -4821,7 +4821,7 @@ export const realTransactions = [
     "txn_date": "2021-06-01",
     "amount": 4937.0,
     "direction": "Dr",
-    "running_balance": -92606.49,
+    "running_balance": -2995.99,
     "raw_description": "UPI/AMAZONPAY/11521984 3843/Request from Am",
     "entities": {
       "channel": {
@@ -4855,7 +4855,7 @@ export const realTransactions = [
     "txn_date": "2021-06-01",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -93606.49,
+    "running_balance": -3995.99,
     "raw_description": "AP:BILLPAY FOR BSEMF 0287876362",
     "entities": {
       "channel": {
@@ -4889,7 +4889,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 1187.08,
     "direction": "Dr",
-    "running_balance": -94793.57,
+    "running_balance": -5183.07,
     "raw_description": "UPI/AMAZON/115202516350 /Request from Am (Value Date:01/06/2021)",
     "entities": {
       "channel": {
@@ -4923,7 +4923,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 1187.08,
     "direction": "Cr",
-    "running_balance": -93606.49,
+    "running_balance": -3995.99,
     "raw_description": "REV- UPI/AMAZON/115200891064 /(Value Date:01/06/2021)",
     "entities": {
       "channel": {
@@ -4957,7 +4957,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 1187.08,
     "direction": "Dr",
-    "running_balance": -94793.57,
+    "running_balance": -5183.07,
     "raw_description": "UPI/AMAZON/115200891064 /Request from Am (Value Date:01/06/2021)",
     "entities": {
       "channel": {
@@ -4991,7 +4991,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 160.0,
     "direction": "Dr",
-    "running_balance": -94953.57,
+    "running_balance": -5343.07,
     "raw_description": "UPI/UBER INDIA SYST/115122290498/UberRi de",
     "entities": {
       "channel": {
@@ -5025,7 +5025,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 94063.0,
     "direction": "Cr",
-    "running_balance": -890.57,
+    "running_balance": 88719.93,
     "raw_description": "ECW SALARY FOR MAY 2021",
     "entities": {
       "channel": {
@@ -5059,7 +5059,7 @@ export const realTransactions = [
     "txn_date": "2021-05-31",
     "amount": 711.01,
     "direction": "Dr",
-    "running_balance": -1601.58,
+    "running_balance": 88008.92,
     "raw_description": "UPI/Payu Payments P/115111311868/Upi Transaction",
     "entities": {
       "channel": {
@@ -5093,7 +5093,7 @@ export const realTransactions = [
     "txn_date": "2021-05-30",
     "amount": 5223.5,
     "direction": "Dr",
-    "running_balance": -6825.08,
+    "running_balance": 82785.42,
     "raw_description": "UPI/CredClub/115017289933 /payment on CRED",
     "entities": {
       "channel": {
@@ -5127,7 +5127,7 @@ export const realTransactions = [
     "txn_date": "2021-05-30",
     "amount": 759.0,
     "direction": "Dr",
-    "running_balance": -7584.08,
+    "running_balance": 82026.42,
     "raw_description": "UPI/CredClub/115017263838 /payment on CRED",
     "entities": {
       "channel": {
@@ -5161,7 +5161,7 @@ export const realTransactions = [
     "txn_date": "2021-05-30",
     "amount": 574.82,
     "direction": "Dr",
-    "running_balance": -8158.9,
+    "running_balance": 81451.6,
     "raw_description": "UPI/Cred/115017259373/pay ment on CRED",
     "entities": {
       "channel": {
@@ -5195,7 +5195,7 @@ export const realTransactions = [
     "txn_date": "2021-05-30",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 1841.1,
+    "running_balance": 91451.6,
     "raw_description": "UPI/SARIKA LALASAHE/115015695782/ju ne",
     "entities": {
       "channel": {
@@ -5229,7 +5229,7 @@ export const realTransactions = [
     "txn_date": "2021-05-26",
     "amount": 169.0,
     "direction": "Dr",
-    "running_balance": 1672.1,
+    "running_balance": 91282.6,
     "raw_description": "UPI/Nilesh Singh/114672949930/NA",
     "entities": {
       "channel": {
@@ -5263,7 +5263,7 @@ export const realTransactions = [
     "txn_date": "2021-05-25",
     "amount": 301.0,
     "direction": "Dr",
-    "running_balance": 1371.1,
+    "running_balance": 90981.6,
     "raw_description": "PCD/1535/PaytmAddMoney/ 1204770770250521/17:26",
     "entities": {
       "channel": {
@@ -5297,7 +5297,7 @@ export const realTransactions = [
     "txn_date": "2021-05-25",
     "amount": 190.0,
     "direction": "Dr",
-    "running_balance": 1181.1,
+    "running_balance": 90791.6,
     "raw_description": "UPI/Swiggy/114517114834/S wiggy Order Id",
     "entities": {
       "channel": {
@@ -5331,7 +5331,7 @@ export const realTransactions = [
     "txn_date": "2021-05-25",
     "amount": 309.0,
     "direction": "Cr",
-    "running_balance": 1490.1,
+    "running_balance": 91100.6,
     "raw_description": "Upi_Cradj_U2_tdt_230521_1 14311139907__20210524_6 C",
     "entities": {
       "channel": {
@@ -5365,7 +5365,7 @@ export const realTransactions = [
     "txn_date": "2021-05-24",
     "amount": 2130.0,
     "direction": "Dr",
-    "running_balance": -639.9,
+    "running_balance": 88970.6,
     "raw_description": "UPI/AMAZON/114411853944 /Request from Am",
     "entities": {
       "channel": {
@@ -5399,7 +5399,7 @@ export const realTransactions = [
     "txn_date": "2021-05-23",
     "amount": 255.0,
     "direction": "Dr",
-    "running_balance": -894.9,
+    "running_balance": 88715.6,
     "raw_description": "UPI/AMAZONPAY/11431849 9912/You are paying",
     "entities": {
       "channel": {
@@ -5433,7 +5433,7 @@ export const realTransactions = [
     "txn_date": "2021-05-23",
     "amount": 309.0,
     "direction": "Dr",
-    "running_balance": -1203.9,
+    "running_balance": 88406.6,
     "raw_description": "UPI/LICIOUS/114311139907/ Licious",
     "entities": {
       "channel": {
@@ -5467,7 +5467,7 @@ export const realTransactions = [
     "txn_date": "2021-05-22",
     "amount": 536.0,
     "direction": "Dr",
-    "running_balance": -1739.9,
+    "running_balance": 87870.6,
     "raw_description": "UPI/Nilesh Singh/114210259610/UPI",
     "entities": {
       "channel": {
@@ -5501,7 +5501,7 @@ export const realTransactions = [
     "txn_date": "2021-05-22",
     "amount": 170.0,
     "direction": "Dr",
-    "running_balance": -1909.9,
+    "running_balance": 87700.6,
     "raw_description": "UPI/Bismillah Chick/114293201009/Oid202 105221006",
     "entities": {
       "channel": {
@@ -5535,7 +5535,7 @@ export const realTransactions = [
     "txn_date": "2021-05-20",
     "amount": 386.01,
     "direction": "Dr",
-    "running_balance": -2295.91,
+    "running_balance": 87314.59,
     "raw_description": "UPI/payumoney/1140141434 52/UPI Transaction Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -5569,7 +5569,7 @@ export const realTransactions = [
     "txn_date": "2021-05-17",
     "amount": 299.0,
     "direction": "Dr",
-    "running_balance": -2594.91,
+    "running_balance": 87015.59,
     "raw_description": "UPI/AMAZON/113800409292 /Request from Am (Value Date:18/05/2021)",
     "entities": {
       "channel": {
@@ -5603,7 +5603,7 @@ export const realTransactions = [
     "txn_date": "2021-05-16",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -3094.91,
+    "running_balance": 86515.59,
     "raw_description": "UPI/bbdaily/113623084469/U PI",
     "entities": {
       "channel": {
@@ -5637,7 +5637,7 @@ export const realTransactions = [
     "txn_date": "2021-05-16",
     "amount": 570.0,
     "direction": "Dr",
-    "running_balance": -3664.91,
+    "running_balance": 85945.59,
     "raw_description": "UPI/AMAZONPAY/11361385 2518/You are paying",
     "entities": {
       "channel": {
@@ -5671,7 +5671,7 @@ export const realTransactions = [
     "txn_date": "2021-05-15",
     "amount": 3540.0,
     "direction": "Dr",
-    "running_balance": -7204.91,
+    "running_balance": 82405.59,
     "raw_description": "NACH-10-DR-HDFCLTD- 282233043",
     "entities": {
       "channel": {
@@ -5705,7 +5705,7 @@ export const realTransactions = [
     "txn_date": "2021-05-15",
     "amount": 16934.0,
     "direction": "Dr",
-    "running_balance": -24138.91,
+    "running_balance": 65471.59,
     "raw_description": "NACH-LEG-DR-HDFCLTD- 282085505",
     "entities": {
       "channel": {
@@ -5739,7 +5739,7 @@ export const realTransactions = [
     "txn_date": "2021-05-13",
     "amount": 554.0,
     "direction": "Dr",
-    "running_balance": -24692.91,
+    "running_balance": 64917.59,
     "raw_description": "UPI/AMAZONPAY/11331055 1098/You are paying",
     "entities": {
       "channel": {
@@ -5773,7 +5773,7 @@ export const realTransactions = [
     "txn_date": "2021-05-12",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -25692.91,
+    "running_balance": 63917.59,
     "raw_description": "AP:BILLPAY FOR BSEMF 0284727049",
     "entities": {
       "channel": {
@@ -5807,7 +5807,7 @@ export const realTransactions = [
     "txn_date": "2021-05-11",
     "amount": 5.0,
     "direction": "Cr",
-    "running_balance": -25687.91,
+    "running_balance": 63922.59,
     "raw_description": "UPI/GOOGLEPAY/11320060 8252/Earned for usin (Value Date:12/05/2021)",
     "entities": {
       "channel": {
@@ -5841,7 +5841,7 @@ export const realTransactions = [
     "txn_date": "2021-05-10",
     "amount": 1699.0,
     "direction": "Dr",
-    "running_balance": -27386.91,
+    "running_balance": 62223.59,
     "raw_description": "UPI/Flipkart/113013308511/U PI",
     "entities": {
       "channel": {
@@ -5875,7 +5875,7 @@ export const realTransactions = [
     "txn_date": "2021-05-10",
     "amount": 5959.0,
     "direction": "Dr",
-    "running_balance": -33345.91,
+    "running_balance": 56264.59,
     "raw_description": "Ins Debit A\\c SPLN 62888541 dt 10/05/21",
     "entities": {
       "channel": {
@@ -5909,7 +5909,7 @@ export const realTransactions = [
     "txn_date": "2021-05-08",
     "amount": 342.0,
     "direction": "Dr",
-    "running_balance": -33687.91,
+    "running_balance": 55922.59,
     "raw_description": "UPI/Nilesh Singh/112821084487/UPI",
     "entities": {
       "channel": {
@@ -5943,7 +5943,7 @@ export const realTransactions = [
     "txn_date": "2021-05-08",
     "amount": 1167.0,
     "direction": "Dr",
-    "running_balance": -34854.91,
+    "running_balance": 54755.59,
     "raw_description": "PCD/1535/FERNS N PETALS PVT LTD/BANGAL080521/16:00",
     "entities": {
       "channel": {
@@ -5977,7 +5977,7 @@ export const realTransactions = [
     "txn_date": "2021-05-08",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": -35104.91,
+    "running_balance": 54505.59,
     "raw_description": "UPI/SHIV FLOURMILL/112810430779/ UPI",
     "entities": {
       "channel": {
@@ -6011,7 +6011,7 @@ export const realTransactions = [
     "txn_date": "2021-05-07",
     "amount": 2000.0,
     "direction": "Dr",
-    "running_balance": -37104.91,
+    "running_balance": 52505.59,
     "raw_description": "ATW/1535/Hiranandani MeadowsThaneMHIN070521/ 12:22",
     "entities": {
       "channel": {
@@ -6045,7 +6045,7 @@ export const realTransactions = [
     "txn_date": "2021-05-07",
     "amount": 877.0,
     "direction": "Dr",
-    "running_balance": -37981.91,
+    "running_balance": 51628.59,
     "raw_description": "UPI/Anmol medical s/112712321235/UPI",
     "entities": {
       "channel": {
@@ -6079,7 +6079,7 @@ export const realTransactions = [
     "txn_date": "2021-05-07",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -38981.91,
+    "running_balance": 50628.59,
     "raw_description": "UPI/BAKUL ARORA/112712232530/cons ultation",
     "entities": {
       "channel": {
@@ -6113,7 +6113,7 @@ export const realTransactions = [
     "txn_date": "2021-05-06",
     "amount": 255.0,
     "direction": "Dr",
-    "running_balance": -39236.91,
+    "running_balance": 50373.59,
     "raw_description": "UPI/AMAZONPAY/11262327 2528/You are paying",
     "entities": {
       "channel": {
@@ -6147,7 +6147,7 @@ export const realTransactions = [
     "txn_date": "2021-05-06",
     "amount": 23088.0,
     "direction": "Dr",
-    "running_balance": -62324.91,
+    "running_balance": 27285.59,
     "raw_description": "NACH-10-DR-HDFC BANK LIMITED-0000098244796",
     "entities": {
       "channel": {
@@ -6181,7 +6181,7 @@ export const realTransactions = [
     "txn_date": "2021-05-06",
     "amount": 450.0,
     "direction": "Dr",
-    "running_balance": -62774.91,
+    "running_balance": 26835.59,
     "raw_description": "UPI/LANKESH DILIP M/112608289506/April 3 x 3 bot",
     "entities": {
       "channel": {
@@ -6215,7 +6215,7 @@ export const realTransactions = [
     "txn_date": "2021-05-03",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -63774.91,
+    "running_balance": 25835.59,
     "raw_description": "AP:BILLPAY FOR BSEMF 0283150604",
     "entities": {
       "channel": {
@@ -6249,7 +6249,7 @@ export const realTransactions = [
     "txn_date": "2021-05-02",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -63974.91,
+    "running_balance": 25635.59,
     "raw_description": "UPI/TRILOK SAXENA/112300277069/UPI (Value Date:03/05/2021)",
     "entities": {
       "channel": {
@@ -6283,7 +6283,7 @@ export const realTransactions = [
     "txn_date": "2021-05-02",
     "amount": 1608.0,
     "direction": "Dr",
-    "running_balance": -65582.91,
+    "running_balance": 24027.59,
     "raw_description": "UPI/CashfreePayment/11221 9190622/Cashfree Paymen",
     "entities": {
       "channel": {
@@ -6317,7 +6317,7 @@ export const realTransactions = [
     "txn_date": "2021-05-02",
     "amount": 14500.0,
     "direction": "Dr",
-    "running_balance": -80082.91,
+    "running_balance": 9527.59,
     "raw_description": "UPI/CREDRENT/112208151 384/payment via CRE",
     "entities": {
       "channel": {
@@ -6351,7 +6351,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 3158.0,
     "direction": "Dr",
-    "running_balance": -83240.91,
+    "running_balance": 6369.59,
     "raw_description": "UPI/CredClub/112114217591 /payment on CRED",
     "entities": {
       "channel": {
@@ -6385,7 +6385,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 332.0,
     "direction": "Dr",
-    "running_balance": -83572.91,
+    "running_balance": 6037.59,
     "raw_description": "UPI/AMAZONPAY/11211354 1127/You are paying",
     "entities": {
       "channel": {
@@ -6419,7 +6419,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 190.0,
     "direction": "Dr",
-    "running_balance": -83762.91,
+    "running_balance": 5847.59,
     "raw_description": "UPI/HEENA PARESH MA/112168162042/NA",
     "entities": {
       "channel": {
@@ -6453,7 +6453,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 35.0,
     "direction": "Dr",
-    "running_balance": -83797.91,
+    "running_balance": 5812.59,
     "raw_description": "UPI/Rajnath Yadav/112168022210/NA Sl. No. Date Description Chq / Ref number Amount Dr / Cr Balance Dr / Cr",
     "entities": {
       "channel": {
@@ -6487,7 +6487,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": -84047.91,
+    "running_balance": 5562.59,
     "raw_description": "UPI/Rajnath Yadav/112168001113/NA",
     "entities": {
       "channel": {
@@ -6521,7 +6521,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 352.0,
     "direction": "Cr",
-    "running_balance": -83695.91,
+    "running_balance": 5914.59,
     "raw_description": "UPI/Amazon Pay Indi/112110969411/Refund for your",
     "entities": {
       "channel": {
@@ -6555,7 +6555,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 352.0,
     "direction": "Dr",
-    "running_balance": -84047.91,
+    "running_balance": 5562.59,
     "raw_description": "UPI/AMAZONPAY/11211061 7027/You are paying",
     "entities": {
       "channel": {
@@ -6589,7 +6589,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -74047.91,
+    "running_balance": 15562.59,
     "raw_description": "UPI/SARIKA LALASAHE/112109218984/m ay",
     "entities": {
       "channel": {
@@ -6623,7 +6623,7 @@ export const realTransactions = [
     "txn_date": "2021-05-01",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -94047.91,
+    "running_balance": -4437.41,
     "raw_description": "MB:SENT MONEY TO OWN 3511614223",
     "entities": {
       "channel": {
@@ -6657,7 +6657,7 @@ export const realTransactions = [
     "txn_date": "2021-04-30",
     "amount": 3940.0,
     "direction": "Dr",
-    "running_balance": -97987.91,
+    "running_balance": -8377.41,
     "raw_description": "UPI/CredClub/112101436121 /payment on CRED (Value Date:01/05/2021)",
     "entities": {
       "channel": {
@@ -6691,7 +6691,7 @@ export const realTransactions = [
     "txn_date": "2021-04-30",
     "amount": 370.0,
     "direction": "Dr",
-    "running_balance": -98357.91,
+    "running_balance": -8747.41,
     "raw_description": "UPI/AMAZON/112101457439 /Request from Am (Value Date:01/05/2021)",
     "entities": {
       "channel": {
@@ -6725,7 +6725,7 @@ export const realTransactions = [
     "txn_date": "2021-04-30",
     "amount": 1185.9,
     "direction": "Dr",
-    "running_balance": -99543.81,
+    "running_balance": -9933.31,
     "raw_description": "UPI/AMAZONPAY/11210195 8434/You are paying (Value Date:01/05/2021)",
     "entities": {
       "channel": {
@@ -6759,7 +6759,7 @@ export const realTransactions = [
     "txn_date": "2021-04-30",
     "amount": 100996.0,
     "direction": "Cr",
-    "running_balance": 1452.19,
+    "running_balance": 91062.69,
     "raw_description": "ECW SALARY FOR APR 2021",
     "entities": {
       "channel": {
@@ -6793,7 +6793,7 @@ export const realTransactions = [
     "txn_date": "2021-04-28",
     "amount": 132.0,
     "direction": "Dr",
-    "running_balance": 1320.19,
+    "running_balance": 90930.69,
     "raw_description": "UPI/Hd mart/111801378497/Oid2021 04280925",
     "entities": {
       "channel": {
@@ -6827,7 +6827,7 @@ export const realTransactions = [
     "txn_date": "2021-04-28",
     "amount": 85.0,
     "direction": "Dr",
-    "running_balance": 1235.19,
+    "running_balance": 90845.69,
     "raw_description": "UPI/Rajnath Yadav/111801258572/NA",
     "entities": {
       "channel": {
@@ -6861,7 +6861,7 @@ export const realTransactions = [
     "txn_date": "2021-04-28",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": 2235.19,
+    "running_balance": 91845.69,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -6895,7 +6895,7 @@ export const realTransactions = [
     "txn_date": "2021-04-24",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": 2205.19,
+    "running_balance": 91815.69,
     "raw_description": "UPI/Hd mart/111422330518/Oid2021 04241127",
     "entities": {
       "channel": {
@@ -6929,7 +6929,7 @@ export const realTransactions = [
     "txn_date": "2021-04-24",
     "amount": 95.0,
     "direction": "Dr",
-    "running_balance": 2110.19,
+    "running_balance": 91720.69,
     "raw_description": "UPI/Health And Beyo/111422259757/Oid2021 04241124",
     "entities": {
       "channel": {
@@ -6963,7 +6963,7 @@ export const realTransactions = [
     "txn_date": "2021-04-21",
     "amount": 270.0,
     "direction": "Dr",
-    "running_balance": 1840.19,
+    "running_balance": 91450.69,
     "raw_description": "UPI/Health And Beyo/111149502742/Oid2021 04210929",
     "entities": {
       "channel": {
@@ -6997,7 +6997,7 @@ export const realTransactions = [
     "txn_date": "2021-04-21",
     "amount": 190.0,
     "direction": "Dr",
-    "running_balance": 1650.19,
+    "running_balance": 91260.69,
     "raw_description": "UPI/Rajnath Yadav/111149365559/NA",
     "entities": {
       "channel": {
@@ -7031,7 +7031,7 @@ export const realTransactions = [
     "txn_date": "2021-04-19",
     "amount": 8.16,
     "direction": "Cr",
-    "running_balance": 1658.35,
+    "running_balance": 91268.85,
     "raw_description": "UPI/Amazon Pay Indi/110910197878/Refund for your",
     "entities": {
       "channel": {
@@ -7065,7 +7065,7 @@ export const realTransactions = [
     "txn_date": "2021-04-18",
     "amount": 219.0,
     "direction": "Dr",
-    "running_balance": 1439.35,
+    "running_balance": 91049.85,
     "raw_description": "UPI/AMAZONPAY/11081996 5881/You are paying",
     "entities": {
       "channel": {
@@ -7099,7 +7099,7 @@ export const realTransactions = [
     "txn_date": "2021-04-18",
     "amount": 375.0,
     "direction": "Dr",
-    "running_balance": 1064.35,
+    "running_balance": 90674.85,
     "raw_description": "UPI/Hd mart/110890379812/Oid2021 04181851",
     "entities": {
       "channel": {
@@ -7133,7 +7133,7 @@ export const realTransactions = [
     "txn_date": "2021-04-17",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": 1034.35,
+    "running_balance": 90644.85,
     "raw_description": "UPI/Rajnath Yadav/110755163988/NA",
     "entities": {
       "channel": {
@@ -7167,7 +7167,7 @@ export const realTransactions = [
     "txn_date": "2021-04-17",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 3034.35,
+    "running_balance": 92644.85,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -7201,7 +7201,7 @@ export const realTransactions = [
     "txn_date": "2021-04-17",
     "amount": 400.0,
     "direction": "Dr",
-    "running_balance": 2634.35,
+    "running_balance": 92244.85,
     "raw_description": "UPI/Health And Beyo/110755022462/Oid2021 04170938",
     "entities": {
       "channel": {
@@ -7235,7 +7235,7 @@ export const realTransactions = [
     "txn_date": "2021-04-15",
     "amount": 16934.0,
     "direction": "Dr",
-    "running_balance": -14299.65,
+    "running_balance": 75310.85,
     "raw_description": "NACH-LEG-DR-HDFCLTD- 279739482",
     "entities": {
       "channel": {
@@ -7269,7 +7269,7 @@ export const realTransactions = [
     "txn_date": "2021-04-15",
     "amount": 3540.0,
     "direction": "Dr",
-    "running_balance": -17839.65,
+    "running_balance": 71770.85,
     "raw_description": "NACH-10-DR-HDFCLTD- 279920324",
     "entities": {
       "channel": {
@@ -7303,7 +7303,7 @@ export const realTransactions = [
     "txn_date": "2021-04-15",
     "amount": 190.0,
     "direction": "Dr",
-    "running_balance": -18029.65,
+    "running_balance": 71580.85,
     "raw_description": "UPI/Rajnath Yadav/110506595484/NA",
     "entities": {
       "channel": {
@@ -7337,7 +7337,7 @@ export const realTransactions = [
     "txn_date": "2021-04-12",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": -18028.65,
+    "running_balance": 71581.85,
     "raw_description": "UPI/SARIKA LALASAHE/110222957698/te st",
     "entities": {
       "channel": {
@@ -7371,7 +7371,7 @@ export const realTransactions = [
     "txn_date": "2021-04-12",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -19028.65,
+    "running_balance": 70581.85,
     "raw_description": "AP:BILLPAY FOR BSEMF 0279880930",
     "entities": {
       "channel": {
@@ -7405,7 +7405,7 @@ export const realTransactions = [
     "txn_date": "2021-04-11",
     "amount": 64.0,
     "direction": "Dr",
-    "running_balance": -19092.65,
+    "running_balance": 70517.85,
     "raw_description": "UPI/Hd mart/110119352474/UPI",
     "entities": {
       "channel": {
@@ -7439,7 +7439,7 @@ export const realTransactions = [
     "txn_date": "2021-04-10",
     "amount": 530.0,
     "direction": "Dr",
-    "running_balance": -19622.65,
+    "running_balance": 69987.85,
     "raw_description": "UPI/MAHIPAL BISHNO/110018469319/UPI",
     "entities": {
       "channel": {
@@ -7473,7 +7473,7 @@ export const realTransactions = [
     "txn_date": "2021-04-10",
     "amount": 5959.0,
     "direction": "Dr",
-    "running_balance": -25581.65,
+    "running_balance": 64028.85,
     "raw_description": "Ins Debit A\\c SPLN 62888541 dt 10/04/21",
     "entities": {
       "channel": {
@@ -7507,7 +7507,7 @@ export const realTransactions = [
     "txn_date": "2021-04-09",
     "amount": 960.0,
     "direction": "Dr",
-    "running_balance": -26541.65,
+    "running_balance": 63068.85,
     "raw_description": "UPI/PRAKASH THAKURD/109918235420/be er",
     "entities": {
       "channel": {
@@ -7541,7 +7541,7 @@ export const realTransactions = [
     "txn_date": "2021-04-09",
     "amount": 448.0,
     "direction": "Dr",
-    "running_balance": -26989.65,
+    "running_balance": 62620.85,
     "raw_description": "UPI/AMAZONPAY/10990985 3274/You are paying",
     "entities": {
       "channel": {
@@ -7575,7 +7575,7 @@ export const realTransactions = [
     "txn_date": "2021-04-09",
     "amount": 145.0,
     "direction": "Dr",
-    "running_balance": -27134.65,
+    "running_balance": 62475.85,
     "raw_description": "UPI/Hd mart/109909147199/UPI",
     "entities": {
       "channel": {
@@ -7609,7 +7609,7 @@ export const realTransactions = [
     "txn_date": "2021-04-09",
     "amount": 45.0,
     "direction": "Dr",
-    "running_balance": -27179.65,
+    "running_balance": 62430.85,
     "raw_description": "UPI/Hd mart/109909106553/UPI",
     "entities": {
       "channel": {
@@ -7643,7 +7643,7 @@ export const realTransactions = [
     "txn_date": "2021-04-09",
     "amount": 105.0,
     "direction": "Dr",
-    "running_balance": -27284.65,
+    "running_balance": 62325.85,
     "raw_description": "UPI/bharatpe.905153/109909 068217/Verified Mercha",
     "entities": {
       "channel": {
@@ -7677,7 +7677,7 @@ export const realTransactions = [
     "txn_date": "2021-04-08",
     "amount": 450.0,
     "direction": "Dr",
-    "running_balance": -27734.65,
+    "running_balance": 61875.85,
     "raw_description": "UPI/LANKESH DILIP M/109810096968/UPI",
     "entities": {
       "channel": {
@@ -7711,7 +7711,7 @@ export const realTransactions = [
     "txn_date": "2021-04-07",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -22734.65,
+    "running_balance": 66875.85,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -7745,7 +7745,7 @@ export const realTransactions = [
     "txn_date": "2021-04-06",
     "amount": 65.0,
     "direction": "Dr",
-    "running_balance": -22799.65,
+    "running_balance": 66810.85,
     "raw_description": "UPI/Rajnath Yadav/109671850491/NA",
     "entities": {
       "channel": {
@@ -7779,7 +7779,7 @@ export const realTransactions = [
     "txn_date": "2021-04-06",
     "amount": 23088.0,
     "direction": "Dr",
-    "running_balance": -45887.65,
+    "running_balance": 43722.85,
     "raw_description": "NACH-10-DR-HDFC BANK LIMITED-0000098244796",
     "entities": {
       "channel": {
@@ -7813,7 +7813,7 @@ export const realTransactions = [
     "txn_date": "2021-04-06",
     "amount": 41637.0,
     "direction": "Dr",
-    "running_balance": -87524.65,
+    "running_balance": 2085.85,
     "raw_description": "UPI/CredClub/109609043877 /payment on CRED",
     "entities": {
       "channel": {
@@ -7847,7 +7847,7 @@ export const realTransactions = [
     "txn_date": "2021-04-06",
     "amount": 30000.0,
     "direction": "Cr",
-    "running_balance": -57524.65,
+    "running_balance": 32085.85,
     "raw_description": "MB:RECEIVED MONEY FROM OWN 3511614223",
     "entities": {
       "channel": {
@@ -7881,7 +7881,7 @@ export const realTransactions = [
     "txn_date": "2021-04-06",
     "amount": 14500.0,
     "direction": "Dr",
-    "running_balance": -72024.65,
+    "running_balance": 17585.85,
     "raw_description": "MB RENT Ref 109609687926",
     "entities": {
       "channel": {
@@ -7915,7 +7915,7 @@ export const realTransactions = [
     "txn_date": "2021-04-05",
     "amount": 1090.0,
     "direction": "Dr",
-    "running_balance": -73114.65,
+    "running_balance": 16495.85,
     "raw_description": "UPI/AMAZON/109511345382 /Request from Am",
     "entities": {
       "channel": {
@@ -7949,7 +7949,7 @@ export const realTransactions = [
     "txn_date": "2021-04-05",
     "amount": 6.0,
     "direction": "Cr",
-    "running_balance": -73108.65,
+    "running_balance": 16501.85,
     "raw_description": "UPI/GOOGLEPAY/10951172 6857/UPI",
     "entities": {
       "channel": {
@@ -7983,7 +7983,7 @@ export const realTransactions = [
     "txn_date": "2021-04-05",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -78108.65,
+    "running_balance": 11501.85,
     "raw_description": "UPI/DANIEL VIKAS RA/109511184008/Umesh contri",
     "entities": {
       "channel": {
@@ -8017,7 +8017,7 @@ export const realTransactions = [
     "txn_date": "2021-04-04",
     "amount": 830.0,
     "direction": "Dr",
-    "running_balance": -78938.65,
+    "running_balance": 10671.85,
     "raw_description": "UPI/CashfreePayment/10941 3216189/Cashfree Paymen",
     "entities": {
       "channel": {
@@ -8051,7 +8051,7 @@ export const realTransactions = [
     "txn_date": "2021-04-04",
     "amount": 1700.0,
     "direction": "Dr",
-    "running_balance": -80638.65,
+    "running_balance": 8971.85,
     "raw_description": "UPI/JAYESHKUMAR PRA/109424512103/Oid2021 04041150",
     "entities": {
       "channel": {
@@ -8085,7 +8085,7 @@ export const realTransactions = [
     "txn_date": "2021-04-04",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -80663.65,
+    "running_balance": 8946.85,
     "raw_description": "UPI/Health And Beyo/109411188101/UPI",
     "entities": {
       "channel": {
@@ -8119,7 +8119,7 @@ export const realTransactions = [
     "txn_date": "2021-04-04",
     "amount": 160.0,
     "direction": "Dr",
-    "running_balance": -80823.65,
+    "running_balance": 8786.85,
     "raw_description": "UPI/Hd mart/109411141492/UPI",
     "entities": {
       "channel": {
@@ -8153,7 +8153,7 @@ export const realTransactions = [
     "txn_date": "2021-04-03",
     "amount": 296.0,
     "direction": "Dr",
-    "running_balance": -81119.65,
+    "running_balance": 8490.85,
     "raw_description": "PCD/1535/MC DONALDS/THANE030421/19 :22",
     "entities": {
       "channel": {
@@ -8187,7 +8187,7 @@ export const realTransactions = [
     "txn_date": "2021-04-02",
     "amount": 1325.0,
     "direction": "Cr",
-    "running_balance": -79794.65,
+    "running_balance": 9815.85,
     "raw_description": "UPI/MOHDOSWAIS SIRA/109213964424/poptate s",
     "entities": {
       "channel": {
@@ -8221,7 +8221,7 @@ export const realTransactions = [
     "txn_date": "2021-04-02",
     "amount": 139.0,
     "direction": "Dr",
-    "running_balance": -79933.65,
+    "running_balance": 9676.85,
     "raw_description": "UPI/Health And Beyo/109209563751/UPI",
     "entities": {
       "channel": {
@@ -8255,7 +8255,7 @@ export const realTransactions = [
     "txn_date": "2021-04-01",
     "amount": 1214.22,
     "direction": "Dr",
-    "running_balance": -81147.87,
+    "running_balance": 8462.63,
     "raw_description": "PCD/1535/AIRTEL/MUMBAI0 10421/10:45",
     "entities": {
       "channel": {
@@ -8289,7 +8289,7 @@ export const realTransactions = [
     "txn_date": "2021-04-01",
     "amount": 2251.0,
     "direction": "Dr",
-    "running_balance": -83398.87,
+    "running_balance": 6211.63,
     "raw_description": "PCD/1535/AMAZON PAY INDIA PRIVA/BANGAL010421/10:",
     "entities": {
       "channel": {
@@ -8323,7 +8323,7 @@ export const realTransactions = [
     "txn_date": "2021-04-01",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -83598.87,
+    "running_balance": 6011.63,
     "raw_description": "UPI/TRILOK SAXENA/109109474380/UPI",
     "entities": {
       "channel": {
@@ -8357,7 +8357,7 @@ export const realTransactions = [
     "txn_date": "2021-04-01",
     "amount": 12683.0,
     "direction": "Dr",
-    "running_balance": -96281.87,
+    "running_balance": -6671.37,
     "raw_description": "UPI/CRED/109108427041/cr edit card bil",
     "entities": {
       "channel": {
@@ -8391,7 +8391,7 @@ export const realTransactions = [
     "txn_date": "2021-04-01",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -86281.87,
+    "running_balance": 3328.63,
     "raw_description": "UPI/SARIKA LALASAHE/109108082770/A pril",
     "entities": {
       "channel": {
@@ -8425,7 +8425,7 @@ export const realTransactions = [
     "txn_date": "2023-09-30",
     "amount": 1200.0,
     "direction": "Cr",
-    "running_balance": 1200.0,
+    "running_balance": 70622.1,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-327302563522-U PI",
     "entities": {
       "channel": {
@@ -8459,7 +8459,7 @@ export const realTransactions = [
     "txn_date": "2023-10-01",
     "amount": 35000.0,
     "direction": "Cr",
-    "running_balance": 36200.0,
+    "running_balance": 105622.1,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-327486744675-UPI",
     "entities": {
       "channel": {
@@ -8493,7 +8493,7 @@ export const realTransactions = [
     "txn_date": "2023-10-01",
     "amount": 700.0,
     "direction": "Dr",
-    "running_balance": 35500.0,
+    "running_balance": 104922.1,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-327403889023-UPI",
     "entities": {
       "channel": {
@@ -8527,7 +8527,7 @@ export const realTransactions = [
     "txn_date": "2023-10-01",
     "amount": 2100.0,
     "direction": "Cr",
-    "running_balance": 37600.0,
+    "running_balance": 107022.1,
     "raw_description": "UPI-SANDESHDOULATRIPOT-SANDESHREPOTE@O KHDFCBANK-HDFC0000291-327423817791-CASH",
     "entities": {
       "channel": {
@@ -8561,7 +8561,7 @@ export const realTransactions = [
     "txn_date": "2023-10-01",
     "amount": 18000.0,
     "direction": "Dr",
-    "running_balance": 19600.0,
+    "running_balance": 89022.1,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS@OKIC ICI-SCBL0036046-327432374351-UPI",
     "entities": {
       "channel": {
@@ -8595,7 +8595,7 @@ export const realTransactions = [
     "txn_date": "2023-10-02",
     "amount": 140.0,
     "direction": "Dr",
-    "running_balance": 19460.0,
+    "running_balance": 88882.1,
     "raw_description": "UPI-MALIMADNANNOORMOH-Q640164266@YBL- YESB0YBLUPI-327537385721-PAYBYWHATSAPP",
     "entities": {
       "channel": {
@@ -8629,7 +8629,7 @@ export const realTransactions = [
     "txn_date": "2023-10-03",
     "amount": 39648.0,
     "direction": "Cr",
-    "running_balance": 59108.0,
+    "running_balance": 128530.1,
     "raw_description": "L1235422SALSE",
     "entities": {
       "channel": {
@@ -8663,7 +8663,7 @@ export const realTransactions = [
     "txn_date": "2023-10-03",
     "amount": 21500.0,
     "direction": "Dr",
-    "running_balance": 37608.0,
+    "running_balance": 107030.1,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-327687958418-UPI",
     "entities": {
       "channel": {
@@ -8697,7 +8697,7 @@ export const realTransactions = [
     "txn_date": "2023-10-03",
     "amount": 9426.0,
     "direction": "Dr",
-    "running_balance": 28182.0,
+    "running_balance": 97604.1,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-327 678409826-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -8731,7 +8731,7 @@ export const realTransactions = [
     "txn_date": "2023-10-03",
     "amount": 10135.0,
     "direction": "Cr",
-    "running_balance": 38317.0,
+    "running_balance": 107739.1,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-327691930089-PAIDVIACRED AND",
     "entities": {
       "channel": {
@@ -8765,7 +8765,7 @@ export const realTransactions = [
     "txn_date": "2023-10-04",
     "amount": 18000.0,
     "direction": "Cr",
-    "running_balance": 56317.0,
+    "running_balance": 125739.1,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-327748143190-UPI",
     "entities": {
       "channel": {
@@ -8799,7 +8799,7 @@ export const realTransactions = [
     "txn_date": "2023-10-04",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": 56257.0,
+    "running_balance": 125679.1,
     "raw_description": "UPI-KGN CATERERS-PAYTMQR281SCKCHP8@PAYTM -PYTM0123456-327723352673-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -8833,7 +8833,7 @@ export const realTransactions = [
     "txn_date": "2023-10-05",
     "amount": 4500.0,
     "direction": "Cr",
-    "running_balance": 60757.0,
+    "running_balance": 130179.1,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-327869580560-UPI",
     "entities": {
       "channel": {
@@ -8867,7 +8867,7 @@ export const realTransactions = [
     "txn_date": "2023-10-05",
     "amount": 24.0,
     "direction": "Dr",
-    "running_balance": 60733.0,
+    "running_balance": 130155.1,
     "raw_description": "UPI-ZAIDULLAH-Q230811244@YBL-YESB0YBLUPI -327817085108-PAIDVIACRED HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -8901,7 +8901,7 @@ export const realTransactions = [
     "txn_date": "2023-10-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": 59321.0,
+    "running_balance": 128743.1,
     "raw_description": "EMI458151064CHQS45815106400511023458 151064",
     "entities": {
       "channel": {
@@ -8935,7 +8935,7 @@ export const realTransactions = [
     "txn_date": "2023-10-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": 53162.54,
+    "running_balance": 122584.64,
     "raw_description": "ACHD-CL02974170-VL3PARB6SSAA",
     "entities": {
       "channel": {
@@ -8969,7 +8969,7 @@ export const realTransactions = [
     "txn_date": "2023-10-05",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": 53102.54,
+    "running_balance": 122524.64,
     "raw_description": "UPI-KGN CATERERS-PAYTMQR281SCKCHP8@PAYTM -PYTM0123456-327851782094-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9003,7 +9003,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 24.0,
     "direction": "Dr",
-    "running_balance": 53078.54,
+    "running_balance": 122500.64,
     "raw_description": "UPI-ZAIDULLAH-Q230811244@YBL-YESB0YBLUPI -364516820956-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9037,7 +9037,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": 52978.54,
+    "running_balance": 122400.64,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-327978922197-UPI",
     "entities": {
       "channel": {
@@ -9071,7 +9071,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 2579.0,
     "direction": "Dr",
-    "running_balance": 50399.54,
+    "running_balance": 119821.64,
     "raw_description": "UPI-BILLDESKTEZ-BILLDESK.LOAN@ICICI-ICIC 0DC0099-327992564392-UPI",
     "entities": {
       "channel": {
@@ -9105,7 +9105,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 3800.0,
     "direction": "Dr",
-    "running_balance": 46599.54,
+    "running_balance": 116021.64,
     "raw_description": "UPI-OMPRAKASHMANNUSAIN-SAINI04021970@O KSBI-SBIN0001685-327995593949-UPI",
     "entities": {
       "channel": {
@@ -9139,7 +9139,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 100.0,
     "direction": "Cr",
-    "running_balance": 46699.54,
+    "running_balance": 116121.64,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-AKKIKHAN9507@OK HDFCBANK-HDFC0000411-327997707415-UPI",
     "entities": {
       "channel": {
@@ -9173,7 +9173,7 @@ export const realTransactions = [
     "txn_date": "2023-10-06",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": 46599.54,
+    "running_balance": 116021.64,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-AKKIKHAN9507@OK ICICI-HDFC0000411-327997748529-UPI",
     "entities": {
       "channel": {
@@ -9207,7 +9207,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 3.0,
     "direction": "Cr",
-    "running_balance": 46602.54,
+    "running_balance": 116024.64,
     "raw_description": "UPI-GOOGLEPAY-GOOG-PAYMENT@OKAXIS-UTIB00 00553-328062805965-UPI",
     "entities": {
       "channel": {
@@ -9241,7 +9241,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 75.0,
     "direction": "Dr",
-    "running_balance": 46527.54,
+    "running_balance": 115949.64,
     "raw_description": "UPI-MRMOHDNISARULHAQU-Q997443579@YBL- YESB0YBLUPI-328057777880-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9275,7 +9275,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 65.0,
     "direction": "Dr",
-    "running_balance": 46462.54,
+    "running_balance": 115884.64,
     "raw_description": "UPI-MRMOHDNISARULHAQU-Q997443579@YBL- YESB0YBLUPI-328019131241-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9309,7 +9309,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 23.0,
     "direction": "Dr",
-    "running_balance": 46439.54,
+    "running_balance": 115861.64,
     "raw_description": "UPI-MAULASHAFISHAIKH-MAULASHAIKH3944@O KSBI-ESFB0001001-328023252646-UPI",
     "entities": {
       "channel": {
@@ -9343,7 +9343,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": 24945.54,
+    "running_balance": 94367.64,
     "raw_description": "EMI140705829CHQS14070582900611023140 705829",
     "entities": {
       "channel": {
@@ -9377,7 +9377,7 @@ export const realTransactions = [
     "txn_date": "2023-10-07",
     "amount": 15500.0,
     "direction": "Cr",
-    "running_balance": 40445.54,
+    "running_balance": 109867.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-328044920200-UPI",
     "entities": {
       "channel": {
@@ -9411,7 +9411,7 @@ export const realTransactions = [
     "txn_date": "2023-10-08",
     "amount": 210.0,
     "direction": "Dr",
-    "running_balance": 40235.54,
+    "running_balance": 109657.64,
     "raw_description": "UPI-AZRUNNISAMOHAMMEDS-BHARATPE.900664 21705@FBPE-FDRL0001382-328151185128-PAY HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -9445,7 +9445,7 @@ export const realTransactions = [
     "txn_date": "2023-10-08",
     "amount": 52000.0,
     "direction": "Dr",
-    "running_balance": -11764.46,
+    "running_balance": 57657.64,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-328163182352-UPI",
     "entities": {
       "channel": {
@@ -9479,7 +9479,7 @@ export const realTransactions = [
     "txn_date": "2023-10-08",
     "amount": 305.0,
     "direction": "Dr",
-    "running_balance": -12069.46,
+    "running_balance": 57352.64,
     "raw_description": "UPI-MAHESHPARAGMALAVDE-BHARATPE9072389 4923@YESBANKLTD-YESB0YESUPI-364769680560 -PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -9513,7 +9513,7 @@ export const realTransactions = [
     "txn_date": "2023-10-08",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": -12129.46,
+    "running_balance": 57292.64,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-364748205795-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -9547,7 +9547,7 @@ export const realTransactions = [
     "txn_date": "2023-10-08",
     "amount": 24.0,
     "direction": "Dr",
-    "running_balance": -12153.46,
+    "running_balance": 57268.64,
     "raw_description": "UPI-USHASANTOSHMANDE-PAYTMQR2810050501 011A09NT93U0WB@PAYTM-PYTM0123456-3647827 62469-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9581,7 +9581,7 @@ export const realTransactions = [
     "txn_date": "2023-10-09",
     "amount": 2040.0,
     "direction": "Cr",
-    "running_balance": -10113.46,
+    "running_balance": 59308.64,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKAX IS-CNRB0000033-328275763588-UPI",
     "entities": {
       "channel": {
@@ -9615,7 +9615,7 @@ export const realTransactions = [
     "txn_date": "2023-10-09",
     "amount": 450.0,
     "direction": "Dr",
-    "running_balance": -10563.46,
+    "running_balance": 58858.64,
     "raw_description": "UPI-KRISHNAKUMARVERMA-BABUBHAI22091983 @OKSBI-DCBL0000012-328299782029-UPI",
     "entities": {
       "channel": {
@@ -9649,7 +9649,7 @@ export const realTransactions = [
     "txn_date": "2023-10-09",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -11063.46,
+    "running_balance": 58358.64,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-328204799567-UPI",
     "entities": {
       "channel": {
@@ -9683,7 +9683,7 @@ export const realTransactions = [
     "txn_date": "2023-10-09",
     "amount": 140.0,
     "direction": "Cr",
-    "running_balance": -10923.46,
+    "running_balance": 58498.64,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKAX IS-CNRB0000033-328296004470-UPI",
     "entities": {
       "channel": {
@@ -9717,7 +9717,7 @@ export const realTransactions = [
     "txn_date": "2023-10-10",
     "amount": 11000.0,
     "direction": "Cr",
-    "running_balance": 76.54,
+    "running_balance": 69498.64,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-328387284050-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -9751,7 +9751,7 @@ export const realTransactions = [
     "txn_date": "2023-10-10",
     "amount": 2.0,
     "direction": "Cr",
-    "running_balance": 78.54,
+    "running_balance": 69500.64,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-328370209732-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -9785,7 +9785,7 @@ export const realTransactions = [
     "txn_date": "2023-10-10",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": 58.54,
+    "running_balance": 69480.64,
     "raw_description": "UPI-RAZIYACHANDPASHAPA-PAYTMQR1OFWUP0D F3@PAYTM-PYTM0123456-364928251654-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -9819,7 +9819,7 @@ export const realTransactions = [
     "txn_date": "2023-10-11",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -19941.46,
+    "running_balance": 49480.64,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS@OKIC ICI-SCBL0036046-328462400718-UPI",
     "entities": {
       "channel": {
@@ -9853,7 +9853,7 @@ export const realTransactions = [
     "txn_date": "2023-10-12",
     "amount": 2092.0,
     "direction": "Dr",
-    "running_balance": -22033.46,
+    "running_balance": 47388.64,
     "raw_description": "CHQPAID-MICRCTS-MU-TORRENTPOWERLTD HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -9887,7 +9887,7 @@ export const realTransactions = [
     "txn_date": "2023-10-12",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -22133.46,
+    "running_balance": 47288.64,
     "raw_description": "UPI-KGN CATERERS-PAYTMQR281SCKCHP8@PAYTM -PYTM0123456-328506058054-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -9921,7 +9921,7 @@ export const realTransactions = [
     "txn_date": "2023-10-15",
     "amount": 4400.0,
     "direction": "Dr",
-    "running_balance": -26533.46,
+    "running_balance": 42888.64,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-AKKIKHAN9507-2@ OKSBI-AUBL0002348-328813939196-TICKET",
     "entities": {
       "channel": {
@@ -9955,7 +9955,7 @@ export const realTransactions = [
     "txn_date": "2023-10-18",
     "amount": 4250.0,
     "direction": "Cr",
-    "running_balance": -22283.46,
+    "running_balance": 47138.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-365723830229-PAIDVIACRED AND",
     "entities": {
       "channel": {
@@ -9989,7 +9989,7 @@ export const realTransactions = [
     "txn_date": "2023-10-19",
     "amount": 15.0,
     "direction": "Dr",
-    "running_balance": -22298.46,
+    "running_balance": 47123.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-329261130949-UPI",
     "entities": {
       "channel": {
@@ -10023,7 +10023,7 @@ export const realTransactions = [
     "txn_date": "2023-10-19",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -22798.46,
+    "running_balance": 46623.64,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-329268314676-U PI",
     "entities": {
       "channel": {
@@ -10057,7 +10057,7 @@ export const realTransactions = [
     "txn_date": "2023-10-20",
     "amount": 14.0,
     "direction": "Dr",
-    "running_balance": -22812.46,
+    "running_balance": 46609.64,
     "raw_description": "UPI-KRISHNATEASHOP-GPAY-11194258906@OK BIZAXIS-UTIB0000000-365921271659-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -10091,7 +10091,7 @@ export const realTransactions = [
     "txn_date": "2023-10-20",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -22312.46,
+    "running_balance": 47109.64,
     "raw_description": "L1235422INTAL",
     "entities": {
       "channel": {
@@ -10125,7 +10125,7 @@ export const realTransactions = [
     "txn_date": "2023-10-20",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -22352.46,
+    "running_balance": 47069.64,
     "raw_description": "UPI-ASHOKRAMNARAYAN YAD-PAYTMQR1OYKVQ2F 4J@PAYTM-PYTM0123456-365979260936-PAIDV",
     "entities": {
       "channel": {
@@ -10159,7 +10159,7 @@ export const realTransactions = [
     "txn_date": "2023-10-20",
     "amount": 120.0,
     "direction": "Dr",
-    "running_balance": -22472.46,
+    "running_balance": 46949.64,
     "raw_description": "UPI-MOHAMMEDHUSSAINIBR-PAYTMQR1NR9SZ8L D8@PAYTM-PYTM0123456-329332286882-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -10193,7 +10193,7 @@ export const realTransactions = [
     "txn_date": "2023-10-21",
     "amount": 175.0,
     "direction": "Dr",
-    "running_balance": -22647.46,
+    "running_balance": 46774.64,
     "raw_description": "UPI-MRMOHDNISARULHAQU-Q997443579@YBL- YESB0YBLUPI-366051036822-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10227,7 +10227,7 @@ export const realTransactions = [
     "txn_date": "2023-10-21",
     "amount": 35.0,
     "direction": "Dr",
-    "running_balance": -22682.46,
+    "running_balance": 46739.64,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQR281005050101106E0 QBM64F1@PAYTM-PYTM0123456-329493101798-P AIDVIACRED",
     "entities": {
       "channel": {
@@ -10261,7 +10261,7 @@ export const realTransactions = [
     "txn_date": "2023-10-21",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": -21682.46,
+    "running_balance": 47739.64,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-366020828347-PAIDVIACRED AND",
     "entities": {
       "channel": {
@@ -10295,7 +10295,7 @@ export const realTransactions = [
     "txn_date": "2023-10-21",
     "amount": 90.0,
     "direction": "Dr",
-    "running_balance": -21772.46,
+    "running_balance": 47649.64,
     "raw_description": "UPI-MADINAMEDICALAND-Q672385132@YBL-YE SB0YBLUPI-366009891834-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10329,7 +10329,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 7000.0,
     "direction": "Cr",
-    "running_balance": -14772.46,
+    "running_balance": 54649.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-329670769125-RENT FORMONTHOF",
     "entities": {
       "channel": {
@@ -10363,7 +10363,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": -15022.46,
+    "running_balance": 54399.64,
     "raw_description": "UPI-SAYYEDREHMATBIMOHA-PAYTMQRA31YP6OB X2@PAYTM-PYTM0123456-329648840145-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -10397,7 +10397,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -15052.46,
+    "running_balance": 54369.64,
     "raw_description": "UPI-MRMIRZAFAIYAZISHA-PAYTMQR11NI1I14 0E@PAYTM-PYTM0123456-366299603073-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -10431,7 +10431,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": -12052.46,
+    "running_balance": 57369.64,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKAX IS-CNRB0000033-329694776420-UPI",
     "entities": {
       "channel": {
@@ -10465,7 +10465,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -13052.46,
+    "running_balance": 56369.64,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-329680491670-UPI",
     "entities": {
       "channel": {
@@ -10499,7 +10499,7 @@ export const realTransactions = [
     "txn_date": "2023-10-23",
     "amount": 113.0,
     "direction": "Dr",
-    "running_balance": -13165.46,
+    "running_balance": 56256.64,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-329600565359-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -10533,7 +10533,7 @@ export const realTransactions = [
     "txn_date": "2023-10-24",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -13185.46,
+    "running_balance": 56236.64,
     "raw_description": "UPI-HEALTHPLUSCHEMIST-BHARATPE90724785 131@YESBANKLTD-YESB0YESUPI-366354127483- PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -10567,7 +10567,7 @@ export const realTransactions = [
     "txn_date": "2023-10-24",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -13205.46,
+    "running_balance": 56216.64,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-329728941661-UPI",
     "entities": {
       "channel": {
@@ -10601,7 +10601,7 @@ export const realTransactions = [
     "txn_date": "2023-10-25",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -13405.46,
+    "running_balance": 56016.64,
     "raw_description": "UPI-UMARAKESHUTTARKAR-Q805501409@YBL- YESB0YBLUPI-329865394738-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10635,7 +10635,7 @@ export const realTransactions = [
     "txn_date": "2023-10-25",
     "amount": 600.0,
     "direction": "Dr",
-    "running_balance": -14005.46,
+    "running_balance": 55416.64,
     "raw_description": "UPI-MALIKAALIYAYUNUSS-MALKAALIYA07@OK SBI-BARB0MCKAUS-329851356259-UPI",
     "entities": {
       "channel": {
@@ -10669,7 +10669,7 @@ export const realTransactions = [
     "txn_date": "2023-10-25",
     "amount": 58.0,
     "direction": "Dr",
-    "running_balance": -14063.46,
+    "running_balance": 55358.64,
     "raw_description": "UPI-UZAIR AHMAD-PAYTMQR1Q4C3GWCIJ@PAYTM- PYTM0123456-329824603893-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10703,7 +10703,7 @@ export const realTransactions = [
     "txn_date": "2023-10-26",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -14113.46,
+    "running_balance": 55308.64,
     "raw_description": "UPI-MRMOHDNISARULHAQU-Q997443579@YBL- YESB0YBLUPI-329947638052-PAIDVIACRED HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -10737,7 +10737,7 @@ export const realTransactions = [
     "txn_date": "2023-10-26",
     "amount": 75.0,
     "direction": "Dr",
-    "running_balance": -14188.46,
+    "running_balance": 55233.64,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-329902767176-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -10771,7 +10771,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -14238.46,
+    "running_balance": 55183.64,
     "raw_description": "UPI-GAURAVFATEBAHADUR S-PAYTMQRDW5QRVBO 4T@PAYTM-PYTM0123456-366634500088-PAIDV",
     "entities": {
       "channel": {
@@ -10805,7 +10805,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 17460.0,
     "direction": "Cr",
-    "running_balance": 3221.54,
+    "running_balance": 72643.64,
     "raw_description": "L1235422REINC",
     "entities": {
       "channel": {
@@ -10839,7 +10839,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": 3141.54,
+    "running_balance": 72563.64,
     "raw_description": "UPI-KRISHNAYADAV-9833092603@FAM-PPIW088 4509-330052974009-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10873,7 +10873,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 45.0,
     "direction": "Dr",
-    "running_balance": 3096.54,
+    "running_balance": 72518.64,
     "raw_description": "UPI-JAMILASULEMANMEMON-PAYTMQR28100505 01011OZWDK6ITK6R@PAYTM-PYTM0123456-33007 5891376-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -10907,7 +10907,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 27500.0,
     "direction": "Dr",
-    "running_balance": -24403.46,
+    "running_balance": 45018.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-330019244121-SRA",
     "entities": {
       "channel": {
@@ -10941,7 +10941,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": -24404.46,
+    "running_balance": 45017.64,
     "raw_description": "UPI-SHAIF ALI-SHAHRUKH1483000@OKSBI-KK BK0000628-330026234233-UPI",
     "entities": {
       "channel": {
@@ -10975,7 +10975,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 12000.0,
     "direction": "Cr",
-    "running_balance": -12404.46,
+    "running_balance": 57017.64,
     "raw_description": "50100224132841-TPT-SRACOINS-AKILAHMEDA TIKAHMEDKHAN",
     "entities": {
       "channel": {
@@ -11009,7 +11009,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 47000.0,
     "direction": "Dr",
-    "running_balance": -59404.46,
+    "running_balance": 10017.64,
     "raw_description": "UPI-SHAIF ALI-SHAHRUKH1483000@OKSBI-KK BK0000628-330026597958-SRAAMT",
     "entities": {
       "channel": {
@@ -11043,7 +11043,7 @@ export const realTransactions = [
     "txn_date": "2023-10-27",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -64404.46,
+    "running_balance": 5017.64,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-330029258210-UPI",
     "entities": {
       "channel": {
@@ -11077,7 +11077,7 @@ export const realTransactions = [
     "txn_date": "2023-10-28",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -69404.46,
+    "running_balance": 17.64,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-330147432200-UPI",
     "entities": {
       "channel": {
@@ -11111,7 +11111,7 @@ export const realTransactions = [
     "txn_date": "2023-10-28",
     "amount": 3.0,
     "direction": "Cr",
-    "running_balance": -69401.46,
+    "running_balance": 20.64,
     "raw_description": "UPI-GOOGLEPAY-GOOG-PAYMENT@OKAXIS-UTIB00 00553-330134217344-UPI",
     "entities": {
       "channel": {
@@ -11145,7 +11145,7 @@ export const realTransactions = [
     "txn_date": "2023-10-28",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": -49401.46,
+    "running_balance": 20020.64,
     "raw_description": "50100224132841-TPT-15PENDING-AKILAHMED ATIKAHMEDKHAN",
     "entities": {
       "channel": {
@@ -11179,7 +11179,7 @@ export const realTransactions = [
     "txn_date": "2023-10-28",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": -34401.46,
+    "running_balance": 35020.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-330156734957-UPI",
     "entities": {
       "channel": {
@@ -11213,7 +11213,7 @@ export const realTransactions = [
     "txn_date": "2023-10-29",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -54401.46,
+    "running_balance": 15020.64,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -11247,7 +11247,7 @@ export const realTransactions = [
     "txn_date": "2023-10-29",
     "amount": 70.0,
     "direction": "Dr",
-    "running_balance": -54471.46,
+    "running_balance": 14950.64,
     "raw_description": "UPI-CHAURASIASHIVGOPAL-Q543165543@YBL- YESB0YBLUPI-330253361768-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -11281,7 +11281,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 600.0,
     "direction": "Dr",
-    "running_balance": -55071.46,
+    "running_balance": 14350.64,
     "raw_description": "UPI-XXXXXX5816-RATN0000081-330443939747- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -11315,7 +11315,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 12000.0,
     "direction": "Cr",
-    "running_balance": -43071.46,
+    "running_balance": 26350.64,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-330467033490-UPI",
     "entities": {
       "channel": {
@@ -11349,7 +11349,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": -42071.46,
+    "running_balance": 27350.64,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-330450458177-UPI",
     "entities": {
       "channel": {
@@ -11383,7 +11383,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 27000.0,
     "direction": "Dr",
-    "running_balance": -69071.46,
+    "running_balance": 350.64,
     "raw_description": "UPI-XXXXXX5816-RATN0000081-330414462602- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -11417,7 +11417,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 27000.0,
     "direction": "Cr",
-    "running_balance": -42071.46,
+    "running_balance": 27350.64,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-330477256192-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -11451,7 +11451,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 27000.0,
     "direction": "Dr",
-    "running_balance": -69071.46,
+    "running_balance": 350.64,
     "raw_description": "UPI-XXXXXX5816-RATN0000081-330413521693- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -11485,7 +11485,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 27000.0,
     "direction": "Cr",
-    "running_balance": -42071.46,
+    "running_balance": 27350.64,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-330443670674-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -11519,7 +11519,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 27000.0,
     "direction": "Dr",
-    "running_balance": -69071.46,
+    "running_balance": 350.64,
     "raw_description": "UPI-XXXXXX5816-RATN0000081-330442615519- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -11553,7 +11553,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -44071.46,
+    "running_balance": 25350.64,
     "raw_description": "50100224132841-TPT-UDHAR-AKILAHMEDATIKA HMEDKHAN",
     "entities": {
       "channel": {
@@ -11587,7 +11587,7 @@ export const realTransactions = [
     "txn_date": "2023-10-31",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -69071.46,
+    "running_balance": 350.64,
     "raw_description": "IMPS-330420338070-BHARATSETHI-FDRL-XXXX XXXXXX8581-HI",
     "entities": {
       "channel": {
@@ -11621,7 +11621,7 @@ export const realTransactions = [
     "txn_date": "2023-11-01",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -64071.46,
+    "running_balance": 5350.64,
     "raw_description": "UPI-KHANGULAMHUSSAINA-AOUNHARDWARE143 -1@OKHDFCBANK-ABHY0065014-330586946932-2 EMITV",
     "entities": {
       "channel": {
@@ -11655,7 +11655,7 @@ export const realTransactions = [
     "txn_date": "2023-11-01",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -63571.46,
+    "running_balance": 5850.64,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-330592607660-U PI",
     "entities": {
       "channel": {
@@ -11689,7 +11689,7 @@ export const realTransactions = [
     "txn_date": "2023-11-01",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -58571.46,
+    "running_balance": 10850.64,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -11723,7 +11723,7 @@ export const realTransactions = [
     "txn_date": "2023-11-01",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -63571.46,
+    "running_balance": 5850.64,
     "raw_description": "UPI-AKILAHMEDATIKAHME-AKKIKHAN9507-3@ OKHDFCBANK-IDFB0040106-330599667019-UPI",
     "entities": {
       "channel": {
@@ -11757,7 +11757,7 @@ export const realTransactions = [
     "txn_date": "2023-11-02",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": -63821.46,
+    "running_balance": 5600.64,
     "raw_description": "UPI-SHAHINFOOTWEAR-PAYTMQR1IGKFB5ZEQ@P AYTM-PYTM0123456-367295189711-PAIDVIAC RED",
     "entities": {
       "channel": {
@@ -11791,7 +11791,7 @@ export const realTransactions = [
     "txn_date": "2023-11-02",
     "amount": 7.56,
     "direction": "Dr",
-    "running_balance": -63829.02,
+    "running_balance": 5593.08,
     "raw_description": "JULSEP23INSTAALERTCHG32SMS031023-MIR 2430525431987",
     "entities": {
       "channel": {
@@ -11825,7 +11825,7 @@ export const realTransactions = [
     "txn_date": "2023-11-03",
     "amount": 3.0,
     "direction": "Cr",
-    "running_balance": -63826.02,
+    "running_balance": 5596.08,
     "raw_description": "UPI-GOOGLEPAY-GOOG-PAYMENT@OKAXIS-UTIB00 00553-330792139366-UPI",
     "entities": {
       "channel": {
@@ -11859,7 +11859,7 @@ export const realTransactions = [
     "txn_date": "2023-11-03",
     "amount": 37000.0,
     "direction": "Cr",
-    "running_balance": -26826.02,
+    "running_balance": 42596.08,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-330722864025-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -11893,7 +11893,7 @@ export const realTransactions = [
     "txn_date": "2023-11-03",
     "amount": 39648.0,
     "direction": "Cr",
-    "running_balance": 12821.98,
+    "running_balance": 82244.08,
     "raw_description": "L1235422SALOC",
     "entities": {
       "channel": {
@@ -11927,7 +11927,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 30000.0,
     "direction": "Cr",
-    "running_balance": 42821.98,
+    "running_balance": 112244.08,
     "raw_description": "50100224132841-TPT-CASH-AKILAHMEDATIKAH MEDKHAN",
     "entities": {
       "channel": {
@@ -11961,7 +11961,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 32821.98,
+    "running_balance": 102244.08,
     "raw_description": "ATW-405988XXXXXX3155-P3ENMM14-THANE",
     "entities": {
       "channel": {
@@ -11995,7 +11995,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 22821.98,
+    "running_balance": 92244.08,
     "raw_description": "ATW-405988XXXXXX3155-P3ENMM14-THANE",
     "entities": {
       "channel": {
@@ -12029,7 +12029,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 12821.98,
+    "running_balance": 82244.08,
     "raw_description": "ATW-405988XXXXXX3155-P3ENMM14-THANE",
     "entities": {
       "channel": {
@@ -12063,7 +12063,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 2337.0,
     "direction": "Dr",
-    "running_balance": 10484.98,
+    "running_balance": 79907.08,
     "raw_description": "UPI-PHONEPE-BBPSBP@YBL-YESB0YBLUPI-33081 1750188-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -12097,7 +12097,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 10485.98,
+    "running_balance": 79908.08,
     "raw_description": "IMPS-330815599482-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -12131,7 +12131,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 15700.0,
     "direction": "Cr",
-    "running_balance": 26185.98,
+    "running_balance": 95608.08,
     "raw_description": "IMPS-330815652307-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -12165,7 +12165,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 16185.98,
+    "running_balance": 85608.08,
     "raw_description": "ATW-405988XXXXXX3155-P1AWMU99-THANE",
     "entities": {
       "channel": {
@@ -12199,7 +12199,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": 11185.98,
+    "running_balance": 80608.08,
     "raw_description": "UPI-ABDUL KALAM KHAN-Q853134331@YBL-YE SB0YBLUPI-330873141533-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -12233,7 +12233,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 395.0,
     "direction": "Dr",
-    "running_balance": 10790.98,
+    "running_balance": 80213.08,
     "raw_description": "UPI-ABDULLATIFYUSUFSU-Q947557365@YBL- HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -12267,7 +12267,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": 10770.98,
+    "running_balance": 80193.08,
     "raw_description": "UPI-ABDULRAHIMJAHURQU-Q231640940@YBL- YESB0YBLUPI-330808928241-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -12301,7 +12301,7 @@ export const realTransactions = [
     "txn_date": "2023-11-04",
     "amount": 2100.0,
     "direction": "Dr",
-    "running_balance": 8670.98,
+    "running_balance": 78093.08,
     "raw_description": "UPI-FAIYAZMOHDTAHIRPE-FAIYAZPEVAKAR@O KAXIS-DCBL0000019-330808633433-PAIDVIA CREDAND",
     "entities": {
       "channel": {
@@ -12335,7 +12335,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 8000.0,
     "direction": "Dr",
-    "running_balance": 670.98,
+    "running_balance": 70093.08,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-330 975580290-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -12369,7 +12369,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": -741.02,
+    "running_balance": 68681.08,
     "raw_description": "EMI458151064CHQS45815106400611123458 151064",
     "entities": {
       "channel": {
@@ -12403,7 +12403,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": -6899.48,
+    "running_balance": 62522.62,
     "raw_description": "ACHD-CL02974170-MXXLCUL79GGH",
     "entities": {
       "channel": {
@@ -12437,7 +12437,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 3500.0,
     "direction": "Dr",
-    "running_balance": -10399.48,
+    "running_balance": 59022.62,
     "raw_description": "UPI-TORRENTPOWERLTDSM-PAYTM-64681579@ PAYTM-PYTM0123456-330902533386-PAYMENTF ROMPHONE",
     "entities": {
       "channel": {
@@ -12471,7 +12471,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 10400.0,
     "direction": "Dr",
-    "running_balance": -20799.48,
+    "running_balance": 48622.62,
     "raw_description": "50100224132841-TPT-HI-AKILAHMEDATIKAHME DKHAN",
     "entities": {
       "channel": {
@@ -12505,7 +12505,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": -20879.48,
+    "running_balance": 48542.62,
     "raw_description": "UPI-SAYEDMOHAMMEDAWAIS-Q843190771@YBL- YESB0YBLUPI-330985155783-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -12539,7 +12539,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 15.0,
     "direction": "Dr",
-    "running_balance": -20894.48,
+    "running_balance": 48527.62,
     "raw_description": "UPI-MRMIRZAFAIYAZISHA-PAYTMQR11NI1I14 0E@PAYTM-PYTM0123456-367534999978-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -12573,7 +12573,7 @@ export const realTransactions = [
     "txn_date": "2023-11-05",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -20994.48,
+    "running_balance": 48427.62,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-330957984457-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -12607,7 +12607,7 @@ export const realTransactions = [
     "txn_date": "2023-11-06",
     "amount": 1700.0,
     "direction": "Dr",
-    "running_balance": -22694.48,
+    "running_balance": 46727.62,
     "raw_description": "UPI-MOHDHASANILYAS MEM-HASANMEMON442@O KAXIS-FDRL0005555-331096092714-PAYMENTF",
     "entities": {
       "channel": {
@@ -12641,7 +12641,7 @@ export const realTransactions = [
     "txn_date": "2023-11-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": -44188.48,
+    "running_balance": 25233.62,
     "raw_description": "EMI140705829CHQS14070582900711123140 705829",
     "entities": {
       "channel": {
@@ -12675,7 +12675,7 @@ export const realTransactions = [
     "txn_date": "2023-11-07",
     "amount": 50000.0,
     "direction": "Cr",
-    "running_balance": 5811.52,
+    "running_balance": 75233.62,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-331107727455-PAYMENTFROMPH HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -12709,7 +12709,7 @@ export const realTransactions = [
     "txn_date": "2023-11-07",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -44188.48,
+    "running_balance": 25233.62,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-331114459450-PAY MENTFROMPHONE",
     "entities": {
       "channel": {
@@ -12743,7 +12743,7 @@ export const realTransactions = [
     "txn_date": "2023-11-09",
     "amount": 85.0,
     "direction": "Dr",
-    "running_balance": -44273.48,
+    "running_balance": 25148.62,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-331382945552-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -12777,7 +12777,7 @@ export const realTransactions = [
     "txn_date": "2023-11-11",
     "amount": 90.0,
     "direction": "Dr",
-    "running_balance": -44363.48,
+    "running_balance": 25058.62,
     "raw_description": "UPI-MOHAMMEDHUSSAINIBR-PAYTMQR1NR9SZ8L D8@PAYTM-PYTM0123456-331553300766-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -12811,7 +12811,7 @@ export const realTransactions = [
     "txn_date": "2023-11-12",
     "amount": 6000.0,
     "direction": "Cr",
-    "running_balance": -38363.48,
+    "running_balance": 31058.62,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-331697660610-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -12845,7 +12845,7 @@ export const realTransactions = [
     "txn_date": "2023-11-12",
     "amount": 4300.0,
     "direction": "Dr",
-    "running_balance": -42663.48,
+    "running_balance": 26758.62,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@YBL- ABHY0065014-331634374148-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -12879,7 +12879,7 @@ export const realTransactions = [
     "txn_date": "2023-11-12",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -62663.48,
+    "running_balance": 6758.62,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-331670873435-PAYMENTFR OMPHONE",
     "entities": {
       "channel": {
@@ -12913,7 +12913,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 37.0,
     "direction": "Dr",
-    "running_balance": -62700.48,
+    "running_balance": 6721.62,
     "raw_description": "UPI-YADAVSACHINKUMARS-PAYTMQRF8D17O0A 3S@PAYTM-PYTM0123456-368306382541-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -12947,7 +12947,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 8500.0,
     "direction": "Dr",
-    "running_balance": -71200.48,
+    "running_balance": -1778.38,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-368371178197-P AIDVIACREDAND",
     "entities": {
       "channel": {
@@ -12981,7 +12981,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -71240.48,
+    "running_balance": -1818.38,
     "raw_description": "UPI-MARYAM PHARMACY-PAYTMQR6XHXU3TP5H@PA YTM-PYTM0123456-331704541202-PAIDVIACR",
     "entities": {
       "channel": {
@@ -13015,7 +13015,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -71290.48,
+    "running_balance": -1868.38,
     "raw_description": "UPI-AMBAJIMEDICALSURGI-AMBAJIMEDICALSU RGICA.42511539@HDFCBANK-HDFC0000001-3317 43190728-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13049,7 +13049,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 125.0,
     "direction": "Dr",
-    "running_balance": -71415.48,
+    "running_balance": -1993.38,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-331744822443-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -13083,7 +13083,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 3500.0,
     "direction": "Cr",
-    "running_balance": -67915.48,
+    "running_balance": 1506.62,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-331745356520-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13117,7 +13117,7 @@ export const realTransactions = [
     "txn_date": "2023-11-13",
     "amount": 3500.0,
     "direction": "Dr",
-    "running_balance": -71415.48,
+    "running_balance": -1993.38,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-331793990423-PAYMENTFR OMPHONE",
     "entities": {
       "channel": {
@@ -13151,7 +13151,7 @@ export const realTransactions = [
     "txn_date": "2023-11-14",
     "amount": 2092.0,
     "direction": "Dr",
-    "running_balance": -73507.48,
+    "running_balance": -4085.38,
     "raw_description": "CHQPAID-MICRCTS-MU-TORRENTPOWERLTD",
     "entities": {
       "channel": {
@@ -13185,7 +13185,7 @@ export const realTransactions = [
     "txn_date": "2023-11-14",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -74007.48,
+    "running_balance": -4585.38,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-331845108289-PAI DVIACREDAND",
     "entities": {
       "channel": {
@@ -13219,7 +13219,7 @@ export const realTransactions = [
     "txn_date": "2023-11-15",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": -84007.48,
+    "running_balance": -14585.38,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-331929981245-PAYMENTFR OMPHONE",
     "entities": {
       "channel": {
@@ -13253,7 +13253,7 @@ export const realTransactions = [
     "txn_date": "2023-11-15",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -79007.48,
+    "running_balance": -9585.38,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-331988375553-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13287,7 +13287,7 @@ export const realTransactions = [
     "txn_date": "2023-11-15",
     "amount": 3640.0,
     "direction": "Cr",
-    "running_balance": -75367.48,
+    "running_balance": -5945.38,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-368551531473-4750-1110",
     "entities": {
       "channel": {
@@ -13321,7 +13321,7 @@ export const realTransactions = [
     "txn_date": "2023-11-17",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -74867.48,
+    "running_balance": -5445.38,
     "raw_description": "L1235422INOCT",
     "entities": {
       "channel": {
@@ -13355,7 +13355,7 @@ export const realTransactions = [
     "txn_date": "2023-11-18",
     "amount": 120.0,
     "direction": "Dr",
-    "running_balance": -74987.48,
+    "running_balance": -5565.38,
     "raw_description": "UPI-MRMOHDNISARULHAQU-Q997443579@YBL- YESB0YBLUPI-332282393398-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13389,7 +13389,7 @@ export const realTransactions = [
     "txn_date": "2023-11-18",
     "amount": 5.9,
     "direction": "Dr",
-    "running_balance": -74993.38,
+    "running_balance": -5571.28,
     "raw_description": ".IMPSP2P330420338070#31/10/2023311023 -MIR2432062453586",
     "entities": {
       "channel": {
@@ -13423,7 +13423,7 @@ export const realTransactions = [
     "txn_date": "2023-11-19",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": -75073.38,
+    "running_balance": -5651.28,
     "raw_description": "UPI-VARSHAELECTRICAND-PAYTMQR28100505 0101199B9TVIXYV9@PAYTM-PYTM0123456-33238 9268651-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13457,7 +13457,7 @@ export const realTransactions = [
     "txn_date": "2023-11-19",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -78073.38,
+    "running_balance": -8651.28,
     "raw_description": "UPI-SHAIKHSHAKEELAMOHA-SHAIKH-SHAKEELA @PAYTM-PYTM0123456-332355080354-PAYMENT FROMPHONE",
     "entities": {
       "channel": {
@@ -13491,7 +13491,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -53073.38,
+    "running_balance": 16348.72,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-332461045540-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13525,7 +13525,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -78073.38,
+    "running_balance": -8651.28,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-332498148629-PAIDVIAC REDAND",
     "entities": {
       "channel": {
@@ -13559,7 +13559,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 36000.0,
     "direction": "Cr",
-    "running_balance": -42073.38,
+    "running_balance": 27348.72,
     "raw_description": "IMPS-332420385346-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13593,7 +13593,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": -42074.38,
+    "running_balance": 27347.72,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-9833039830@AXL- HDFC0000146-369000933708-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13627,7 +13627,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 36000.0,
     "direction": "Dr",
-    "running_balance": -78074.38,
+    "running_balance": -8652.28,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-9833039830@AXL- HDFC0000146-369076141722-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13661,7 +13661,7 @@ export const realTransactions = [
     "txn_date": "2023-11-20",
     "amount": 2500.0,
     "direction": "Dr",
-    "running_balance": -80574.38,
+    "running_balance": -11152.28,
     "raw_description": "UPI-ZOYAAARAB-7249297186@YBL-SRCB00003 92-332446914779-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -13695,7 +13695,7 @@ export const realTransactions = [
     "txn_date": "2023-11-21",
     "amount": 2500.0,
     "direction": "Cr",
-    "running_balance": -78074.38,
+    "running_balance": -8652.28,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-332592717389-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -13729,7 +13729,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 36.0,
     "direction": "Dr",
-    "running_balance": -78110.38,
+    "running_balance": -8688.28,
     "raw_description": "UPI-ZAIDULLAH-Q599796785@YBL-YESB0YBLUPI -369338546246-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13763,7 +13763,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 280.0,
     "direction": "Dr",
-    "running_balance": -78390.38,
+    "running_balance": -8968.28,
     "raw_description": "UPI-TAYYEBHAIDERALIPOL-AKBARPOLAIWALA@ OKSBI-SBIN0014748-369389049180-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -13797,7 +13797,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 130.0,
     "direction": "Dr",
-    "running_balance": -78520.38,
+    "running_balance": -9098.28,
     "raw_description": "UPI-PRAVEENJAYPRAKASHG-PAYTMQR8106NU6S IO@PAYTM-PYTM0123456-332795617765-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -13831,7 +13831,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 102.0,
     "direction": "Dr",
-    "running_balance": -78622.38,
+    "running_balance": -9200.28,
     "raw_description": "UPI-HYDRABADEGGSCENTRE-Q194101464@YBL- YESB0YBLUPI-369391373607-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -13865,7 +13865,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 55.0,
     "direction": "Dr",
-    "running_balance": -78677.38,
+    "running_balance": -9255.28,
     "raw_description": "UPI-ABDULREHMAN RAZZAK-PAYTMQR1DUMR72QP K@PAYTM-PYTM0123456-332754678127-PAIDVI",
     "entities": {
       "channel": {
@@ -13899,7 +13899,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 550.0,
     "direction": "Dr",
-    "running_balance": -79227.38,
+    "running_balance": -9805.28,
     "raw_description": "UPI-UBAIDULLAH ANSARULLA-KHANOBAIDULLAH8 23@OKHDFCBANK-KKBK0000628-369327346074-P",
     "entities": {
       "channel": {
@@ -13933,7 +13933,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": -79377.38,
+    "running_balance": -9955.28,
     "raw_description": "UPI-LAXMIBARTANSTORES-PAYTMQRAWE0NI6U6 P@PAYTM-PYTM0123456-332773386392-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -13967,7 +13967,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 930.0,
     "direction": "Dr",
-    "running_balance": -80307.38,
+    "running_balance": -10885.28,
     "raw_description": "UPI-SANGITABENHANWANTSI-8264177212@YBL- BKID0002073-369371855770-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -14001,7 +14001,7 @@ export const realTransactions = [
     "txn_date": "2023-11-23",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -80807.38,
+    "running_balance": -11385.28,
     "raw_description": "UPI-NAFISAQAIDJOHAR M-NAFISAPOLAIWALA @OKAXIS-UTIB0002924-332738635858-PAIDVI ACREDAND",
     "entities": {
       "channel": {
@@ -14035,7 +14035,7 @@ export const realTransactions = [
     "txn_date": "2023-11-24",
     "amount": 780.0,
     "direction": "Dr",
-    "running_balance": -81587.38,
+    "running_balance": -12165.28,
     "raw_description": "UPI-AZRUNNISAMOHAMMEDS-BHARATPE.900664 21705@FBPE-FDRL0001382-332841269033-PAY TOBHARATPEME",
     "entities": {
       "channel": {
@@ -14069,7 +14069,7 @@ export const realTransactions = [
     "txn_date": "2023-11-24",
     "amount": 136.0,
     "direction": "Dr",
-    "running_balance": -81723.38,
+    "running_balance": -12301.28,
     "raw_description": "UPI-SHIVNERIGAVRANMISA-Q575498485@YBL- YESB0YBLUPI-332869225154-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14103,7 +14103,7 @@ export const realTransactions = [
     "txn_date": "2023-11-24",
     "amount": 4500.0,
     "direction": "Cr",
-    "running_balance": -77223.38,
+    "running_balance": -7801.28,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-369475629551-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14137,7 +14137,7 @@ export const realTransactions = [
     "txn_date": "2023-11-26",
     "amount": 250.0,
     "direction": "Dr",
-    "running_balance": -77473.38,
+    "running_balance": -8051.28,
     "raw_description": "UPI-CHANDELFILINGSTATI-Q245706037@YBL- YESB0YBLUPI-369658685084-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14171,7 +14171,7 @@ export const realTransactions = [
     "txn_date": "2023-11-27",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -77493.38,
+    "running_balance": -8071.28,
     "raw_description": "UPI-SHIVAMKUMAR-Q861345365@YBL-YESB0YBL UPI-369781598777-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14205,7 +14205,7 @@ export const realTransactions = [
     "txn_date": "2023-11-27",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": -77494.38,
+    "running_balance": -8072.28,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-369701825967-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -14239,7 +14239,7 @@ export const realTransactions = [
     "txn_date": "2023-11-27",
     "amount": 6000.0,
     "direction": "Dr",
-    "running_balance": -83494.38,
+    "running_balance": -14072.28,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-369768636769-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -14273,7 +14273,7 @@ export const realTransactions = [
     "txn_date": "2023-11-27",
     "amount": 7500.0,
     "direction": "Cr",
-    "running_balance": -75994.38,
+    "running_balance": -6572.28,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-333185364413-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -14307,7 +14307,7 @@ export const realTransactions = [
     "txn_date": "2023-11-28",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -76014.38,
+    "running_balance": -6592.28,
     "raw_description": "UPI-LAWLESH-Q238914349@YBL-BARB0ATARRA-3 69857219091-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14341,7 +14341,7 @@ export const realTransactions = [
     "txn_date": "2023-11-28",
     "amount": 7000.0,
     "direction": "Cr",
-    "running_balance": -69014.38,
+    "running_balance": 407.72,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-369877627888-LASTRENTOF THEM",
     "entities": {
       "channel": {
@@ -14375,7 +14375,7 @@ export const realTransactions = [
     "txn_date": "2023-11-29",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -69044.38,
+    "running_balance": 377.72,
     "raw_description": "UPI-MRYASHGUPTA-6307913616@IBL-IDIB000 B518-333370922848-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14409,7 +14409,7 @@ export const realTransactions = [
     "txn_date": "2023-11-29",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": -69194.38,
+    "running_balance": 227.72,
     "raw_description": "UPI-FIRDAUSKHAN-9555286889@AXL-AIRP0000 001-369969786210-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -14443,7 +14443,7 @@ export const realTransactions = [
     "txn_date": "2023-11-30",
     "amount": 3070.0,
     "direction": "Cr",
-    "running_balance": -66124.38,
+    "running_balance": 3297.72,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-333447627914-UPI",
     "entities": {
       "channel": {
@@ -14477,7 +14477,7 @@ export const realTransactions = [
     "txn_date": "2023-11-30",
     "amount": 11000.0,
     "direction": "Cr",
-    "running_balance": -55124.38,
+    "running_balance": 14297.72,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-333427410125-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -14511,7 +14511,7 @@ export const realTransactions = [
     "txn_date": "2023-12-01",
     "amount": 900.0,
     "direction": "Dr",
-    "running_balance": -56024.38,
+    "running_balance": 13397.72,
     "raw_description": "UPI-CHANDELFILINGSTATI-Q245706037@YBL- YESB0YBLUPI-333543309111-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14545,7 +14545,7 @@ export const realTransactions = [
     "txn_date": "2023-12-01",
     "amount": 39595.0,
     "direction": "Cr",
-    "running_balance": -16429.38,
+    "running_balance": 52992.72,
     "raw_description": "L1235422SALNV",
     "entities": {
       "channel": {
@@ -14579,7 +14579,7 @@ export const realTransactions = [
     "txn_date": "2023-12-01",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": -14429.38,
+    "running_balance": 54992.72,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-370193757315-UPI",
     "entities": {
       "channel": {
@@ -14613,7 +14613,7 @@ export const realTransactions = [
     "txn_date": "2023-12-01",
     "amount": 2000.0,
     "direction": "Dr",
-    "running_balance": -16429.38,
+    "running_balance": 52992.72,
     "raw_description": "NWD-405988XXXXXX3155-N3684600-BANDA",
     "entities": {
       "channel": {
@@ -14647,7 +14647,7 @@ export const realTransactions = [
     "txn_date": "2023-12-03",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": -15429.38,
+    "running_balance": 53992.72,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-333709864490-U PI",
     "entities": {
       "channel": {
@@ -14681,7 +14681,7 @@ export const realTransactions = [
     "txn_date": "2023-12-04",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -15439.38,
+    "running_balance": 53982.72,
     "raw_description": "UPI-KALEEMUDDINAHMEDQU-BHARATPE9072718 0131@YESBANKLTD-YESB0YESUPI-370433281896 -PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -14715,7 +14715,7 @@ export const realTransactions = [
     "txn_date": "2023-12-04",
     "amount": 175.0,
     "direction": "Dr",
-    "running_balance": -15614.38,
+    "running_balance": 53807.72,
     "raw_description": "UPI-SAYYEDPAANSHOP-GPAY-11176578642@OK BIZAXIS-UTIB0000000-333846527731-PAIDVI ACRED",
     "entities": {
       "channel": {
@@ -14749,7 +14749,7 @@ export const realTransactions = [
     "txn_date": "2023-12-04",
     "amount": 7847.0,
     "direction": "Dr",
-    "running_balance": -23461.38,
+    "running_balance": 45960.72,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-333 861113889-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -14783,7 +14783,7 @@ export const realTransactions = [
     "txn_date": "2023-12-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": -24873.38,
+    "running_balance": 44548.72,
     "raw_description": "EMI458151064CHQS45815106400711223458 HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -14817,7 +14817,7 @@ export const realTransactions = [
     "txn_date": "2023-12-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": -31031.84,
+    "running_balance": 38390.26,
     "raw_description": "ACHD-CL02974170-DV2C8HVJ8S54",
     "entities": {
       "channel": {
@@ -14851,7 +14851,7 @@ export const realTransactions = [
     "txn_date": "2023-12-06",
     "amount": 2579.0,
     "direction": "Dr",
-    "running_balance": -33610.84,
+    "running_balance": 35811.26,
     "raw_description": "UPI-PHONEPE-BBPSBP@YBL-YESB0YBLUPI-37060 3345366-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -14885,7 +14885,7 @@ export const realTransactions = [
     "txn_date": "2023-12-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": -55104.84,
+    "running_balance": 14317.26,
     "raw_description": "EMI140705829CHQS14070582900811223140 705829",
     "entities": {
       "channel": {
@@ -14919,7 +14919,7 @@ export const realTransactions = [
     "txn_date": "2023-12-07",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -56104.84,
+    "running_balance": 13317.26,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -14953,7 +14953,7 @@ export const realTransactions = [
     "txn_date": "2023-12-09",
     "amount": 850.0,
     "direction": "Dr",
-    "running_balance": -56954.84,
+    "running_balance": 12467.26,
     "raw_description": "UPI-MOHAMMADNAYEEMMOHA-Q290699442@YBL- DCBL0000012-334331558148-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -14987,7 +14987,7 @@ export const realTransactions = [
     "txn_date": "2023-12-09",
     "amount": 1500.0,
     "direction": "Dr",
-    "running_balance": -58454.84,
+    "running_balance": 10967.26,
     "raw_description": "UPI-MOHAMMEDWASEEMANWA-Q566572891@YBL- YESB0YBLUPI-370963002359-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -15021,7 +15021,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": -43454.84,
+    "running_balance": 25967.26,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-334433757610-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -15055,7 +15055,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 2350.0,
     "direction": "Cr",
-    "running_balance": -41104.84,
+    "running_balance": 28317.26,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-334477627145-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -15089,7 +15089,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 5850.0,
     "direction": "Cr",
-    "running_balance": -35254.84,
+    "running_balance": 34167.26,
     "raw_description": "UPI-MOHAMMEDBILALABDUL-8454899885@YBL- RATN0000000-334469993169-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -15123,7 +15123,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -25254.84,
+    "running_balance": 44167.26,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKAXI S-ABHY0065014-371026886655-UPI",
     "entities": {
       "channel": {
@@ -15157,7 +15157,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 3500.0,
     "direction": "Dr",
-    "running_balance": -28754.84,
+    "running_balance": 40667.26,
     "raw_description": "UPI-TORRENTPOWERLTDSM-PAYTM-64681579@ PAYTM-PYTM0123456-334445656574-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -15191,7 +15191,7 @@ export const realTransactions = [
     "txn_date": "2023-12-10",
     "amount": 110.0,
     "direction": "Dr",
-    "running_balance": -28864.84,
+    "running_balance": 40557.26,
     "raw_description": "UPI-VIRANIAUTOMOBILES-PAYTMQR2810050501 011B6CSOLRO85O@PAYTM-PYTM0123456-3710873 20458-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -15225,7 +15225,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 200.0,
     "direction": "Cr",
-    "running_balance": -28664.84,
+    "running_balance": 40757.26,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-334568268949-U PI",
     "entities": {
       "channel": {
@@ -15259,7 +15259,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 199.0,
     "direction": "Dr",
-    "running_balance": -28863.84,
+    "running_balance": 40558.26,
     "raw_description": "UPI-AMBAJIMEDICALSURGI-AMBAJIMEDICALSU HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -15293,7 +15293,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -28893.84,
+    "running_balance": 40528.26,
     "raw_description": "UPI-REKHAMEDICAL-GPAY-11231846402@OKBIZ AXIS-UTIB0000000-334549856540-PAIDVIAC RED",
     "entities": {
       "channel": {
@@ -15327,7 +15327,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -28903.84,
+    "running_balance": 40518.26,
     "raw_description": "UPI-REKHAMEDICAL-GPAY-11231846402@OKBIZ AXIS-UTIB0000000-371103507182-PAIDVIAC RED",
     "entities": {
       "channel": {
@@ -15361,7 +15361,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 8000.0,
     "direction": "Cr",
-    "running_balance": -20903.84,
+    "running_balance": 48518.26,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-334568350877-U PI",
     "entities": {
       "channel": {
@@ -15395,7 +15395,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 8000.0,
     "direction": "Dr",
-    "running_balance": -28903.84,
+    "running_balance": 40518.26,
     "raw_description": "EAW-405988XXXXXX3155-AECN86104-MUMBRA",
     "entities": {
       "channel": {
@@ -15429,7 +15429,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 12.0,
     "direction": "Dr",
-    "running_balance": -28915.84,
+    "running_balance": 40506.26,
     "raw_description": "UPI-METREANILVITTHAL-ANIL.METRE123@OKI CICI-PJSB0000012-371175821956-PAIDVIAC REDAND",
     "entities": {
       "channel": {
@@ -15463,7 +15463,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 48000.0,
     "direction": "Dr",
-    "running_balance": -76915.84,
+    "running_balance": -7493.74,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIYSKHAN69@YB L-SCBL0036046-334580795975-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -15497,7 +15497,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -71915.84,
+    "running_balance": -2493.74,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKAX IS-CNRB0000033-371182424157-UPI",
     "entities": {
       "channel": {
@@ -15531,7 +15531,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -76915.84,
+    "running_balance": -7493.74,
     "raw_description": "UPI-ZAHIDAMEMORIALCLIN-7304683988@OKBI ZICICI-ICIC0DC0099-371101870822-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -15565,7 +15565,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -76940.84,
+    "running_balance": -7518.74,
     "raw_description": "UPI-MOHAMMEDISRARSIDDI-Q632752536@YBL- YESB0YBLUPI-371179945616-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -15599,7 +15599,7 @@ export const realTransactions = [
     "txn_date": "2023-12-11",
     "amount": 1050.0,
     "direction": "Dr",
-    "running_balance": -77990.84,
+    "running_balance": -8568.74,
     "raw_description": "UPI-JAIDEEPCHUNDAWAT-8433873562@PAYTM-R MGB0000001-371199850562-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -15633,7 +15633,7 @@ export const realTransactions = [
     "txn_date": "2023-12-13",
     "amount": 2092.0,
     "direction": "Dr",
-    "running_balance": -80082.84,
+    "running_balance": -10660.74,
     "raw_description": "CHQPAID-MICRCTS-MU-TORRENTPOWERLTD",
     "entities": {
       "channel": {
@@ -15667,7 +15667,7 @@ export const realTransactions = [
     "txn_date": "2023-12-13",
     "amount": 7000.0,
     "direction": "Cr",
-    "running_balance": -73082.84,
+    "running_balance": -3660.74,
     "raw_description": "UPI-BALDEEPSINGH-9779130829@PAYTM-PSIB0 021143-334725278992-NA",
     "entities": {
       "channel": {
@@ -15701,7 +15701,7 @@ export const realTransactions = [
     "txn_date": "2023-12-13",
     "amount": 7200.0,
     "direction": "Cr",
-    "running_balance": -65882.84,
+    "running_balance": 3539.26,
     "raw_description": "UPI-HARBHAJANSINGH-HAR8818@AXISBANK-UTI B0000834-334712960343-UPI HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -15735,7 +15735,7 @@ export const realTransactions = [
     "txn_date": "2023-12-14",
     "amount": 5800.0,
     "direction": "Cr",
-    "running_balance": -60082.84,
+    "running_balance": 9339.26,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKAXI S-ABHY0065014-334837537852-UPI",
     "entities": {
       "channel": {
@@ -15769,7 +15769,7 @@ export const realTransactions = [
     "txn_date": "2023-12-14",
     "amount": 115.0,
     "direction": "Dr",
-    "running_balance": -60197.84,
+    "running_balance": 9224.26,
     "raw_description": "UPI-ABDULMANNANFAIYAZ-PAYTMQR1JTKKL87 2D@PAYTM-PYTM0123456-371476210389-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -15803,7 +15803,7 @@ export const realTransactions = [
     "txn_date": "2023-12-14",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -60697.84,
+    "running_balance": 8724.26,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-371408811314-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -15837,7 +15837,7 @@ export const realTransactions = [
     "txn_date": "2023-12-14",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": -70697.84,
+    "running_balance": -1275.74,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -15871,7 +15871,7 @@ export const realTransactions = [
     "txn_date": "2023-12-14",
     "amount": 9500.0,
     "direction": "Dr",
-    "running_balance": -80197.84,
+    "running_balance": -10775.74,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -15905,7 +15905,7 @@ export const realTransactions = [
     "txn_date": "2023-12-15",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -80237.84,
+    "running_balance": -10815.74,
     "raw_description": "UPI-HARERAMSAH-PAYTMQR2810050501011KSY8 OW2GS42@PAYTM-PYTM0123456-334937563457-P AIDVIACRED",
     "entities": {
       "channel": {
@@ -15939,7 +15939,7 @@ export const realTransactions = [
     "txn_date": "2023-12-15",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -81237.84,
+    "running_balance": -11815.74,
     "raw_description": "UPI-JALARAMOILTRADERS-PAYTMQREWNZT2DSQ 6@PAYTM-PYTM0123456-334915943575-PAYMENT FROMPHONE",
     "entities": {
       "channel": {
@@ -15973,7 +15973,7 @@ export const realTransactions = [
     "txn_date": "2023-12-16",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": -78237.84,
+    "running_balance": -8815.74,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKAXI S-ABHY0065014-335087029952-UPI",
     "entities": {
       "channel": {
@@ -16007,7 +16007,7 @@ export const realTransactions = [
     "txn_date": "2023-12-16",
     "amount": 36.0,
     "direction": "Dr",
-    "running_balance": -78273.84,
+    "running_balance": -8851.74,
     "raw_description": "UPI-USHASANTOSHMANDE-PAYTMQR2810050501 011A09NT93U0WB@PAYTM-PYTM0123456-3716925 54785-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16041,7 +16041,7 @@ export const realTransactions = [
     "txn_date": "2023-12-17",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -78313.84,
+    "running_balance": -8891.74,
     "raw_description": "UPI-HARESHBHIMJIANAVAD-PAYTMQR12CCSVPQ W6@PAYTM-PYTM0123456-335118503359-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -16075,7 +16075,7 @@ export const realTransactions = [
     "txn_date": "2023-12-18",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -78343.84,
+    "running_balance": -8921.74,
     "raw_description": "UPI-MRKRISHNAKUMARYAD-PAYTMQRCX60P4G5 8Q@PAYTM-PYTM0123456-371856023084-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -16109,7 +16109,7 @@ export const realTransactions = [
     "txn_date": "2023-12-18",
     "amount": 56.0,
     "direction": "Dr",
-    "running_balance": -78399.84,
+    "running_balance": -8977.74,
     "raw_description": "UPI-AMBAJIMEDICALSURGI-AMBAJIMEDICALSU RGICA.42511540@HDFCBANK-HDFC0000001-3718 79615652-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16143,7 +16143,7 @@ export const realTransactions = [
     "txn_date": "2023-12-21",
     "amount": 450.0,
     "direction": "Dr",
-    "running_balance": -78849.84,
+    "running_balance": -9427.74,
     "raw_description": "UPI-OMPRAKASH SAINI-SAINI04021970@OKICI CI-SBIN0001685-335509355822-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -16177,7 +16177,7 @@ export const realTransactions = [
     "txn_date": "2023-12-21",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -78879.84,
+    "running_balance": -9457.74,
     "raw_description": "UPI-A1FOOTWEAR-9867285352-1@OKBIZAXIS-U TIB0000000-335518850148-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16211,7 +16211,7 @@ export const realTransactions = [
     "txn_date": "2023-12-21",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -53879.84,
+    "running_balance": 15542.26,
     "raw_description": "IMPS-335522154866-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16245,7 +16245,7 @@ export const realTransactions = [
     "txn_date": "2023-12-22",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -53379.84,
+    "running_balance": 16042.26,
     "raw_description": "L1235422INTNV",
     "entities": {
       "channel": {
@@ -16279,7 +16279,7 @@ export const realTransactions = [
     "txn_date": "2023-12-22",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -78379.84,
+    "running_balance": -8957.74,
     "raw_description": "UPI-SANDESHDOULATRIPOT-SANDESHREPOTE@O KHDFCBANK-HDFC0000291-372263025798-PAID VIACREDAND",
     "entities": {
       "channel": {
@@ -16313,7 +16313,7 @@ export const realTransactions = [
     "txn_date": "2023-12-22",
     "amount": 1050.0,
     "direction": "Dr",
-    "running_balance": -79429.84,
+    "running_balance": -10007.74,
     "raw_description": "UPI-NEXTBILLION TECHNOLO-GROWWNBT@YESG-Y ESB0YESUPI-335602763791-PAIDBYGROWWPA",
     "entities": {
       "channel": {
@@ -16347,7 +16347,7 @@ export const realTransactions = [
     "txn_date": "2023-12-23",
     "amount": 239.0,
     "direction": "Dr",
-    "running_balance": -79668.84,
+    "running_balance": -10246.74,
     "raw_description": "UPI-CREDTELECOM-CRED.TELECOM@AXISB-UTIB 0000114-335747107959-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -16381,7 +16381,7 @@ export const realTransactions = [
     "txn_date": "2023-12-23",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": -78668.84,
+    "running_balance": -9246.74,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKAXI S-ABHY0065014-372335489713-UPI",
     "entities": {
       "channel": {
@@ -16415,7 +16415,7 @@ export const realTransactions = [
     "txn_date": "2023-12-23",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -79668.84,
+    "running_balance": -10246.74,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@IBL- ABHY0065014-335712742812-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -16449,7 +16449,7 @@ export const realTransactions = [
     "txn_date": "2023-12-23",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -79688.84,
+    "running_balance": -10266.74,
     "raw_description": "UPI-SONU-Q255042841@YBL-YESB0YBLUPI-3723 76322157-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16483,7 +16483,7 @@ export const realTransactions = [
     "txn_date": "2023-12-24",
     "amount": 11000.0,
     "direction": "Cr",
-    "running_balance": -68688.84,
+    "running_balance": 733.26,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-335820315417-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16517,7 +16517,7 @@ export const realTransactions = [
     "txn_date": "2023-12-24",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -68738.84,
+    "running_balance": 683.26,
     "raw_description": "UPI-DILIPKUMARRAMMURAT-BHARATPE.900599 57679@FBPE-FDRL0001382-372411305204-PAY TOBHARATPEME",
     "entities": {
       "channel": {
@@ -16551,7 +16551,7 @@ export const realTransactions = [
     "txn_date": "2023-12-25",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -69238.84,
+    "running_balance": 183.26,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-372501761579-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -16585,7 +16585,7 @@ export const realTransactions = [
     "txn_date": "2023-12-25",
     "amount": 45.0,
     "direction": "Dr",
-    "running_balance": -69283.84,
+    "running_balance": 138.26,
     "raw_description": "UPI-MALLU-Q554983198@YBL-YESB0YBLUPI-372 515063113-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16619,7 +16619,7 @@ export const realTransactions = [
     "txn_date": "2023-12-25",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -64283.84,
+    "running_balance": 5138.26,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-372540343756-PAIDVIACRED HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -16653,7 +16653,7 @@ export const realTransactions = [
     "txn_date": "2023-12-26",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -65283.84,
+    "running_balance": 4138.26,
     "raw_description": "UPI-NEXTBILLION TECHNOLO-GROWWNBT@YESG-Y ESB0YESUPI-336034474751-PAIDBYGROWWPA",
     "entities": {
       "channel": {
@@ -16687,7 +16687,7 @@ export const realTransactions = [
     "txn_date": "2023-12-27",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -66283.84,
+    "running_balance": 3138.26,
     "raw_description": "UPI-KHANSHOEBTASIBULLA-SHOEB9881@YBL-S VCB0000136-336183176035-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -16721,7 +16721,7 @@ export const realTransactions = [
     "txn_date": "2023-12-28",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -61283.84,
+    "running_balance": 8138.26,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-336228060345-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16755,7 +16755,7 @@ export const realTransactions = [
     "txn_date": "2023-12-30",
     "amount": 2700.0,
     "direction": "Cr",
-    "running_balance": -58583.84,
+    "running_balance": 10838.26,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-373041409640-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -16789,7 +16789,7 @@ export const realTransactions = [
     "txn_date": "2023-12-31",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -58683.84,
+    "running_balance": 10738.26,
     "raw_description": "UPI-NAWABBIKEGARAGE-GPAY-11235483656@O KBIZAXIS-UTIB0000000-336521350812-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -16823,7 +16823,7 @@ export const realTransactions = [
     "txn_date": "2023-12-31",
     "amount": 2700.0,
     "direction": "Dr",
-    "running_balance": -61383.84,
+    "running_balance": 8038.26,
     "raw_description": "UPI-MOHAMMEDWASEEMANWA-Q566572891@YBL- YESB0YBLUPI-336525201799-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -16857,7 +16857,7 @@ export const realTransactions = [
     "txn_date": "2023-12-31",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -51383.84,
+    "running_balance": 18038.26,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-336508975890-U PI",
     "entities": {
       "channel": {
@@ -16891,7 +16891,7 @@ export const realTransactions = [
     "txn_date": "2024-01-01",
     "amount": 292.0,
     "direction": "Cr",
-    "running_balance": -51091.84,
+    "running_balance": 18330.26,
     "raw_description": "CREDITINTERESTCAPITALISED",
     "entities": {
       "channel": {
@@ -16925,7 +16925,7 @@ export const realTransactions = [
     "txn_date": "2024-01-01",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -51101.84,
+    "running_balance": 18320.26,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU NB0299900-400159330611-PAIDVIACREDAND",
     "entities": {
       "channel": {
@@ -16959,7 +16959,7 @@ export const realTransactions = [
     "txn_date": "2024-01-01",
     "amount": 29650.0,
     "direction": "Dr",
-    "running_balance": -80751.84,
+    "running_balance": -11329.74,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU NB0299900-436746122908-PAIDVIACREDAND",
     "entities": {
       "channel": {
@@ -16993,7 +16993,7 @@ export const realTransactions = [
     "txn_date": "2024-01-01",
     "amount": 30000.0,
     "direction": "Cr",
-    "running_balance": -50751.84,
+    "running_balance": 18670.26,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-400127373921-UPI",
     "entities": {
       "channel": {
@@ -17027,7 +17027,7 @@ export const realTransactions = [
     "txn_date": "2024-01-02",
     "amount": 32300.0,
     "direction": "Cr",
-    "running_balance": -18451.84,
+    "running_balance": 50970.26,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-400248766394-UPI HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -17061,7 +17061,7 @@ export const realTransactions = [
     "txn_date": "2024-01-02",
     "amount": 2000.0,
     "direction": "Dr",
-    "running_balance": -20451.84,
+    "running_balance": 48970.26,
     "raw_description": "UPI-SINGHSHUKRITIRADHE-8080207407@IBL- RSBL0000008-400274222363-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -17095,7 +17095,7 @@ export const realTransactions = [
     "txn_date": "2024-01-02",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -45451.84,
+    "running_balance": 23970.26,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-400251216208-PAI DVIACREDAND",
     "entities": {
       "channel": {
@@ -17129,7 +17129,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -45501.84,
+    "running_balance": 23920.26,
     "raw_description": "UPI-RAGHVENDRASINGHAJI-SRAGHVENDRA811@ OKAXIS-CNRB0000033-400322552314-PAIDVIA CREDAND",
     "entities": {
       "channel": {
@@ -17163,7 +17163,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -20501.84,
+    "running_balance": 48920.26,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-400379760544-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -17197,7 +17197,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -40501.84,
+    "running_balance": 28920.26,
     "raw_description": "UPI-NEXTBILLION TECHNOLO-GROWWNBT@YESG-Y ESB0YESUPI-400373206753-PAIDBYGROWWPA",
     "entities": {
       "channel": {
@@ -17231,7 +17231,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 81472.0,
     "direction": "Cr",
-    "running_balance": 40970.16,
+    "running_balance": 110392.26,
     "raw_description": "L1235422SALDE",
     "entities": {
       "channel": {
@@ -17265,7 +17265,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": 20970.16,
+    "running_balance": 90392.26,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@IBL- ABHY0065014-400360219804-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -17299,7 +17299,7 @@ export const realTransactions = [
     "txn_date": "2024-01-03",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 20971.16,
+    "running_balance": 90393.26,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-400316215089-UPI",
     "entities": {
       "channel": {
@@ -17333,7 +17333,7 @@ export const realTransactions = [
     "txn_date": "2024-01-04",
     "amount": 8183.0,
     "direction": "Dr",
-    "running_balance": 12788.16,
+    "running_balance": 82210.26,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-437 071569825-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -17367,7 +17367,7 @@ export const realTransactions = [
     "txn_date": "2024-01-04",
     "amount": 2337.0,
     "direction": "Dr",
-    "running_balance": 10451.16,
+    "running_balance": 79873.26,
     "raw_description": "UPI-PHONEPE-BBPSBP@YBL-YESB0YBLUPI-43705 7466355-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -17401,7 +17401,7 @@ export const realTransactions = [
     "txn_date": "2024-01-04",
     "amount": 105.0,
     "direction": "Dr",
-    "running_balance": 10346.16,
+    "running_balance": 79768.26,
     "raw_description": "UPI-ASHOKRAMNARAYAN YAD-PAYTMQR1OYKVQ2F 4J@PAYTM-PYTM0123456-437076357331-PAIDV",
     "entities": {
       "channel": {
@@ -17435,7 +17435,7 @@ export const realTransactions = [
     "txn_date": "2024-01-04",
     "amount": 40000.0,
     "direction": "Cr",
-    "running_balance": 50346.16,
+    "running_balance": 119768.26,
     "raw_description": "IMPS-400415919313-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -17469,7 +17469,7 @@ export const realTransactions = [
     "txn_date": "2024-01-04",
     "amount": 40000.0,
     "direction": "Dr",
-    "running_balance": 10346.16,
+    "running_balance": 79768.26,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -17503,7 +17503,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 25346.16,
+    "running_balance": 94768.26,
     "raw_description": "NEFTCR-ICIC0099999-NEXTBILLIONTECHNOLO GYPRIVATELIMITEDCLIENTACCO-BILALMOH AMMED-CMS3829055817",
     "entities": {
       "channel": {
@@ -17539,7 +17539,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": 23934.16,
+    "running_balance": 93356.26,
     "raw_description": "EMI458151064CHQS45815106400810124458 151064",
     "entities": {
       "channel": {
@@ -17573,7 +17573,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": 17775.7,
+    "running_balance": 87197.8,
     "raw_description": "ACHD-CL02974170-F98DWNXDAVUV",
     "entities": {
       "channel": {
@@ -17607,7 +17607,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": 18775.7,
+    "running_balance": 88197.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-400577003045-UPI",
     "entities": {
       "channel": {
@@ -17641,7 +17641,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": 17775.7,
+    "running_balance": 87197.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@IBL- ABHY0065014-400597876229-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -17675,7 +17675,7 @@ export const realTransactions = [
     "txn_date": "2024-01-05",
     "amount": 6000.0,
     "direction": "Cr",
-    "running_balance": 23775.7,
+    "running_balance": 93197.8,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-400532058301-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -17709,7 +17709,7 @@ export const realTransactions = [
     "txn_date": "2024-01-06",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": 28775.7,
+    "running_balance": 98197.8,
     "raw_description": "UPI-MOHAMMEDANASRIYAZ -SHAIKHMOHDANAS7 59-2@OKHDFCBANK-KKBK0001360-400601028281",
     "entities": {
       "channel": {
@@ -17743,7 +17743,7 @@ export const realTransactions = [
     "txn_date": "2024-01-06",
     "amount": 5020.92,
     "direction": "Cr",
-    "running_balance": 33796.62,
+    "running_balance": 103218.72,
     "raw_description": "NEFTCR-ICIC0099999-NEXTBILLIONTECHNOLO GYPRIVATELIMITEDCLIENTACCO-BILALMOH AMMED-CMS3833378106",
     "entities": {
       "channel": {
@@ -17779,7 +17779,7 @@ export const realTransactions = [
     "txn_date": "2024-01-06",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -16203.38,
+    "running_balance": 53218.72,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU NB0299900-437281897371-PAIDVIACREDAND",
     "entities": {
       "channel": {
@@ -17813,7 +17813,7 @@ export const realTransactions = [
     "txn_date": "2024-01-06",
     "amount": 3500.0,
     "direction": "Dr",
-    "running_balance": -19703.38,
+    "running_balance": 49718.72,
     "raw_description": "UPI-TORRENTPOWERLTDSM-PAYTM-64681579@ PAYTM-PYTM0123456-400688147830-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -17847,7 +17847,7 @@ export const realTransactions = [
     "txn_date": "2024-01-07",
     "amount": 4000.0,
     "direction": "Cr",
-    "running_balance": -15703.38,
+    "running_balance": 53718.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-437356375135-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -17881,7 +17881,7 @@ export const realTransactions = [
     "txn_date": "2024-01-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": -37197.38,
+    "running_balance": 32224.72,
     "raw_description": "EMI140705829CHQS14070582900910124140 HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -17915,7 +17915,7 @@ export const realTransactions = [
     "txn_date": "2024-01-07",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -12197.38,
+    "running_balance": 57224.72,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-400752851223-UPI",
     "entities": {
       "channel": {
@@ -17949,7 +17949,7 @@ export const realTransactions = [
     "txn_date": "2024-01-08",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -15197.38,
+    "running_balance": 54224.72,
     "raw_description": "UPI-NEXTBILLION TECHNOLO-GROWWNBT@YESG-Y ESB0YESUPI-437446384119-PAIDBYGROWWPA",
     "entities": {
       "channel": {
@@ -17983,7 +17983,7 @@ export const realTransactions = [
     "txn_date": "2024-01-08",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": -197.38,
+    "running_balance": 69224.72,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-400884841462-UPI",
     "entities": {
       "channel": {
@@ -18017,7 +18017,7 @@ export const realTransactions = [
     "txn_date": "2024-01-08",
     "amount": 400.0,
     "direction": "Cr",
-    "running_balance": 202.62,
+    "running_balance": 69624.72,
     "raw_description": "UPI-KHANSHOEBTASIBULLA-SHOEB9881@AXL-S VCB0000136-400823066331-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -18051,7 +18051,7 @@ export const realTransactions = [
     "txn_date": "2024-01-08",
     "amount": 2000.0,
     "direction": "Dr",
-    "running_balance": -1797.38,
+    "running_balance": 67624.72,
     "raw_description": "UPI-NEXTBILLION TECHNOLO-GROWWNBT@YESG-Y ESB0YESUPI-437477446463-PAIDBYGROWWPA",
     "entities": {
       "channel": {
@@ -18085,7 +18085,7 @@ export const realTransactions = [
     "txn_date": "2024-01-09",
     "amount": 450.0,
     "direction": "Cr",
-    "running_balance": -1347.38,
+    "running_balance": 68074.72,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-400935453308-U PI",
     "entities": {
       "channel": {
@@ -18119,7 +18119,7 @@ export const realTransactions = [
     "txn_date": "2024-01-09",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": -1407.38,
+    "running_balance": 68014.72,
     "raw_description": "UPI-ABDULHAFIZMOHAMMED-PAYTMQR19J5X7GC 7S@PAYTM-PYTM0123456-437579179827-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -18153,7 +18153,7 @@ export const realTransactions = [
     "txn_date": "2024-01-10",
     "amount": 6500.0,
     "direction": "Cr",
-    "running_balance": 5092.62,
+    "running_balance": 74514.72,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKHD FCBANK-CNRB0000033-401050439677-UPI",
     "entities": {
       "channel": {
@@ -18187,7 +18187,7 @@ export const realTransactions = [
     "txn_date": "2024-01-10",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": 5062.62,
+    "running_balance": 74484.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-437662960086-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -18221,7 +18221,7 @@ export const realTransactions = [
     "txn_date": "2024-01-12",
     "amount": 2092.0,
     "direction": "Dr",
-    "running_balance": 2970.62,
+    "running_balance": 72392.72,
     "raw_description": "CHQPAID-MICRCTS-MU-TORRENTPOWERLTD",
     "entities": {
       "channel": {
@@ -18255,7 +18255,7 @@ export const realTransactions = [
     "txn_date": "2024-01-13",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 17970.62,
+    "running_balance": 87392.72,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-401376868281-UPI",
     "entities": {
       "channel": {
@@ -18289,7 +18289,7 @@ export const realTransactions = [
     "txn_date": "2024-01-13",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": 37970.62,
+    "running_balance": 107392.72,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-401377292736-UPI",
     "entities": {
       "channel": {
@@ -18323,7 +18323,7 @@ export const realTransactions = [
     "txn_date": "2024-01-13",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 37960.62,
+    "running_balance": 107382.72,
     "raw_description": "UPI-XXXXXX2671-HDFC0000001-401316456989- HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -18357,7 +18357,7 @@ export const realTransactions = [
     "txn_date": "2024-01-14",
     "amount": 38000.0,
     "direction": "Cr",
-    "running_balance": 75960.62,
+    "running_balance": 145382.72,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-401406250590-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -18391,7 +18391,7 @@ export const realTransactions = [
     "txn_date": "2024-01-15",
     "amount": 68440.0,
     "direction": "Dr",
-    "running_balance": 7520.62,
+    "running_balance": 76942.72,
     "raw_description": "UPI-XXXXXX2671-HDFC0000001-401579797628- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -18425,7 +18425,7 @@ export const realTransactions = [
     "txn_date": "2024-01-15",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": -2479.38,
+    "running_balance": 66942.72,
     "raw_description": "UPI-MOHDSHAHIDMOHDJAM-SHAHIDKHAN70981 @OKICICI-BARB0MCMINA-401515802301-PAIDV IACREDAND",
     "entities": {
       "channel": {
@@ -18459,7 +18459,7 @@ export const realTransactions = [
     "txn_date": "2024-01-15",
     "amount": 42500.0,
     "direction": "Cr",
-    "running_balance": 40020.62,
+    "running_balance": 109442.72,
     "raw_description": "UPI-AKILAHMEDATIKAHMED-9004300664@AXIS B-HDFC0000411-438107327007-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -18493,7 +18493,7 @@ export const realTransactions = [
     "txn_date": "2024-01-15",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 50020.62,
+    "running_balance": 119442.72,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-401548524269-UPI",
     "entities": {
       "channel": {
@@ -18527,7 +18527,7 @@ export const realTransactions = [
     "txn_date": "2024-01-16",
     "amount": 41000.0,
     "direction": "Dr",
-    "running_balance": 9020.62,
+    "running_balance": 78442.72,
     "raw_description": "UPI-JAGMOHAN SINGH-7508586575@IBL-SBIN0 050077-401696769823-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -18561,7 +18561,7 @@ export const realTransactions = [
     "txn_date": "2024-01-16",
     "amount": 6000.0,
     "direction": "Dr",
-    "running_balance": 3020.62,
+    "running_balance": 72442.72,
     "raw_description": "UPI-JAGMOHAN SINGH-7508586575@IBL-SBIN0 050077-401606569805-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -18595,7 +18595,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": 2870.62,
+    "running_balance": 72292.72,
     "raw_description": "UPI-BILALMEDICALANDGE-KAU015198@TJSB- TJSB0000129-401764146322-UPI",
     "entities": {
       "channel": {
@@ -18629,7 +18629,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": 2720.62,
+    "running_balance": 72142.72,
     "raw_description": "UPI-MOMINPETROLEUM-PAYTM-78181851@PAYTM -PYTM0123456-401705203454-UPI",
     "entities": {
       "channel": {
@@ -18663,7 +18663,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 21.0,
     "direction": "Dr",
-    "running_balance": 2699.62,
+    "running_balance": 72121.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-438321066555-UPI",
     "entities": {
       "channel": {
@@ -18697,7 +18697,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 29.0,
     "direction": "Dr",
-    "running_balance": 2670.62,
+    "running_balance": 72092.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-438372771270-UPI",
     "entities": {
       "channel": {
@@ -18731,7 +18731,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": 2620.62,
+    "running_balance": 72042.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-438363990793-UPI",
     "entities": {
       "channel": {
@@ -18765,7 +18765,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": 2520.62,
+    "running_balance": 71942.72,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@OKICICI- KKBK0000628-438398376131-UPI",
     "entities": {
       "channel": {
@@ -18799,7 +18799,7 @@ export const realTransactions = [
     "txn_date": "2024-01-17",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 12520.62,
+    "running_balance": 81942.72,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-438319596207-UPI",
     "entities": {
       "channel": {
@@ -18833,7 +18833,7 @@ export const realTransactions = [
     "txn_date": "2024-01-18",
     "amount": 63200.0,
     "direction": "Dr",
-    "running_balance": -50679.38,
+    "running_balance": 18742.72,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -18867,7 +18867,7 @@ export const realTransactions = [
     "txn_date": "2024-01-19",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -50179.38,
+    "running_balance": 19242.72,
     "raw_description": "L1235422INTDE",
     "entities": {
       "channel": {
@@ -18901,7 +18901,7 @@ export const realTransactions = [
     "txn_date": "2024-01-20",
     "amount": 23000.0,
     "direction": "Cr",
-    "running_balance": -27179.38,
+    "running_balance": 42242.72,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-402025784897-UPI",
     "entities": {
       "channel": {
@@ -18935,7 +18935,7 @@ export const realTransactions = [
     "txn_date": "2024-01-20",
     "amount": 23000.0,
     "direction": "Dr",
-    "running_balance": -50179.38,
+    "running_balance": 19242.72,
     "raw_description": "UPI-GURPREETSINGH-8872671309@PAYTM-HDFC 0003504-438642292348-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -18969,7 +18969,7 @@ export const realTransactions = [
     "txn_date": "2024-01-20",
     "amount": 1.42,
     "direction": "Dr",
-    "running_balance": -50180.8,
+    "running_balance": 19241.3,
     "raw_description": "OCTDEC23INSTAALERTCHG6SMS050124-MIR2 401937318114",
     "entities": {
       "channel": {
@@ -19003,7 +19003,7 @@ export const realTransactions = [
     "txn_date": "2024-01-20",
     "amount": 6.0,
     "direction": "Dr",
-    "running_balance": -50186.8,
+    "running_balance": 19235.3,
     "raw_description": "UPI-AMAZON PAY-AMAZONPAYRECHARGES@APL-UT IB0000100-402085428076-REQUESTFROMAMAZ",
     "entities": {
       "channel": {
@@ -19037,7 +19037,7 @@ export const realTransactions = [
     "txn_date": "2024-01-20",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -50286.8,
+    "running_balance": 19135.3,
     "raw_description": "UPI-SWAMISAMARTH-SILICON.SWAMISAMARTHTE CH@TIMECOSMOS-SBIN0050830-402044488662-P AYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19071,7 +19071,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 666.0,
     "direction": "Dr",
-    "running_balance": -50952.8,
+    "running_balance": 18469.3,
     "raw_description": "UPI-AMAZON PAY-AMAZONPAYRECHARGES@APL-UT IB0000100-402104009803-REQUESTFROMAMAZ",
     "entities": {
       "channel": {
@@ -19105,7 +19105,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -51052.8,
+    "running_balance": 18369.3,
     "raw_description": "UPI-NINECITYTECHNOLOGIE-MONEYGT.NINECIT YTECH@TIMECOSMOS-SBIN0005354-40214639637 4-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19139,7 +19139,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -51152.8,
+    "running_balance": 18269.3,
     "raw_description": "UPI-NINECITYTECHNOLOGIE-MONEYGT.NINECIT YTECH@TIMECOSMOS-SBIN0005354-40212580478 4-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19173,7 +19173,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 284.4,
     "direction": "Cr",
-    "running_balance": -50868.4,
+    "running_balance": 18553.7,
     "raw_description": "IMPS-402125020699-RUDKAVINTERNATIONAL-R ATN-XXXXXXXX4709-BILLER2024FUNDTRANSFER",
     "entities": {
       "channel": {
@@ -19207,7 +19207,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -50968.4,
+    "running_balance": 18453.7,
     "raw_description": "UPI-TERAPIASOFTWARE-SILICON.TERAPIASOFT WARE@TIMECOSMOS-SBIN0050830-402193452496 -PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19241,7 +19241,7 @@ export const realTransactions = [
     "txn_date": "2024-01-21",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -51068.4,
+    "running_balance": 18353.7,
     "raw_description": "UPI-TERAPIASOFTWARE-SILICON.TERAPIASOFT HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -19275,7 +19275,7 @@ export const realTransactions = [
     "txn_date": "2024-01-22",
     "amount": 24.78,
     "direction": "Dr",
-    "running_balance": -51093.18,
+    "running_balance": 18328.92,
     "raw_description": "FEE-ATMCASH(1TXN)15/12/2023-AOR24022433 88151",
     "entities": {
       "channel": {
@@ -19309,7 +19309,7 @@ export const realTransactions = [
     "txn_date": "2024-01-22",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -51118.18,
+    "running_balance": 18303.92,
     "raw_description": "UPI-MOHAMMEDISRARSIDDI-Q688527140@YBL- YESB0YBLUPI-402286430178-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -19343,7 +19343,7 @@ export const realTransactions = [
     "txn_date": "2024-01-24",
     "amount": 50000.0,
     "direction": "Cr",
-    "running_balance": -1118.18,
+    "running_balance": 68303.92,
     "raw_description": "50100224132841-TPT-TARNFE-AKILAHMEDATIK AHMEDKHAN",
     "entities": {
       "channel": {
@@ -19377,7 +19377,7 @@ export const realTransactions = [
     "txn_date": "2024-01-24",
     "amount": 49000.0,
     "direction": "Cr",
-    "running_balance": 47881.82,
+    "running_balance": 117303.92,
     "raw_description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17 -1@OKHDFCBANK-HDFC0000146-402475617505-U PI",
     "entities": {
       "channel": {
@@ -19411,7 +19411,7 @@ export const realTransactions = [
     "txn_date": "2024-01-24",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -2118.18,
+    "running_balance": 67303.92,
     "raw_description": "UPI-JAGMOHAN SINGH-7508586575@IBL-SBIN0 050077-402468444705-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -19445,7 +19445,7 @@ export const realTransactions = [
     "txn_date": "2024-01-25",
     "amount": 11000.0,
     "direction": "Cr",
-    "running_balance": 8881.82,
+    "running_balance": 78303.92,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-402516512016-UPI",
     "entities": {
       "channel": {
@@ -19479,7 +19479,7 @@ export const realTransactions = [
     "txn_date": "2024-01-25",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": 8880.82,
+    "running_balance": 78302.92,
     "raw_description": "UPI-XXXXXX2671-HDFC0000001-402525306030- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19513,7 +19513,7 @@ export const realTransactions = [
     "txn_date": "2024-01-25",
     "amount": 60000.0,
     "direction": "Dr",
-    "running_balance": -51119.18,
+    "running_balance": 18302.92,
     "raw_description": "UPI-XXXXXX2671-HDFC0000001-402514044213- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19547,7 +19547,7 @@ export const realTransactions = [
     "txn_date": "2024-01-26",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -51144.18,
+    "running_balance": 18277.92,
     "raw_description": "UPI-MOHAMMEDISRARSIDDI-Q688527140@YBL- YESB0YBLUPI-439264993297-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -19581,7 +19581,7 @@ export const realTransactions = [
     "txn_date": "2024-01-27",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": -48144.18,
+    "running_balance": 21277.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439396636459-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19615,7 +19615,7 @@ export const realTransactions = [
     "txn_date": "2024-01-27",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -48244.18,
+    "running_balance": 21177.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439310776254-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19649,7 +19649,7 @@ export const realTransactions = [
     "txn_date": "2024-01-28",
     "amount": 55.0,
     "direction": "Dr",
-    "running_balance": -48299.18,
+    "running_balance": 21122.92,
     "raw_description": "UPI-MALLU-Q556211669@YBL-YESB0YBLUPI-439 430258420-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -19683,7 +19683,7 @@ export const realTransactions = [
     "txn_date": "2024-01-28",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": -48359.18,
+    "running_balance": 21062.92,
     "raw_description": "UPI-ABDULMANNANFAIYAZ-PAYTMQR1JTKKL87 2D@PAYTM-PYTM0123456-402823780293-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -19717,7 +19717,7 @@ export const realTransactions = [
     "txn_date": "2024-01-28",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": -28359.18,
+    "running_balance": 41062.92,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-402828157552-UPI HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -19751,7 +19751,7 @@ export const realTransactions = [
     "txn_date": "2024-01-28",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -27859.18,
+    "running_balance": 41562.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439474462334-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19785,7 +19785,7 @@ export const realTransactions = [
     "txn_date": "2024-01-31",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": -27858.18,
+    "running_balance": 41563.92,
     "raw_description": "IMPS-403116796326-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -19819,7 +19819,7 @@ export const realTransactions = [
     "txn_date": "2024-01-31",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -17858.18,
+    "running_balance": 51563.92,
     "raw_description": "IMPS-403116808694-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -19853,7 +19853,7 @@ export const realTransactions = [
     "txn_date": "2024-01-31",
     "amount": 1500.0,
     "direction": "Cr",
-    "running_balance": -16358.18,
+    "running_balance": 53063.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439722472298-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19887,7 +19887,7 @@ export const realTransactions = [
     "txn_date": "2024-02-01",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -15858.18,
+    "running_balance": 53563.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439887754215-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -19921,7 +19921,7 @@ export const realTransactions = [
     "txn_date": "2024-02-01",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -5858.18,
+    "running_balance": 63563.92,
     "raw_description": "IMPS-403214637103-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -19955,7 +19955,7 @@ export const realTransactions = [
     "txn_date": "2024-02-01",
     "amount": 237.0,
     "direction": "Dr",
-    "running_balance": -6095.18,
+    "running_balance": 63326.92,
     "raw_description": "UPI-AMAZON PAY-AMAZONPAYRECHARGES@APL-UT IB0000100-439897062706-REQUESTFROMAMAZ",
     "entities": {
       "channel": {
@@ -19989,7 +19989,7 @@ export const realTransactions = [
     "txn_date": "2024-02-01",
     "amount": 3610.0,
     "direction": "Cr",
-    "running_balance": -2485.18,
+    "running_balance": 66936.92,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-403224870962-UPI",
     "entities": {
       "channel": {
@@ -20023,7 +20023,7 @@ export const realTransactions = [
     "txn_date": "2024-02-01",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 12514.82,
+    "running_balance": 81936.92,
     "raw_description": "IMPS-403223521385-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -20057,7 +20057,7 @@ export const realTransactions = [
     "txn_date": "2024-02-02",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": 13514.82,
+    "running_balance": 82936.92,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-439900333183-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20091,7 +20091,7 @@ export const realTransactions = [
     "txn_date": "2024-02-02",
     "amount": 39595.0,
     "direction": "Cr",
-    "running_balance": 53109.82,
+    "running_balance": 122531.92,
     "raw_description": "L1235422SAJAN",
     "entities": {
       "channel": {
@@ -20125,7 +20125,7 @@ export const realTransactions = [
     "txn_date": "2024-02-02",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 55109.82,
+    "running_balance": 124531.92,
     "raw_description": "UPI-MOHDASHRAF-ASHRAFKHAN3238@OKICICI-I CIC0000063-403324297154-UPI",
     "entities": {
       "channel": {
@@ -20159,7 +20159,7 @@ export const realTransactions = [
     "txn_date": "2024-02-02",
     "amount": 13000.0,
     "direction": "Cr",
-    "running_balance": 68109.82,
+    "running_balance": 137531.92,
     "raw_description": "UPI-MOHDASHRAF-ASHRAFKHAN3238@OKICICI-I CIC0000063-439997802109-UPI",
     "entities": {
       "channel": {
@@ -20193,7 +20193,7 @@ export const realTransactions = [
     "txn_date": "2024-02-03",
     "amount": 2028.6,
     "direction": "Dr",
-    "running_balance": 66081.22,
+    "running_balance": 135503.32,
     "raw_description": "UPI-IRCTCWEBUPI-PAYTM-651536@PAYTM-PYT M0123456-440020678549-OID100004767736419",
     "entities": {
       "channel": {
@@ -20227,7 +20227,7 @@ export const realTransactions = [
     "txn_date": "2024-02-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": 64669.22,
+    "running_balance": 134091.32,
     "raw_description": "EMI458151064CHQS45815106400910224458 151064",
     "entities": {
       "channel": {
@@ -20261,7 +20261,7 @@ export const realTransactions = [
     "txn_date": "2024-02-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": 58510.76,
+    "running_balance": 127932.86,
     "raw_description": "ACHD-TRILLIONLOANS-QF3HUKE9KOKO HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -20295,7 +20295,7 @@ export const realTransactions = [
     "txn_date": "2024-02-05",
     "amount": 3791.0,
     "direction": "Dr",
-    "running_balance": 54719.76,
+    "running_balance": 124141.86,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-403 631085188-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -20329,7 +20329,7 @@ export const realTransactions = [
     "txn_date": "2024-02-05",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 69719.76,
+    "running_balance": 139141.86,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-403640861617-CLE AR",
     "entities": {
       "channel": {
@@ -20363,7 +20363,7 @@ export const realTransactions = [
     "txn_date": "2024-02-07",
     "amount": 1.74,
     "direction": "Cr",
-    "running_balance": 69721.5,
+    "running_balance": 139143.6,
     "raw_description": "NEFTCR-ICIC0099999-NEXTBILLIONTECHNOLO GYPRIVATELIMITEDCLIENTACCO-BILALMOH AMMED-CMS3906646682",
     "entities": {
       "channel": {
@@ -20399,7 +20399,7 @@ export const realTransactions = [
     "txn_date": "2024-02-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": 48227.5,
+    "running_balance": 117649.6,
     "raw_description": "EMI140705829CHQS14070582901010224140 705829",
     "entities": {
       "channel": {
@@ -20433,7 +20433,7 @@ export const realTransactions = [
     "txn_date": "2024-02-07",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 50227.5,
+    "running_balance": 119649.6,
     "raw_description": "UPI-SINGHSHUKRITIRADHE-8080207407@IBL- RSBL0000008-403881183183-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -20467,7 +20467,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 2100.0,
     "direction": "Dr",
-    "running_balance": 48127.5,
+    "running_balance": 117549.6,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-440795810262-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20501,7 +20501,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 350.0,
     "direction": "Dr",
-    "running_balance": 47777.5,
+    "running_balance": 117199.6,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-440743350165-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20535,7 +20535,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 950.0,
     "direction": "Cr",
-    "running_balance": 48727.5,
+    "running_balance": 118149.6,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-440792182113-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20569,7 +20569,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 6800.0,
     "direction": "Dr",
-    "running_balance": 41927.5,
+    "running_balance": 111349.6,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-404171595421-PAY MENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20603,7 +20603,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 2982.0,
     "direction": "Dr",
-    "running_balance": 38945.5,
+    "running_balance": 108367.6,
     "raw_description": "UPI-PHONEPE-BBPSBP@YBL-YESB0YBLUPI-44074 5598923-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20637,7 +20637,7 @@ export const realTransactions = [
     "txn_date": "2024-02-10",
     "amount": 1940.0,
     "direction": "Cr",
-    "running_balance": 40885.5,
+    "running_balance": 110307.6,
     "raw_description": "UPI-IRCTCWEBUPI-PAYTM-651536@PAYTM-PYT M0123456-404144298069-COLLECT",
     "entities": {
       "channel": {
@@ -20671,7 +20671,7 @@ export const realTransactions = [
     "txn_date": "2024-02-11",
     "amount": 1800.0,
     "direction": "Cr",
-    "running_balance": 42685.5,
+    "running_balance": 112107.6,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-404242738269-UPI",
     "entities": {
       "channel": {
@@ -20705,7 +20705,7 @@ export const realTransactions = [
     "txn_date": "2024-02-11",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": 37685.5,
+    "running_balance": 107107.6,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-440840958113-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -20739,7 +20739,7 @@ export const realTransactions = [
     "txn_date": "2024-02-11",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 52685.5,
+    "running_balance": 122107.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-404274139701-UPI HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -20773,7 +20773,7 @@ export const realTransactions = [
     "txn_date": "2024-02-11",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": 32685.5,
+    "running_balance": 102107.6,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIYSKHAN69@YB L-SCBL0036046-404261615613-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -20807,7 +20807,7 @@ export const realTransactions = [
     "txn_date": "2024-02-13",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": 32665.5,
+    "running_balance": 102087.6,
     "raw_description": "UPI-GUPTAPANIPURI-GPAY-11234398042@OKB IZAXIS-UTIB0000000-404469674197-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -20841,7 +20841,7 @@ export const realTransactions = [
     "txn_date": "2024-02-14",
     "amount": 50000.0,
     "direction": "Cr",
-    "running_balance": 82665.5,
+    "running_balance": 152087.6,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-404561533980-UPI",
     "entities": {
       "channel": {
@@ -20875,7 +20875,7 @@ export const realTransactions = [
     "txn_date": "2024-02-14",
     "amount": 3500.0,
     "direction": "Dr",
-    "running_balance": 79165.5,
+    "running_balance": 148587.6,
     "raw_description": "UPI-TORRENT POWER-BDGPAY.TORRENTPOWER@HD FCBANK-HDFC0000499-404587029069-TORRENTP",
     "entities": {
       "channel": {
@@ -20909,7 +20909,7 @@ export const realTransactions = [
     "txn_date": "2024-02-14",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": 79665.5,
+    "running_balance": 149087.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-404583231280-UPI",
     "entities": {
       "channel": {
@@ -20943,7 +20943,7 @@ export const realTransactions = [
     "txn_date": "2024-02-14",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": 78665.5,
+    "running_balance": 148087.6,
     "raw_description": "UPI-KRISHNAKUMARVERMA-BABUBHAI22091983 @OKSBI-DCBL0000012-404582065972-PAYMENT FROMPHONE",
     "entities": {
       "channel": {
@@ -20977,7 +20977,7 @@ export const realTransactions = [
     "txn_date": "2024-02-15",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 68665.5,
+    "running_balance": 138087.6,
     "raw_description": "NWD-405988XXXXXX3155-0205W041-THANE",
     "entities": {
       "channel": {
@@ -21011,7 +21011,7 @@ export const realTransactions = [
     "txn_date": "2024-02-15",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": 68515.5,
+    "running_balance": 137937.6,
     "raw_description": "UPI-SHAIKHSAHILABDULK-PAYTMQR28100505 0101P35PXTF2P3EQ@PAYTM-PYTM0123456-44124 0250376-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -21045,7 +21045,7 @@ export const realTransactions = [
     "txn_date": "2024-02-15",
     "amount": 150.0,
     "direction": "Cr",
-    "running_balance": 68665.5,
+    "running_balance": 138087.6,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-441252286772-UPI",
     "entities": {
       "channel": {
@@ -21079,7 +21079,7 @@ export const realTransactions = [
     "txn_date": "2024-02-15",
     "amount": 13000.0,
     "direction": "Cr",
-    "running_balance": 81665.5,
+    "running_balance": 151087.6,
     "raw_description": "UPI-ZOYAAARAB-7249297186@YBL-SRCB00003 92-404678755100-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -21113,7 +21113,7 @@ export const realTransactions = [
     "txn_date": "2024-02-15",
     "amount": 110.0,
     "direction": "Dr",
-    "running_balance": 81555.5,
+    "running_balance": 150977.6,
     "raw_description": "UPI-MRNAEEMMOHDAMINK-PAYTMQR72IZ46AT 51@PAYTM-PYTM0123456-404621796631-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -21147,7 +21147,7 @@ export const realTransactions = [
     "txn_date": "2024-02-16",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": 81055.5,
+    "running_balance": 150477.6,
     "raw_description": "UPI-AYAZYUSUFKHAN-NSNET907@OKICICI-KKB K0000628-404745214331-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -21181,7 +21181,7 @@ export const realTransactions = [
     "txn_date": "2024-02-16",
     "amount": 12.0,
     "direction": "Dr",
-    "running_balance": 81043.5,
+    "running_balance": 150465.6,
     "raw_description": "UPI-USHASANTOSHMANDE-PAYTMQR2810050501 011A09NT93U0WB@PAYTM-PYTM0123456-4413460 HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -21215,7 +21215,7 @@ export const realTransactions = [
     "txn_date": "2024-02-17",
     "amount": 4000.0,
     "direction": "Cr",
-    "running_balance": 85043.5,
+    "running_balance": 154465.6,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKIC ICI-CNRB0000033-441408438360-UPI",
     "entities": {
       "channel": {
@@ -21249,7 +21249,7 @@ export const realTransactions = [
     "txn_date": "2024-02-17",
     "amount": 2500.0,
     "direction": "Dr",
-    "running_balance": 82543.5,
+    "running_balance": 151965.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@IBL- ABHY0065014-404826647014-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -21283,7 +21283,7 @@ export const realTransactions = [
     "txn_date": "2024-02-17",
     "amount": 15.0,
     "direction": "Dr",
-    "running_balance": 82528.5,
+    "running_balance": 151950.6,
     "raw_description": "UPI-HEALTHPLUSCHEMIST-8268635717@OKBI ZAXIS-UTIB0000000-441409785223-PAIDVIA CRED",
     "entities": {
       "channel": {
@@ -21317,7 +21317,7 @@ export const realTransactions = [
     "txn_date": "2024-02-17",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 92528.5,
+    "running_balance": 161950.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-404888261490-UPI",
     "entities": {
       "channel": {
@@ -21351,7 +21351,7 @@ export const realTransactions = [
     "txn_date": "2024-02-18",
     "amount": 160.0,
     "direction": "Dr",
-    "running_balance": 92368.5,
+    "running_balance": 161790.6,
     "raw_description": "UPI-MOHMMADSHAHNAWAZA-SHANUSAL1986-1@ OKAXIS-DCBL0000012-404935450829-PAIDVIA CREDAND",
     "entities": {
       "channel": {
@@ -21385,7 +21385,7 @@ export const realTransactions = [
     "txn_date": "2024-02-18",
     "amount": 245.0,
     "direction": "Dr",
-    "running_balance": 92123.5,
+    "running_balance": 161545.6,
     "raw_description": "UPI-APNAMEDICALDAYNIG-Q767180770@YBL- YESB0YBLUPI-441590163907-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -21419,7 +21419,7 @@ export const realTransactions = [
     "txn_date": "2024-02-18",
     "amount": 285.0,
     "direction": "Cr",
-    "running_balance": 92408.5,
+    "running_balance": 161830.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-404926668243-UPI",
     "entities": {
       "channel": {
@@ -21453,7 +21453,7 @@ export const realTransactions = [
     "txn_date": "2024-02-18",
     "amount": 23.0,
     "direction": "Dr",
-    "running_balance": 92385.5,
+    "running_balance": 161807.6,
     "raw_description": "UPI-APNAMEDICALDAYNIG-Q767180770@YBL- YESB0YBLUPI-404981968545-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -21487,7 +21487,7 @@ export const realTransactions = [
     "txn_date": "2024-02-18",
     "amount": 22.0,
     "direction": "Dr",
-    "running_balance": 92363.5,
+    "running_balance": 161785.6,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQRAG7KJUI3U0@PAYTM- PYTM0123456-404989737732-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -21521,7 +21521,7 @@ export const realTransactions = [
     "txn_date": "2024-02-19",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": 92863.5,
+    "running_balance": 162285.6,
     "raw_description": "L1235422JAINT",
     "entities": {
       "channel": {
@@ -21555,7 +21555,7 @@ export const realTransactions = [
     "txn_date": "2024-02-19",
     "amount": 42.0,
     "direction": "Dr",
-    "running_balance": 92821.5,
+    "running_balance": 162243.6,
     "raw_description": "UPI-RAJVENDRASINGHSONI-RAJVENDRAS3@OKS BI-SBIN0014748-441675269164-PAIDVIACRE D",
     "entities": {
       "channel": {
@@ -21589,7 +21589,7 @@ export const realTransactions = [
     "txn_date": "2024-02-20",
     "amount": 95.0,
     "direction": "Dr",
-    "running_balance": 92726.5,
+    "running_balance": 162148.6,
     "raw_description": "UPI-AZRUNNISAMOHAMMEDS-BHARATPE.900664 21705@FBPE-FDRL0001382-405138843335-PAY TOBHARATPEME",
     "entities": {
       "channel": {
@@ -21623,7 +21623,7 @@ export const realTransactions = [
     "txn_date": "2024-02-20",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 102726.5,
+    "running_balance": 172148.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-405174699178-UPI",
     "entities": {
       "channel": {
@@ -21657,7 +21657,7 @@ export const realTransactions = [
     "txn_date": "2024-02-20",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 102716.5,
+    "running_balance": 172138.6,
     "raw_description": "UPI-XXXXXX2904-ICIC0000273-405104937583- HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -21691,7 +21691,7 @@ export const realTransactions = [
     "txn_date": "2024-02-20",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": 77716.5,
+    "running_balance": 147138.6,
     "raw_description": "UPI-XXXXXX2904-ICIC0000273-405190220875- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -21725,7 +21725,7 @@ export const realTransactions = [
     "txn_date": "2024-02-20",
     "amount": 400.0,
     "direction": "Dr",
-    "running_balance": 77316.5,
+    "running_balance": 146738.6,
     "raw_description": "UPI-MOHAMMAD MOHTASIM-MOHAMMADMOHTASIM3 53-1@OKSBI-KKBK0000628-441733598898-PAID",
     "entities": {
       "channel": {
@@ -21759,7 +21759,7 @@ export const realTransactions = [
     "txn_date": "2024-02-21",
     "amount": 50030.0,
     "direction": "Dr",
-    "running_balance": 27286.5,
+    "running_balance": 96708.6,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-441824260232-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -21793,7 +21793,7 @@ export const realTransactions = [
     "txn_date": "2024-02-21",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": 27266.5,
+    "running_balance": 96688.6,
     "raw_description": "UPI-HEENAUMESH PATEL-PAYTMQR11MGSMBV87@ PAYTM-PYTM0123456-441868364485-PAIDVIA",
     "entities": {
       "channel": {
@@ -21827,7 +21827,7 @@ export const realTransactions = [
     "txn_date": "2024-02-21",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": 47266.5,
+    "running_balance": 116688.6,
     "raw_description": "IMPS-405215853710-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -21861,7 +21861,7 @@ export const realTransactions = [
     "txn_date": "2024-02-21",
     "amount": 80.0,
     "direction": "Dr",
-    "running_balance": 47186.5,
+    "running_balance": 116608.6,
     "raw_description": "UPI-NAGARAJSO HANAMANTR-NAGARAJAGUTTEDA R@YBL-PKGB0010740-405261860901-PAIDVIA",
     "entities": {
       "channel": {
@@ -21895,7 +21895,7 @@ export const realTransactions = [
     "txn_date": "2024-02-22",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": 27186.5,
+    "running_balance": 96608.6,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-441925115359-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -21929,7 +21929,7 @@ export const realTransactions = [
     "txn_date": "2024-02-22",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 29186.5,
+    "running_balance": 98608.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-405352509348-UPI",
     "entities": {
       "channel": {
@@ -21963,7 +21963,7 @@ export const realTransactions = [
     "txn_date": "2024-02-22",
     "amount": 12640.0,
     "direction": "Dr",
-    "running_balance": 16546.5,
+    "running_balance": 85968.6,
     "raw_description": "UPI-XXXXXX2671-HDFC0000001-405359661357- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -21997,7 +21997,7 @@ export const realTransactions = [
     "txn_date": "2024-02-23",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -8453.5,
+    "running_balance": 60968.6,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU NB0299900-442011497700-PAIDVIACREDAND",
     "entities": {
       "channel": {
@@ -22031,7 +22031,7 @@ export const realTransactions = [
     "txn_date": "2024-02-23",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -8653.5,
+    "running_balance": 60768.6,
     "raw_description": "UPI-BHAGAVATCAVARREVATS-9353369033@YBL- HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -22065,7 +22065,7 @@ export const realTransactions = [
     "txn_date": "2024-02-23",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -8693.5,
+    "running_balance": 60728.6,
     "raw_description": "UPI-RAJVENDRASINGHSONI-RAJVENDRAS3-2@O KAXIS-CNRB0000033-405419411981-PAIDVIA CREDAND",
     "entities": {
       "channel": {
@@ -22099,7 +22099,7 @@ export const realTransactions = [
     "txn_date": "2024-02-24",
     "amount": 16500.0,
     "direction": "Cr",
-    "running_balance": 7806.5,
+    "running_balance": 77228.6,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-442109741746-UPI",
     "entities": {
       "channel": {
@@ -22133,7 +22133,7 @@ export const realTransactions = [
     "txn_date": "2024-02-24",
     "amount": 1600.0,
     "direction": "Dr",
-    "running_balance": 6206.5,
+    "running_balance": 75628.6,
     "raw_description": "UPI-IIFLFINANCELIMITED-IIFLFINANC.BD@I CICI-ICIC0DC0099-405592581399-COLLECT-PA Y-REQUES",
     "entities": {
       "channel": {
@@ -22167,7 +22167,7 @@ export const realTransactions = [
     "txn_date": "2024-02-24",
     "amount": 75.0,
     "direction": "Dr",
-    "running_balance": 6131.5,
+    "running_balance": 75553.6,
     "raw_description": "UPI-ANSARIABDULMANNAN-Q284334059@YBL- YESB0YBLUPI-405587757991-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -22201,7 +22201,7 @@ export const realTransactions = [
     "txn_date": "2024-02-26",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": 3131.5,
+    "running_balance": 72553.6,
     "raw_description": "UPI-NEXTBILLIONTECHNOLOG-GROWW.RAZORPAY@ ICICI-ICIC0DC0099-405714662779-PAYVIARAZ ORPAY",
     "entities": {
       "channel": {
@@ -22235,7 +22235,7 @@ export const realTransactions = [
     "txn_date": "2024-02-26",
     "amount": 240.0,
     "direction": "Dr",
-    "running_balance": 2891.5,
+    "running_balance": 72313.6,
     "raw_description": "UPI-ASHOKRAMNARAYAN YAD-PAYTMQR1OYKVQ2F 4J@PAYTM-PYTM0123456-442318010127-PAIDV",
     "entities": {
       "channel": {
@@ -22269,7 +22269,7 @@ export const realTransactions = [
     "txn_date": "2024-02-26",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": 2791.5,
+    "running_balance": 72213.6,
     "raw_description": "UPI-CHALOMOBILITYPRIVA-CHALOMOBILITYPR 658.RZP@ICICI-ICIC0DC0099-405724668524-P AYVIARAZORPAY",
     "entities": {
       "channel": {
@@ -22303,7 +22303,7 @@ export const realTransactions = [
     "txn_date": "2024-02-26",
     "amount": 100.0,
     "direction": "Cr",
-    "running_balance": 2891.5,
+    "running_balance": 72313.6,
     "raw_description": "UPI-CHALOMOBILITYPRIVA-CHALOMOBILITYPR 658.RZP@ICICI-ICIC0DC0099-405700443632-R AZORPAYREFUNDNF",
     "entities": {
       "channel": {
@@ -22337,7 +22337,7 @@ export const realTransactions = [
     "txn_date": "2024-02-27",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 2881.5,
+    "running_balance": 72303.6,
     "raw_description": "UPI-CHALOMOBILITYPRIVA-CHALOMOBILITYPR 805.RZP@AXISBANK-UTIB0000100-40581882815 6-PAYVIARAZORPAY",
     "entities": {
       "channel": {
@@ -22371,7 +22371,7 @@ export const realTransactions = [
     "txn_date": "2024-02-28",
     "amount": 750.0,
     "direction": "Dr",
-    "running_balance": 2131.5,
+    "running_balance": 71553.6,
     "raw_description": "UPI-RAHATMEDICAL-GPAY-11214237134@OKBIZ AXIS-UTIB0000000-442536046049-PAIDVIAC RED",
     "entities": {
       "channel": {
@@ -22405,7 +22405,7 @@ export const realTransactions = [
     "txn_date": "2024-02-28",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": 2081.5,
+    "running_balance": 71503.6,
     "raw_description": "UPI-CHALOMOBILITYPRIVA-CHALOMOBILITYPR HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -22439,7 +22439,7 @@ export const realTransactions = [
     "txn_date": "2024-02-29",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": 2051.5,
+    "running_balance": 71473.6,
     "raw_description": "UPI-HARESHBHIMJIANAVAD-PAYTMQR12CCSVPQ W6@PAYTM-PYTM0123456-406001574143-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -22473,7 +22473,7 @@ export const realTransactions = [
     "txn_date": "2024-03-01",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": 1551.5,
+    "running_balance": 70973.6,
     "raw_description": "UPI-SHAMAIDRISSHAIKH-7738480899@AXL-BA RB0MCKAUS-442753570653-PAYMENTFROMPHON E",
     "entities": {
       "channel": {
@@ -22507,7 +22507,7 @@ export const realTransactions = [
     "txn_date": "2024-03-01",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": -1448.5,
+    "running_balance": 67973.6,
     "raw_description": "UPI-NAWED ALAM-NAWED.ALAM5@OKHDFCBANK-PU NB0299900-442711730675-PAIDVIACREDAND",
     "entities": {
       "channel": {
@@ -22541,7 +22541,7 @@ export const realTransactions = [
     "txn_date": "2024-03-01",
     "amount": 18912.0,
     "direction": "Cr",
-    "running_balance": 17463.5,
+    "running_balance": 86885.6,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-406130845087-UPI",
     "entities": {
       "channel": {
@@ -22575,7 +22575,7 @@ export const realTransactions = [
     "txn_date": "2024-03-01",
     "amount": 46000.0,
     "direction": "Cr",
-    "running_balance": 63463.5,
+    "running_balance": 132885.6,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-SCBL0036046-442752333992-UPI",
     "entities": {
       "channel": {
@@ -22609,7 +22609,7 @@ export const realTransactions = [
     "txn_date": "2024-03-02",
     "amount": 39.0,
     "direction": "Dr",
-    "running_balance": 63424.5,
+    "running_balance": 132846.6,
     "raw_description": "UPI-ZAIDULLAH FAROOQUI-Q599796785@YBL-Y ESB0YBLUPI-406238521055-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -22643,7 +22643,7 @@ export const realTransactions = [
     "txn_date": "2024-03-02",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": 83424.5,
+    "running_balance": 152846.6,
     "raw_description": "UPI-SHAHIDHUSSAINKHAN-SKSPEED7@OKICICI -KKBK0001360-406272834132-UPI",
     "entities": {
       "channel": {
@@ -22677,7 +22677,7 @@ export const realTransactions = [
     "txn_date": "2024-03-02",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": 63424.5,
+    "running_balance": 132846.6,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-406253822825-PAY MENTFROMPHONE",
     "entities": {
       "channel": {
@@ -22711,7 +22711,7 @@ export const realTransactions = [
     "txn_date": "2024-03-02",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": 63924.5,
+    "running_balance": 133346.6,
     "raw_description": "UPI-GULAMHUSSAINABDUL-AOUNHARDWARE143 @OKHDFCBANK-HDFC0000146-406265607727-UPI",
     "entities": {
       "channel": {
@@ -22745,7 +22745,7 @@ export const realTransactions = [
     "txn_date": "2024-03-02",
     "amount": 130.0,
     "direction": "Dr",
-    "running_balance": 63794.5,
+    "running_balance": 133216.6,
     "raw_description": "UPI-MAHESHPARAGMALAVDE-BHARATPE9072389 4923@YESBANKLTD-YESB0YESUPI-442854534277 -PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -22779,7 +22779,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 54068.0,
     "direction": "Dr",
-    "running_balance": 9726.5,
+    "running_balance": 79148.6,
     "raw_description": "UPI-AXIS-CRED.CLUB@AXISB-UTIB0000114-442 970399510-PAYMENTONCRED",
     "entities": {
       "channel": {
@@ -22813,7 +22813,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 9000.0,
     "direction": "Cr",
-    "running_balance": 18726.5,
+    "running_balance": 88148.6,
     "raw_description": "UPI-IMRANFAKREALAMUSMA-IMRANUSMANI427- 2@OKHDFCBANK-HDFC0000406-406314445640-IM HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -22847,7 +22847,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": 38726.5,
+    "running_balance": 108148.6,
     "raw_description": "UPI-MOHAMMEDANASRIYAZ -SHAIKHMOHDANAS7 59-2@OKHDFCBANK-KKBK0001360-406314434601",
     "entities": {
       "channel": {
@@ -22881,7 +22881,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 49000.0,
     "direction": "Cr",
-    "running_balance": 87726.5,
+    "running_balance": 157148.6,
     "raw_description": "IMPS-406319500734-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -22915,7 +22915,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 49000.0,
     "direction": "Dr",
-    "running_balance": 38726.5,
+    "running_balance": 108148.6,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-442986513481-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -22949,7 +22949,7 @@ export const realTransactions = [
     "txn_date": "2024-03-03",
     "amount": 49000.0,
     "direction": "Cr",
-    "running_balance": 87726.5,
+    "running_balance": 157148.6,
     "raw_description": "IMPS-406321334314-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -22983,7 +22983,7 @@ export const realTransactions = [
     "txn_date": "2024-03-04",
     "amount": 52000.0,
     "direction": "Cr",
-    "running_balance": 139726.5,
+    "running_balance": 209148.6,
     "raw_description": "UPI-NAWEDALAM-NAWED.ALAM5@OKICICI-PUNB0 299900-443008088084-UPI",
     "entities": {
       "channel": {
@@ -23017,7 +23017,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 1412.0,
     "direction": "Dr",
-    "running_balance": 138314.5,
+    "running_balance": 207736.6,
     "raw_description": "EMI458151064CHQS45815106401010324458 151064",
     "entities": {
       "channel": {
@@ -23051,7 +23051,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 6158.46,
     "direction": "Dr",
-    "running_balance": 132156.04,
+    "running_balance": 201578.14,
     "raw_description": "ACHD-TRILLIONLOANS-NH4GB1P96EOG",
     "entities": {
       "channel": {
@@ -23085,7 +23085,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 51.0,
     "direction": "Dr",
-    "running_balance": 132105.04,
+    "running_balance": 201527.14,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQRAG7KJUI3U0@PAYTM- PYTM0123456-406565534865-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -23119,7 +23119,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 21300.0,
     "direction": "Cr",
-    "running_balance": 153405.04,
+    "running_balance": 222827.14,
     "raw_description": "NEFTCR-SBIN0000987-EMPLOYEEPROVIDENTF UNDORGANIZATIO-KHANMOHAMMEDBILAL ABDU",
     "entities": {
       "channel": {
@@ -23155,7 +23155,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 143405.04,
+    "running_balance": 212827.14,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -23189,7 +23189,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 133405.04,
+    "running_balance": 202827.14,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -23223,7 +23223,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 123405.04,
+    "running_balance": 192827.14,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -23257,7 +23257,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 113405.04,
+    "running_balance": 182827.14,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -23291,7 +23291,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 103405.04,
+    "running_balance": 172827.14,
     "raw_description": "EAW-405988XXXXXX3155-DWCW136418-MUMBRA",
     "entities": {
       "channel": {
@@ -23325,7 +23325,7 @@ export const realTransactions = [
     "txn_date": "2024-03-05",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 103406.04,
+    "running_balance": 172828.14,
     "raw_description": "IMPS-406523907753-DREAMPLUGTECHNOLOGIES PRIVATELIMITED-YESB-XXXXXXXXXXX6201-PA IDVIACRED",
     "entities": {
       "channel": {
@@ -23359,7 +23359,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 103407.04,
+    "running_balance": 172829.14,
     "raw_description": "IMPS-406600920440-DREAMPLUGTECHNOLOGIES HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -23393,7 +23393,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": 103357.04,
+    "running_balance": 172779.14,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-NA-406657597904-HI",
     "entities": {
       "channel": {
@@ -23427,7 +23427,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 50.0,
     "direction": "Cr",
-    "running_balance": 103407.04,
+    "running_balance": 172829.14,
     "raw_description": "REV-UPI-50100206358420-8454899885@HDFCBA NK-PAY-406657597904-HI",
     "entities": {
       "channel": {
@@ -23461,7 +23461,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": 103357.04,
+    "running_balance": 172779.14,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIS.APPS-1@OK AXIS-NA-406657594281-HI",
     "entities": {
       "channel": {
@@ -23495,7 +23495,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 50.0,
     "direction": "Cr",
-    "running_balance": 103407.04,
+    "running_balance": 172829.14,
     "raw_description": "REV-UPI-50100206358420-8454899885@HDFCBA NK-PAY-406657594281-HI",
     "entities": {
       "channel": {
@@ -23529,7 +23529,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": 103257.04,
+    "running_balance": 172679.14,
     "raw_description": "IMPS-406600364348-AKILAHMEDKHAN-HDFC-XX XXXXXXXX2841-HI",
     "entities": {
       "channel": {
@@ -23563,7 +23563,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 37000.0,
     "direction": "Dr",
-    "running_balance": 66257.04,
+    "running_balance": 135679.14,
     "raw_description": "IMPS-406600365738-AKILAHMEDKHAN-HDFC-XX XXXXXXXX2841-HI",
     "entities": {
       "channel": {
@@ -23597,7 +23597,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": 66256.04,
+    "running_balance": 135678.14,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-443275174290-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -23631,7 +23631,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": 65256.04,
+    "running_balance": 134678.14,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-443273809088-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -23665,7 +23665,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": 66256.04,
+    "running_balance": 135678.14,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-443232037989-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -23699,7 +23699,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 40000.0,
     "direction": "Dr",
-    "running_balance": 26256.04,
+    "running_balance": 95678.14,
     "raw_description": "IMPS-406616341381-AKILAHMEDKHAN-HDFC-XX XXXXXXXX2841-HI",
     "entities": {
       "channel": {
@@ -23733,7 +23733,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": 16256.04,
+    "running_balance": 85678.14,
     "raw_description": "UPI-XXXXXX0326-PUNB0000001-406681450514- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -23767,7 +23767,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 26256.04,
+    "running_balance": 95678.14,
     "raw_description": "50100224132841-TPT-RETURNED-AKILAHMEDAT IKAHMEDKHAN",
     "entities": {
       "channel": {
@@ -23801,7 +23801,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 3000.0,
     "direction": "Dr",
-    "running_balance": 23256.04,
+    "running_balance": 92678.14,
     "raw_description": "UPI-HINAASALAMMALABARI-HINAMALBARI4@OK SBI-HDFC0000827-406654288593-PAYMENTFRO MPHONE",
     "entities": {
       "channel": {
@@ -23835,7 +23835,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": 23255.04,
+    "running_balance": 92677.14,
     "raw_description": "UPI-KHATIJALALMOHAMMAD-9422036447@YBL- BKID0000704-443251784471-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -23869,7 +23869,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": 23254.04,
+    "running_balance": 92676.14,
     "raw_description": "UPI-MAHIBOOBSAIPANSHAI-9890265195@YBL- BKID0000710-443212254442-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -23903,7 +23903,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 23255.04,
+    "running_balance": 92677.14,
     "raw_description": "UPI-SAJIDRAJESAHEBPAT-797786269@YBL-S BIN0001656-443209921269-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -23937,7 +23937,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 1.0,
     "direction": "Dr",
-    "running_balance": 23254.04,
+    "running_balance": 92676.14,
     "raw_description": "UPI-AHMEDRAZASAJIDPATE-AHMEDRAZA6186@Y BL-SBIN0001656-443226420719-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -23971,7 +23971,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 80000.0,
     "direction": "Cr",
-    "running_balance": 103254.04,
+    "running_balance": 172676.14,
     "raw_description": "UPI-MAHIBOOBSAIPANSHAI-9890265195@YBL- BKID0000710-443247510762-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -24005,7 +24005,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 20000.0,
     "direction": "Cr",
-    "running_balance": 123254.04,
+    "running_balance": 192676.14,
     "raw_description": "UPI-SAJIDRAJESAHEBPAT-797786269@YBL-S BIN0001656-443290964519-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -24039,7 +24039,7 @@ export const realTransactions = [
     "txn_date": "2024-03-06",
     "amount": 50000.0,
     "direction": "Cr",
-    "running_balance": 173254.04,
+    "running_balance": 242676.14,
     "raw_description": "IMPS-406622036965-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -24073,7 +24073,7 @@ export const realTransactions = [
     "txn_date": "2024-03-07",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 173255.04,
+    "running_balance": 242677.14,
     "raw_description": "UPI-MAHIBOOBSAIPANSHAI-9890265195@YBL- BKID0000710-443381023674-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -24107,7 +24107,7 @@ export const realTransactions = [
     "txn_date": "2024-03-07",
     "amount": 21494.0,
     "direction": "Dr",
-    "running_balance": 151761.04,
+    "running_balance": 221183.14,
     "raw_description": "EMI140705829CHQS14070582901110324140 705829",
     "entities": {
       "channel": {
@@ -24141,7 +24141,7 @@ export const realTransactions = [
     "txn_date": "2024-03-07",
     "amount": 624.0,
     "direction": "Dr",
-    "running_balance": 151137.04,
+    "running_balance": 220559.14,
     "raw_description": "UPI-PHONEPE-BBPSBP@YBL-YESB0YBLUPI-44337 3996223-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -24175,7 +24175,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 161137.04,
+    "running_balance": 230559.14,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-406803657854-UPI",
     "entities": {
       "channel": {
@@ -24209,7 +24209,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 80000.0,
     "direction": "Dr",
-    "running_balance": 81137.04,
+    "running_balance": 150559.14,
     "raw_description": "UPI-MAHIBOOBSAIPANSHAI-9890265195@YBL- BKID0000710-443471575532-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -24243,7 +24243,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": 61137.04,
+    "running_balance": 130559.14,
     "raw_description": "UPI-SAJIDRAJESAHEBPAT-797786269@YBL-S BIN0001656-443465308171-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -24277,7 +24277,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": 11137.04,
+    "running_balance": 80559.14,
     "raw_description": "IMPS-406820304939-AKILAHMEDKHAN-HDFC-XX XXXXXXXX2841-HI",
     "entities": {
       "channel": {
@@ -24311,7 +24311,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 50000.0,
     "direction": "Cr",
-    "running_balance": 61137.04,
+    "running_balance": 130559.14,
     "raw_description": "50100224132841-TPT-RETRNED-AKILAHMEDATI KAHMEDKHAN",
     "entities": {
       "channel": {
@@ -24345,7 +24345,7 @@ export const realTransactions = [
     "txn_date": "2024-03-08",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": 11137.04,
+    "running_balance": 80559.14,
     "raw_description": "IMPS-406821311582-AKILAHMEDKHAN-HDFC-XX XXXXXXXX2841-HI",
     "entities": {
       "channel": {
@@ -24379,7 +24379,7 @@ export const realTransactions = [
     "txn_date": "2024-03-09",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -8862.96,
+    "running_balance": 60559.14,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIYSKHAN69@YB L-SCBL0036046-406983211466-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -24413,7 +24413,7 @@ export const realTransactions = [
     "txn_date": "2024-03-10",
     "amount": 60.0,
     "direction": "Dr",
-    "running_balance": -8922.96,
+    "running_balance": 60499.14,
     "raw_description": "UPI-AMITGHANSHYAM MOURY-PAYTMQRJUBYALXN FM@PAYTM-PYTM0123456-443607495057-PAIDV",
     "entities": {
       "channel": {
@@ -24447,7 +24447,7 @@ export const realTransactions = [
     "txn_date": "2024-03-12",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": 6077.04,
+    "running_balance": 75499.14,
     "raw_description": "IMPS-407217257862-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -24481,7 +24481,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 190.0,
     "direction": "Dr",
-    "running_balance": 5887.04,
+    "running_balance": 75309.14,
     "raw_description": "UPI-MOHAMMEDHUSSAIN IBR-PAYTMQRQVTRJUQH RT@PAYTM-PYTM0123456-443935334949-PAIDV",
     "entities": {
       "channel": {
@@ -24515,7 +24515,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 6200.0,
     "direction": "Cr",
-    "running_balance": 12087.04,
+    "running_balance": 81509.14,
     "raw_description": "IMPS-407301712583-DREAMPLUGPAYTECHSO-UTI B-XXXXXXXXXXX7853-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -24549,7 +24549,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 475.0,
     "direction": "Dr",
-    "running_balance": 11612.04,
+    "running_balance": 81034.14,
     "raw_description": "UPI-AMBAJIMEDICALSURGI-AMBAJIMEDICALSU RGICA.42511538@HDFCBANK-HDFC0000001-4439 36627971-GENERATINGDYNAMIC",
     "entities": {
       "channel": {
@@ -24583,7 +24583,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": 11613.04,
+    "running_balance": 81035.14,
     "raw_description": "UPI-SAJIDRAJESAHEBPAT-797786269@YBL-S BIN0001656-443929776162-PAYMENTFROMPHO NE",
     "entities": {
       "channel": {
@@ -24617,7 +24617,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -38386.96,
+    "running_balance": 31035.14,
     "raw_description": "UPI-SAJIDRAJESAHEBPAT-797786269@YBL-S BIN0001656-443906651617-PAYMENTFROMPHO HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -24651,7 +24651,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 807.0,
     "direction": "Dr",
-    "running_balance": -39193.96,
+    "running_balance": 30228.14,
     "raw_description": "UPI-JALARAMTRADERS-Q583931726@YBL-YESB0 YBLUPI-407346711308-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -24685,7 +24685,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 380.0,
     "direction": "Dr",
-    "running_balance": -39573.96,
+    "running_balance": 29848.14,
     "raw_description": "UPI-AQSATOURSANDTRAVE-PAYTMQRHXZ4BOL0 6L@PAYTM-PYTM0123456-443961925890-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -24719,7 +24719,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 130.0,
     "direction": "Dr",
-    "running_balance": -39703.96,
+    "running_balance": 29718.14,
     "raw_description": "UPI-HARESHBHIMJIANAVAD-PAYTMQR12CCSVPQ W6@PAYTM-PYTM0123456-407322332849-PAYMEN TFROMPHONE",
     "entities": {
       "channel": {
@@ -24753,7 +24753,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 160.0,
     "direction": "Dr",
-    "running_balance": -39863.96,
+    "running_balance": 29558.14,
     "raw_description": "UPI-JAMILASULEMANMEMON-PAYTMQR28100505 01011OZWDK6ITK6R@PAYTM-PYTM0123456-40734 6612085-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -24787,7 +24787,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 135.0,
     "direction": "Dr",
-    "running_balance": -39998.96,
+    "running_balance": 29423.14,
     "raw_description": "UPI-MOHDRAFIQUE-BHARATPE.90070071351@FB PE-FDRL0001382-407335520771-PAYTOBHARA TPEME",
     "entities": {
       "channel": {
@@ -24821,7 +24821,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -40023.96,
+    "running_balance": 29398.14,
     "raw_description": "UPI-MOHAMMEDISRARSIDDI-Q688527140@YBL- YESB0YBLUPI-407346428258-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -24855,7 +24855,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -40048.96,
+    "running_balance": 29373.14,
     "raw_description": "UPI-ASHOKRAMNARAYAN YAD-PAYTMQR1OYKVQ2F 4J@PAYTM-PYTM0123456-443962636761-PAIDV",
     "entities": {
       "channel": {
@@ -24889,7 +24889,7 @@ export const realTransactions = [
     "txn_date": "2024-03-13",
     "amount": 475.0,
     "direction": "Cr",
-    "running_balance": -39573.96,
+    "running_balance": 29848.14,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKHD FCBANK-CNRB0000033-407301243593-UPI",
     "entities": {
       "channel": {
@@ -24923,7 +24923,7 @@ export const realTransactions = [
     "txn_date": "2024-03-14",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -39593.96,
+    "running_balance": 29828.14,
     "raw_description": "UPI-GUPTAKISHORMAHENDR-PAYTMQR17N8JS79 UX@PAYTM-PYTM0123456-444065175158-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -24957,7 +24957,7 @@ export const realTransactions = [
     "txn_date": "2024-03-14",
     "amount": 180.0,
     "direction": "Dr",
-    "running_balance": -39773.96,
+    "running_balance": 29648.14,
     "raw_description": "UPI-MRMUHAMMADARSHADM-BHARATPE9072715 0411@YESBANKLTD-YESB0YESUPI-407471494855 -PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -24991,7 +24991,7 @@ export const realTransactions = [
     "txn_date": "2024-03-14",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": -29773.96,
+    "running_balance": 39648.14,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-407431116224-UPI",
     "entities": {
       "channel": {
@@ -25025,7 +25025,7 @@ export const realTransactions = [
     "txn_date": "2024-03-14",
     "amount": 10000.0,
     "direction": "Dr",
-    "running_balance": -39773.96,
+    "running_balance": 29648.14,
     "raw_description": "NWD-405988XXXXXX3155-SACWT681-THANE HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -25059,7 +25059,7 @@ export const realTransactions = [
     "txn_date": "2024-03-15",
     "amount": 2500.0,
     "direction": "Dr",
-    "running_balance": -42273.96,
+    "running_balance": 27148.14,
     "raw_description": "UPI-TORRENT POWER-BDGPAY.TORRENTPOWER@HD FCBANK-HDFC0000499-407589594774-TORRENTP",
     "entities": {
       "channel": {
@@ -25093,7 +25093,7 @@ export const realTransactions = [
     "txn_date": "2024-03-15",
     "amount": 72.0,
     "direction": "Dr",
-    "running_balance": -42345.96,
+    "running_balance": 27076.14,
     "raw_description": "UPI-APNAMEDICALDAYNIG-Q548956259@YBL- YESB0YBLUPI-407563123133-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -25127,7 +25127,7 @@ export const realTransactions = [
     "txn_date": "2024-03-15",
     "amount": 85.0,
     "direction": "Dr",
-    "running_balance": -42430.96,
+    "running_balance": 26991.14,
     "raw_description": "UPI-ANSARIABDULMANNAN-Q284334059@YBL- YESB0YBLUPI-407516988808-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -25161,7 +25161,7 @@ export const realTransactions = [
     "txn_date": "2024-03-15",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -37430.96,
+    "running_balance": 31991.14,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-407572978616-UPI",
     "entities": {
       "channel": {
@@ -25195,7 +25195,7 @@ export const realTransactions = [
     "txn_date": "2024-03-15",
     "amount": 5000.0,
     "direction": "Dr",
-    "running_balance": -42430.96,
+    "running_balance": 26991.14,
     "raw_description": "UPI-KHANGULAMNABIABDUL-9930768099@IBL- ABHY0065014-407594800849-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -25229,7 +25229,7 @@ export const realTransactions = [
     "txn_date": "2024-03-16",
     "amount": 15.0,
     "direction": "Dr",
-    "running_balance": -42445.96,
+    "running_balance": 26976.14,
     "raw_description": "UPI-KAUSHALYADAVSATYNA-Q369474965@YBL- YESB0YBLUPI-407660567520-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -25263,7 +25263,7 @@ export const realTransactions = [
     "txn_date": "2024-03-16",
     "amount": 49.56,
     "direction": "Dr",
-    "running_balance": -42495.52,
+    "running_balance": 26926.58,
     "raw_description": "FEE-ATMCASH(2TXN)06/03/24-AOR2407684643 171",
     "entities": {
       "channel": {
@@ -25297,7 +25297,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 85.0,
     "direction": "Dr",
-    "running_balance": -42580.52,
+    "running_balance": 26841.58,
     "raw_description": "UPI-YASINUSMANSAYED-AMZN0007633713@APL -CNRB0000033-407740590343-UPI",
     "entities": {
       "channel": {
@@ -25331,7 +25331,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -42610.52,
+    "running_balance": 26811.58,
     "raw_description": "UPI-MOHAMMEDHUSSAIN IBR-PAYTMQRQVTRJUQH RT@PAYTM-YESB0PTMUPI-407724291904-PAIDV",
     "entities": {
       "channel": {
@@ -25365,7 +25365,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 160.0,
     "direction": "Dr",
-    "running_balance": -42770.52,
+    "running_balance": 26651.58,
     "raw_description": "UPI-JJJALEBI-Q793215900@YBL-YESB0YBLUP I-407727118548-UPI",
     "entities": {
       "channel": {
@@ -25399,7 +25399,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 40.0,
     "direction": "Dr",
-    "running_balance": -42810.52,
+    "running_balance": 26611.58,
     "raw_description": "UPI-MRNAFISMOHDAYUBP-NAFIYSKHAN69@YB L-SCBL0036046-407766447570-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -25433,7 +25433,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -42910.52,
+    "running_balance": 26511.58,
     "raw_description": "UPI-MRMOHDSIDDIQUESHA-MOHDSIDDIQUESHA IKH239-3@OKHDFCBANK-BDBL0001534-40773852 3450-UPI",
     "entities": {
       "channel": {
@@ -25467,7 +25467,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": -43060.52,
+    "running_balance": 26361.58,
     "raw_description": "UPI-PANKAJ SHRIVASTAVA-PANKAJSHRIVASTAV HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -25501,7 +25501,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 150.0,
     "direction": "Dr",
-    "running_balance": -43210.52,
+    "running_balance": 26211.58,
     "raw_description": "UPI-SAFIRULLAHBARATIPA-7738861819@KOTA K-KKBK0000811-444389018865-UPI",
     "entities": {
       "channel": {
@@ -25535,7 +25535,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -43220.52,
+    "running_balance": 26201.58,
     "raw_description": "UPI-SAMEERAHMEDKHAN-SAM905794@OKICICI- IDFB0040101-407719409684-UPI",
     "entities": {
       "channel": {
@@ -25569,7 +25569,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 490.0,
     "direction": "Dr",
-    "running_balance": -43710.52,
+    "running_balance": 25711.58,
     "raw_description": "UPI-PARMESHKUMARGUPTA-PKG.GUPTA2200@OK HDFCBANK-SBIN0000516-407761159783-UPI",
     "entities": {
       "channel": {
@@ -25603,7 +25603,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 2300.0,
     "direction": "Dr",
-    "running_balance": -46010.52,
+    "running_balance": 23411.58,
     "raw_description": "UPI-SANJAYSURENDRAPRASA-Q669644750@YBL- YESB0YBLUPI-407784678772-UPI",
     "entities": {
       "channel": {
@@ -25637,7 +25637,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -46110.52,
+    "running_balance": 23311.58,
     "raw_description": "UPI-SANJAYSURENDRAPRASA-Q669644750@YBL- YESB0YBLUPI-407752365397-UPI",
     "entities": {
       "channel": {
@@ -25671,7 +25671,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 490.0,
     "direction": "Cr",
-    "running_balance": -45620.52,
+    "running_balance": 23801.58,
     "raw_description": "UPI-PARMESHKUMARGUPTA-PKG.GUPTA2200@OK AXIS-SBIN0000516-407786999341-UPI",
     "entities": {
       "channel": {
@@ -25705,7 +25705,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 200.0,
     "direction": "Dr",
-    "running_balance": -45820.52,
+    "running_balance": 23601.58,
     "raw_description": "UPI-MAHENDRAKUMARSHYAM-9987407651@YBL- UBIN0558346-444396360259-UPI",
     "entities": {
       "channel": {
@@ -25739,7 +25739,7 @@ export const realTransactions = [
     "txn_date": "2024-03-17",
     "amount": 180.0,
     "direction": "Dr",
-    "running_balance": -46000.52,
+    "running_balance": 23421.58,
     "raw_description": "UPI-SAFIRULLAHBARATIPA-7738861819@KOTA K-KKBK0000811-444308342722-UPI",
     "entities": {
       "channel": {
@@ -25773,7 +25773,7 @@ export const realTransactions = [
     "txn_date": "2024-03-18",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -46025.52,
+    "running_balance": 23396.58,
     "raw_description": "UPI-RAMLALSHRIRAMCHAUH-BHARATPE9072801 2307@YESBANKLTD-YESB0YESUPI-407863308588 -PAYTOBHARATPEME",
     "entities": {
       "channel": {
@@ -25807,7 +25807,7 @@ export const realTransactions = [
     "txn_date": "2024-03-18",
     "amount": 46.0,
     "direction": "Dr",
-    "running_balance": -46071.52,
+    "running_balance": 23350.58,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQRAG7KJUI3U0@PAYTM- YESB0PTMUPI-444488738175-UPI",
     "entities": {
       "channel": {
@@ -25841,7 +25841,7 @@ export const realTransactions = [
     "txn_date": "2024-03-18",
     "amount": 110.0,
     "direction": "Dr",
-    "running_balance": -46181.52,
+    "running_balance": 23240.58,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQRAG7KJUI3U0@PAYTM- YESB0PTMUPI-407835672160-UPI",
     "entities": {
       "channel": {
@@ -25875,7 +25875,7 @@ export const realTransactions = [
     "txn_date": "2024-03-18",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -21181.52,
+    "running_balance": 48240.58,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-407873224654-UPI",
     "entities": {
       "channel": {
@@ -25909,7 +25909,7 @@ export const realTransactions = [
     "txn_date": "2024-03-18",
     "amount": 100.0,
     "direction": "Dr",
-    "running_balance": -21281.52,
+    "running_balance": 48140.58,
     "raw_description": "UPI-MOHAMMEDHUSSAIN IBR-PAYTMQRQVTRJUQH RT@PAYTM-YESB0PTMUPI-407868009320-UPI",
     "entities": {
       "channel": {
@@ -25943,7 +25943,7 @@ export const realTransactions = [
     "txn_date": "2024-03-19",
     "amount": 300.0,
     "direction": "Dr",
-    "running_balance": -21581.52,
+    "running_balance": 47840.58,
     "raw_description": "UPI-NAWABBIKEGARAGE-GPAY-11235483656@O KBIZAXIS-UTIB0000000-407922731762-PAYMEN TFROMPHONE",
     "entities": {
       "channel": {
@@ -25977,7 +25977,7 @@ export const realTransactions = [
     "txn_date": "2024-03-19",
     "amount": 15000.0,
     "direction": "Cr",
-    "running_balance": -6581.52,
+    "running_balance": 62840.58,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-407916470051-UPI",
     "entities": {
       "channel": {
@@ -26011,7 +26011,7 @@ export const realTransactions = [
     "txn_date": "2024-03-19",
     "amount": 850.0,
     "direction": "Dr",
-    "running_balance": -7431.52,
+    "running_balance": 61990.58,
     "raw_description": "UPI-MOHAMMEDWASIMSHAMI-Q769191100@YBL- YESB0YBLUPI-444522593963-UPI",
     "entities": {
       "channel": {
@@ -26045,7 +26045,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 1.0,
     "direction": "Cr",
-    "running_balance": -7430.52,
+    "running_balance": 61991.58,
     "raw_description": "UPI-HAZIQUEMUSTAFAKHAN-KHANHAZIQUE786@ YBL-FDRL0005555-408087558223-PAYMENTFRO MPHONE",
     "entities": {
       "channel": {
@@ -26079,7 +26079,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 9000.0,
     "direction": "Cr",
-    "running_balance": 1569.48,
+    "running_balance": 70991.58,
     "raw_description": "UPI-HAZIQUEMUSTAFAKHAN-KHANHAZIQUE786@ YBL-FDRL0005555-408012111282-PAYMENTFRO MPHONE",
     "entities": {
       "channel": {
@@ -26113,7 +26113,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 3569.48,
+    "running_balance": 72991.58,
     "raw_description": "IMPS-408000200821-GOOGLEINDIADIGITAL-UTI B-XXXXXXXXXXX2063-IMPS",
     "entities": {
       "channel": {
@@ -26147,7 +26147,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 3559.48,
+    "running_balance": 72981.58,
     "raw_description": "UPI-XXXXXX6160-HDFC0000001-408073239550- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -26181,7 +26181,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 1250.0,
     "direction": "Dr",
-    "running_balance": 2309.48,
+    "running_balance": 71731.58,
     "raw_description": "UPI-KHANFAIZANRIZWAN-FK001380@YBL-KKBK 0000628-444636720492-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -26215,7 +26215,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -47690.52,
+    "running_balance": 21731.58,
     "raw_description": "UPI-XXXXXX6160-HDFC0000001-408022272090- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -26249,7 +26249,7 @@ export const realTransactions = [
     "txn_date": "2024-03-20",
     "amount": 24.78,
     "direction": "Dr",
-    "running_balance": -47715.3,
+    "running_balance": 21706.8,
     "raw_description": "FEE-ATMCASH(1TXN)15/03/24-AOR2408094375 079",
     "entities": {
       "channel": {
@@ -26283,7 +26283,7 @@ export const realTransactions = [
     "txn_date": "2024-03-21",
     "amount": 240.0,
     "direction": "Cr",
-    "running_balance": -47475.3,
+    "running_balance": 21946.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-408183544112-UPI",
     "entities": {
       "channel": {
@@ -26317,7 +26317,7 @@ export const realTransactions = [
     "txn_date": "2024-03-21",
     "amount": 240.0,
     "direction": "Dr",
-    "running_balance": -47715.3,
+    "running_balance": 21706.8,
     "raw_description": "UPI-ALAJWA STN-PAYTMQRA2BQSYCDDV@PAYTM- YESB0PTMUPI-444769329044-UPI",
     "entities": {
       "channel": {
@@ -26351,7 +26351,7 @@ export const realTransactions = [
     "txn_date": "2024-03-22",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -47735.3,
+    "running_balance": 21686.8,
     "raw_description": "UPI-MOHAMMEDHUSSAINIBR-PAYTMQR8SO8BKJ3 46@PAYTM-YESB0PTMUPI-444837829865-UPI",
     "entities": {
       "channel": {
@@ -26385,7 +26385,7 @@ export const realTransactions = [
     "txn_date": "2024-03-22",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": -47745.3,
+    "running_balance": 21676.8,
     "raw_description": "UPI-KALEEMUDDINAHMEDQU-BHARATPE.900665 59621@FBPE-FDRL0001382-444892100877-PAY TOBHARATPEME",
     "entities": {
       "channel": {
@@ -26419,7 +26419,7 @@ export const realTransactions = [
     "txn_date": "2024-03-23",
     "amount": 234.0,
     "direction": "Cr",
-    "running_balance": -47511.3,
+    "running_balance": 21910.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-408368163663-UPI HDFCBANKLIMITED",
     "entities": {
       "channel": {
@@ -26453,7 +26453,7 @@ export const realTransactions = [
     "txn_date": "2024-03-23",
     "amount": 230.0,
     "direction": "Cr",
-    "running_balance": -47281.3,
+    "running_balance": 22140.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-408372956898-UPI",
     "entities": {
       "channel": {
@@ -26487,7 +26487,7 @@ export const realTransactions = [
     "txn_date": "2024-03-24",
     "amount": 300.0,
     "direction": "Dr",
-    "running_balance": -47581.3,
+    "running_balance": 21840.8,
     "raw_description": "UPI-WASEEMSIRAJMUKADAM-Q758401257@YBL- YESB0YBLUPI-445005587084-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -26521,7 +26521,7 @@ export const realTransactions = [
     "txn_date": "2024-03-24",
     "amount": 230.0,
     "direction": "Dr",
-    "running_balance": -47811.3,
+    "running_balance": 21610.8,
     "raw_description": "UPI-BAHARENOORAQUARIU-PAYTMQRQY2GHZ9X MO@PAYTM-YESB0PTMUPI-445026906905-PAIDV IACRED",
     "entities": {
       "channel": {
@@ -26555,7 +26555,7 @@ export const realTransactions = [
     "txn_date": "2024-03-24",
     "amount": 350.0,
     "direction": "Cr",
-    "running_balance": -47461.3,
+    "running_balance": 21960.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-408410808936-UPI",
     "entities": {
       "channel": {
@@ -26589,7 +26589,7 @@ export const realTransactions = [
     "txn_date": "2024-03-25",
     "amount": 360.0,
     "direction": "Dr",
-    "running_balance": -47821.3,
+    "running_balance": 21600.8,
     "raw_description": "UPI-ASHFAQUEMUSHTAQUEK-PAYTMQR1N8H32JQ RU@PAYTM-YESB0PTMUPI-408594013345-PAYMEN TFROMPHONE",
     "entities": {
       "channel": {
@@ -26623,7 +26623,7 @@ export const realTransactions = [
     "txn_date": "2024-03-25",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": -22821.3,
+    "running_balance": 46600.8,
     "raw_description": "UPI-KHANGULAMNABIABDUL-GK5572842@OKHDF CBANK-ABHY0065014-408544174002-UPI",
     "entities": {
       "channel": {
@@ -26657,7 +26657,7 @@ export const realTransactions = [
     "txn_date": "2024-03-25",
     "amount": 875.0,
     "direction": "Cr",
-    "running_balance": -21946.3,
+    "running_balance": 47475.8,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-408519092709-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -26691,7 +26691,7 @@ export const realTransactions = [
     "txn_date": "2024-03-26",
     "amount": 25000.0,
     "direction": "Cr",
-    "running_balance": 3053.7,
+    "running_balance": 72475.8,
     "raw_description": "UPI-KHANABDULKADIRABD-AKKHAN0071@OKHD FCBANK-CNRB0000033-408646435136-UPI",
     "entities": {
       "channel": {
@@ -26725,7 +26725,7 @@ export const realTransactions = [
     "txn_date": "2024-03-26",
     "amount": 10.0,
     "direction": "Dr",
-    "running_balance": 3043.7,
+    "running_balance": 72465.8,
     "raw_description": "UPI-XXXXXX6160-HDFC0000001-408698269061- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -26759,7 +26759,7 @@ export const realTransactions = [
     "txn_date": "2024-03-26",
     "amount": 50000.0,
     "direction": "Dr",
-    "running_balance": -46956.3,
+    "running_balance": 22465.8,
     "raw_description": "UPI-XXXXXX6160-HDFC0000001-408692028322- PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -26793,7 +26793,7 @@ export const realTransactions = [
     "txn_date": "2024-03-27",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -47456.3,
+    "running_balance": 21965.8,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-445324221553-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -26827,7 +26827,7 @@ export const realTransactions = [
     "txn_date": "2024-03-27",
     "amount": 500.0,
     "direction": "Dr",
-    "running_balance": -47956.3,
+    "running_balance": 21465.8,
     "raw_description": "UPI-MOIZMUSTAFAALOTWAL-7208785396-2@YB L-KKBK0000628-445371112294-PAYMENTFROM PHONE",
     "entities": {
       "channel": {
@@ -26861,7 +26861,7 @@ export const realTransactions = [
     "txn_date": "2024-03-27",
     "amount": 500.0,
     "direction": "Cr",
-    "running_balance": -47456.3,
+    "running_balance": 21965.8,
     "raw_description": "UPI-SANDESHDOULATRIPOT-8097982640@YBL- HDFC0000291-445312777110-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -26895,7 +26895,7 @@ export const realTransactions = [
     "txn_date": "2024-03-27",
     "amount": 20.0,
     "direction": "Dr",
-    "running_balance": -47476.3,
+    "running_balance": 21945.8,
     "raw_description": "UPI-LAXMANVERMASOBHUJ-PAYTMQRF4EAZB3H HDFCBANKLIMITED *Closingbalanceincludesfundsearmarkedforholdandunclearedfunds",
     "entities": {
       "channel": {
@@ -26929,7 +26929,7 @@ export const realTransactions = [
     "txn_date": "2024-03-28",
     "amount": 2.45,
     "direction": "Cr",
-    "running_balance": -47473.85,
+    "running_balance": 21948.25,
     "raw_description": "NEFTCR-ICIC0099999-NEXTBILLIONTECHNOLO GYPRIVATELIMITEDCLIENTACCO-BILALMOH AMMED-CMS4039186955",
     "entities": {
       "channel": {
@@ -26965,7 +26965,7 @@ export const realTransactions = [
     "txn_date": "2024-03-29",
     "amount": 25.0,
     "direction": "Dr",
-    "running_balance": -47498.85,
+    "running_balance": 21923.25,
     "raw_description": "UPI-UZAIRAHMAD-PAYTMQRAG7KJUI3U0@PAYTM- YESB0PTMUPI-445519658879-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -26999,7 +26999,7 @@ export const realTransactions = [
     "txn_date": "2024-03-29",
     "amount": 50.0,
     "direction": "Dr",
-    "running_balance": -47548.85,
+    "running_balance": 21873.25,
     "raw_description": "UPI-BHAGAVATCAVARREVATS-9353369033@YBL- BARB0NIPPAN-445589240046-PAYMENTFROMPH ONE",
     "entities": {
       "channel": {
@@ -27033,7 +27033,7 @@ export const realTransactions = [
     "txn_date": "2024-03-29",
     "amount": 4931.0,
     "direction": "Cr",
-    "running_balance": -42617.85,
+    "running_balance": 26804.25,
     "raw_description": "L1235422FSFEB",
     "entities": {
       "channel": {
@@ -27067,7 +27067,7 @@ export const realTransactions = [
     "txn_date": "2024-03-29",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": -40617.85,
+    "running_balance": 28804.25,
     "raw_description": "UPI-AKILAHMEDATIKAHME-9004300664@AXIS B-IDFB0040101-445542654810-PAIDVIACRED",
     "entities": {
       "channel": {
@@ -27101,7 +27101,7 @@ export const realTransactions = [
     "txn_date": "2024-03-30",
     "amount": 1000.0,
     "direction": "Dr",
-    "running_balance": -41617.85,
+    "running_balance": 27804.25,
     "raw_description": "UPI-7977137150PAYTM-7977137150@PAYTM-ICI C0000020-409058609104-PAYMENTFROMPHONE",
     "entities": {
       "channel": {
@@ -27135,7 +27135,7 @@ export const realTransactions = [
     "txn_date": "2024-03-31",
     "amount": 30.0,
     "direction": "Dr",
-    "running_balance": -41647.85,
+    "running_balance": 27774.25,
     "raw_description": "UPI-MRSHAN MOHMMAD-PAYTMQRS2QI4EDNI7@PA YTM-YESB0PTMUPI-445781273195-PAIDVIACR",
     "entities": {
       "channel": {
@@ -27169,7 +27169,7 @@ export const realTransactions = [
     "txn_date": "2024-04-01",
     "amount": 739.0,
     "direction": "Cr",
-    "running_balance": -40908.85,
+    "running_balance": 28513.25,
     "raw_description": "CREDITINTERESTCAPITALISED",
     "entities": {
       "channel": {
@@ -28155,7 +28155,7 @@ export const realTransactions = [
     "txn_date": "2026-04-13",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -25000.0,
+    "running_balance": 1129791.51,
     "raw_description": "UPI/DR/840398205126/FPL Tech/UTIB/getonec/UPIInte",
     "entities": {
       "channel": {
@@ -28191,7 +28191,7 @@ export const realTransactions = [
     "txn_date": "2019-07-01",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 2000.0,
+    "running_balance": 18674.45,
     "raw_description": "BY CASH - BIJOLIA",
     "entities": {
       "channel": {
@@ -28225,7 +28225,7 @@ export const realTransactions = [
     "txn_date": "2019-07-02",
     "amount": 3740.0,
     "direction": "Cr",
-    "running_balance": 5740.0,
+    "running_balance": 22414.45,
     "raw_description": "BIL/INFT/001743804629/NA/",
     "entities": {
       "channel": {
@@ -28259,7 +28259,7 @@ export const realTransactions = [
     "txn_date": "2019-07-02",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 8740.0,
+    "running_balance": 25414.45,
     "raw_description": "MMT/IMPS/918317526479/vidrc/MKELECTRON/BANK OF BAR",
     "entities": {
       "channel": {
@@ -28293,7 +28293,7 @@ export const realTransactions = [
     "txn_date": "2019-07-03",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 11740.0,
+    "running_balance": 28414.45,
     "raw_description": "BY CASH-KACHHOLA",
     "entities": {
       "channel": {
@@ -28327,7 +28327,7 @@ export const realTransactions = [
     "txn_date": "2019-07-03",
     "amount": 14000.0,
     "direction": "Cr",
-    "running_balance": 25740.0,
+    "running_balance": 42414.45,
     "raw_description": "MMT/IMPS/918418038560/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -28361,7 +28361,7 @@ export const realTransactions = [
     "txn_date": "2019-07-05",
     "amount": 40000.0,
     "direction": "Dr",
-    "running_balance": -14260.0,
+    "running_balance": 2414.45,
     "raw_description": "CLG/COSMOS ENTERPRISES /BRK 5181",
     "entities": {
       "channel": {
@@ -28395,7 +28395,7 @@ export const realTransactions = [
     "txn_date": "2019-07-06",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -9260.0,
+    "running_balance": 7414.45,
     "raw_description": "MMT/IMPS/918710930334/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -28429,7 +28429,7 @@ export const realTransactions = [
     "txn_date": "2019-07-08",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": -4260.0,
+    "running_balance": 12414.45,
     "raw_description": "MMT/IMPS/918814106619/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -28463,7 +28463,7 @@ export const realTransactions = [
     "txn_date": "2019-07-08",
     "amount": 2150.0,
     "direction": "Cr",
-    "running_balance": -2110.0,
+    "running_balance": 14564.45,
     "raw_description": "BIL/INFT/001748219433/NA/",
     "entities": {
       "channel": {
@@ -28497,7 +28497,7 @@ export const realTransactions = [
     "txn_date": "2019-07-08",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 890.0,
+    "running_balance": 17564.45,
     "raw_description": "UPI/918911468469/UPI/nandkishormali4/State Bank Of",
     "entities": {
       "channel": {
@@ -28531,7 +28531,7 @@ export const realTransactions = [
     "txn_date": "2019-07-09",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 2890.0,
+    "running_balance": 19564.45,
     "raw_description": "UPI/919006529705/Palak2vd2h/urmilarankaasin/Paytm",
     "entities": {
       "channel": {
@@ -28565,7 +28565,7 @@ export const realTransactions = [
     "txn_date": "2019-07-09",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 4890.0,
+    "running_balance": 21564.45,
     "raw_description": "UPI/919036840608/NA/9602426732@payt/Bank of Baroda",
     "entities": {
       "channel": {
@@ -28599,7 +28599,7 @@ export const realTransactions = [
     "txn_date": "2019-07-09",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": 9890.0,
+    "running_balance": 26564.45,
     "raw_description": "MMT/IMPS/919014033158/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -28633,7 +28633,7 @@ export const realTransactions = [
     "txn_date": "2019-07-11",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 12890.0,
+    "running_balance": 29564.45,
     "raw_description": "MMT/IMPS/919212840990/vidrc/MKELECTRON/BANK OF BAR",
     "entities": {
       "channel": {
@@ -28667,7 +28667,7 @@ export const realTransactions = [
     "txn_date": "2019-07-11",
     "amount": 20000.0,
     "direction": "Dr",
-    "running_balance": -7110.0,
+    "running_balance": 9564.45,
     "raw_description": "CLG/CODMOD ENTERPRISES/BRK 5182",
     "entities": {
       "channel": {
@@ -28701,7 +28701,7 @@ export const realTransactions = [
     "txn_date": "2019-07-11",
     "amount": 1520.0,
     "direction": "Cr",
-    "running_balance": -5590.0,
+    "running_balance": 11084.45,
     "raw_description": "UPI/919242812430/Payment from Ph/9828846558@ybl/IC",
     "entities": {
       "channel": {
@@ -28735,7 +28735,7 @@ export const realTransactions = [
     "txn_date": "2019-07-12",
     "amount": 1950.0,
     "direction": "Cr",
-    "running_balance": -3640.0,
+    "running_balance": 13034.45,
     "raw_description": "UPI/919322122791/Payment from Ph/9351997650@ybl/IC",
     "entities": {
       "channel": {
@@ -28769,7 +28769,7 @@ export const realTransactions = [
     "txn_date": "2019-07-15",
     "amount": 1520.0,
     "direction": "Cr",
-    "running_balance": -2120.0,
+    "running_balance": 14554.45,
     "raw_description": "BIL/INFT/001752493955/NA/",
     "entities": {
       "channel": {
@@ -28803,7 +28803,7 @@ export const realTransactions = [
     "txn_date": "2019-07-15",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 7880.0,
+    "running_balance": 24554.45,
     "raw_description": "MMT/IMPS/919414649494/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -28837,7 +28837,7 @@ export const realTransactions = [
     "txn_date": "2019-07-15",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": 12880.0,
+    "running_balance": 29554.45,
     "raw_description": "BY CASH - GULABPURA BAWRI CHOURAHA",
     "entities": {
       "channel": {
@@ -28871,7 +28871,7 @@ export const realTransactions = [
     "txn_date": "2019-07-15",
     "amount": 1800.0,
     "direction": "Cr",
-    "running_balance": 14680.0,
+    "running_balance": 31354.45,
     "raw_description": "BIL/INFT/001754025469/MIB-/",
     "entities": {
       "channel": {
@@ -28905,7 +28905,7 @@ export const realTransactions = [
     "txn_date": "2019-07-16",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 17680.0,
+    "running_balance": 34354.45,
     "raw_description": "BY CASH - GULABPURA BAWRI CHOURAHA",
     "entities": {
       "channel": {
@@ -28939,7 +28939,7 @@ export const realTransactions = [
     "txn_date": "2019-07-17",
     "amount": 25000.0,
     "direction": "Dr",
-    "running_balance": -7320.0,
+    "running_balance": 9354.45,
     "raw_description": "CLG/COSMOS ENTERPRISES/BRK 5183",
     "entities": {
       "channel": {
@@ -28973,7 +28973,7 @@ export const realTransactions = [
     "txn_date": "2019-07-18",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": -5320.0,
+    "running_balance": 11354.45,
     "raw_description": "BIL/INFT/001755789313/MIB-/",
     "entities": {
       "channel": {
@@ -29007,7 +29007,7 @@ export const realTransactions = [
     "txn_date": "2019-07-18",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 4680.0,
+    "running_balance": 21354.45,
     "raw_description": "MMT/IMPS/919922724515/vidicon/MONUVAISHN/BANK OF B",
     "entities": {
       "channel": {
@@ -29041,7 +29041,7 @@ export const realTransactions = [
     "txn_date": "2019-07-20",
     "amount": 1370.0,
     "direction": "Cr",
-    "running_balance": 6050.0,
+    "running_balance": 22724.45,
     "raw_description": "MMT/IMPS/920111689183/sisodiyakarera/GOPALSINGH/BA",
     "entities": {
       "channel": {
@@ -29075,7 +29075,7 @@ export const realTransactions = [
     "txn_date": "2019-07-20",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 9050.0,
+    "running_balance": 25724.45,
     "raw_description": "UPI/920115721877/UPI/jaina8645@oksbi/State Bank Of",
     "entities": {
       "channel": {
@@ -29109,7 +29109,7 @@ export const realTransactions = [
     "txn_date": "2019-07-22",
     "amount": 3000.0,
     "direction": "Cr",
-    "running_balance": 12050.0,
+    "running_balance": 28724.45,
     "raw_description": "MMT/IMPS/920312994555/vidrc/MKELECTRON/BANK OF BAR",
     "entities": {
       "channel": {
@@ -29143,7 +29143,7 @@ export const realTransactions = [
     "txn_date": "2019-07-22",
     "amount": 5000.0,
     "direction": "Cr",
-    "running_balance": 17050.0,
+    "running_balance": 33724.45,
     "raw_description": "MMT/IMPS/920313790639/d2h/HANSHRAJSO/BANK OF",
     "entities": {
       "channel": {
@@ -29177,7 +29177,7 @@ export const realTransactions = [
     "txn_date": "2019-07-23",
     "amount": 3040.0,
     "direction": "Cr",
-    "running_balance": 20090.0,
+    "running_balance": 36764.45,
     "raw_description": "BIL/INFT/001758812148/NA/",
     "entities": {
       "channel": {
@@ -29211,7 +29211,7 @@ export const realTransactions = [
     "txn_date": "2019-07-23",
     "amount": 10000.0,
     "direction": "Cr",
-    "running_balance": 30090.0,
+    "running_balance": 46764.45,
     "raw_description": "MMT/IMPS/920412416551/vidicon/MONUVAISHN/BANK OF B",
     "entities": {
       "channel": {
@@ -29245,7 +29245,7 @@ export const realTransactions = [
     "txn_date": "2019-07-23",
     "amount": 2500.0,
     "direction": "Cr",
-    "running_balance": 32590.0,
+    "running_balance": 49264.45,
     "raw_description": "MMT/IMPS/920417396415/MB: PCS/SHRAWAN KU/KOTAK",
     "entities": {
       "channel": {
@@ -29279,7 +29279,7 @@ export const realTransactions = [
     "txn_date": "2019-07-24",
     "amount": 30000.0,
     "direction": "Dr",
-    "running_balance": 2590.0,
+    "running_balance": 19264.45,
     "raw_description": "CLG/COSMOS ENTERPRISES /BRK 5184",
     "entities": {
       "channel": {
@@ -29313,7 +29313,7 @@ export const realTransactions = [
     "txn_date": "2019-07-25",
     "amount": 3050.0,
     "direction": "Cr",
-    "running_balance": 5640.0,
+    "running_balance": 22314.45,
     "raw_description": "BY CASH-KACHHOLA",
     "entities": {
       "channel": {
@@ -29347,7 +29347,7 @@ export const realTransactions = [
     "txn_date": "2019-07-26",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 7640.0,
+    "running_balance": 24314.45,
     "raw_description": "UPI/920714508104/UPI/nandkishormali4/State Bank Of",
     "entities": {
       "channel": {
@@ -29381,7 +29381,7 @@ export const realTransactions = [
     "txn_date": "2019-07-29",
     "amount": 2000.0,
     "direction": "Cr",
-    "running_balance": 9640.0,
+    "running_balance": 26314.45,
     "raw_description": "UPI/921024499579/Payment from Ph/gopalsoni88@ybl/H",
     "entities": {
       "channel": {
@@ -29415,7 +29415,7 @@ export const realTransactions = [
     "txn_date": "2019-07-31",
     "amount": 1000.0,
     "direction": "Cr",
-    "running_balance": 10640.0,
+    "running_balance": 27314.45,
     "raw_description": "MMT/IMPS/921211070844/MB: PCS NAYAK/SHRAWAN",
     "entities": {
       "channel": {
