@@ -41,9 +41,12 @@ Phase 1 scaffold is **buildable and runnable** with real extracted data end-to-e
 
 - **Extraction** — 99–100% sum-check accuracy across HDFC CC, IDFC, HDFC Savings, ICICI, Kotak on 9 test PDFs / 858 transactions. See [benchmarks/SUMMARY.md](benchmarks/SUMMARY.md).
 - **Parser → frontend export** — `python tools/export-for-frontend.py` regenerates `frontend/src/app/data/realData.ts` from the latest benchmark output.
-- **Frontend builds** — `cd frontend && npm run build` produces `dist/` (284 KB → 715 KB after real data; 126 KB gzipped).
+- **Frontend builds** — `cd frontend && npm run build` produces `dist/` (~715 KB JS / 92 KB CSS; 126 KB gzipped).
 - **Frontend runs** — `npm run dev` serves on :5173 in ~580 ms.
-- **Data model** — `Case → Person → Account → Statement → Transaction` with key-value `entities` matches [docs/data-model.md](docs/data-model.md).
+- **Backend runs** — `cd backend && uvicorn app.main:app --reload --port 8000`. Seven endpoints live, seeded with all 858 transactions.
+- **End-to-end HTTP** — `bash tools/smoke-test-e2e.sh --check` boots backend, hits the three key read endpoints, PATCHes a transaction, reads back the audit log. Currently proven green.
+- **HTTP client ready** — `frontend/src/app/lib/api.ts` has typed fetchers for every backend endpoint. Not plugged into components yet; swap is one-line when we add react-query.
+- **Data model** — `Case → Person → Account → Statement → Transaction` with key-value `entities` matches [docs/data-model.md](docs/data-model.md), enforced on both sides (Pydantic + TypeScript).
 - **Design system** — LedgerFlow branded, tri-font, MD3 + shadcn token families coexist.
 
 ## What's in the repo (top-level)
@@ -109,16 +112,20 @@ bank-analyser/
 - **Enrichment**. PEP / sanctions / FIU-IND lookups not wired.
 - **Authentication**. No login screen. `auth/jwt.py` is synced from crypto but not used yet.
 
-## Git history (last 7 commits)
+## Git history (last 10 commits)
 
 ```
-e38680f  Wire realData via facade + fix case-scoping + generalise bank labels
-edbd309  Phase 1 frontend scaffold + first crypto sync + real-data adapter
-d9772bb  CRYPTO_SYNC.md: crypto team shipped all cleanup
-d3b6457  Lock in Phase 1 UX + data model
-f6f21c5  Add UX sprint artifacts: decisions matrix + wireframes
-eb07c0d  Incorporate crypto team feedback + add phased UX plan
-86a0a38  Initial repo: bank-statement extraction + benchmark harness
+(latest — run `git log --oneline` for current state)
+Add frontend HTTP client + e2e smoke test script
+Phase 1 backend stub + opening-balance back-fill
+Add STATUS.md — project state after Phase 1 scaffold
+Wire realData via facade + fix case-scoping + generalise bank labels
+Phase 1 frontend scaffold + first crypto sync + real-data adapter
+CRYPTO_SYNC.md: crypto team shipped all cleanup
+Lock in Phase 1 UX + data model
+Add UX sprint artifacts: decisions matrix + wireframes
+Incorporate crypto team feedback + add phased UX plan
+Initial repo: bank-statement extraction + benchmark harness
 ```
 
 ## Immediate next steps (in priority order)
