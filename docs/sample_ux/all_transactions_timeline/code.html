@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Forensic Ledger - Merged Timeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#faf8ff",
+                    "surface": "#faf8ff",
+                    "tertiary-container": "#003e29",
+                    "on-primary-fixed-variant": "#2e476f",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#d5e3fc",
+                    "surface-dim": "#d2d9f4",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#1b365d",
+                    "primary": "#002046",
+                    "on-tertiary-fixed-variant": "#005137",
+                    "primary-fixed-dim": "#aec7f7",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#57657a",
+                    "tertiary-fixed-dim": "#68dba9",
+                    "surface-container-high": "#e2e7ff",
+                    "on-primary-container": "#87a0cd",
+                    "secondary-fixed-dim": "#b9c7df",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#44474e",
+                    "primary-fixed": "#d6e3ff",
+                    "outline": "#74777f",
+                    "on-tertiary-container": "#39b282",
+                    "on-secondary-fixed": "#0d1c2e",
+                    "outline-variant": "#c4c6cf",
+                    "inverse-surface": "#283044",
+                    "inverse-on-surface": "#eef0ff",
+                    "surface-container-low": "#f2f3ff",
+                    "tertiary-fixed": "#85f8c4",
+                    "on-secondary-fixed-variant": "#3a485b",
+                    "secondary-container": "#d5e3fc",
+                    "tertiary": "#002618",
+                    "secondary": "#515f74",
+                    "inverse-primary": "#aec7f7",
+                    "on-background": "#131b2e",
+                    "surface-tint": "#465f88",
+                    "surface-container": "#eaedff",
+                    "on-tertiary-fixed": "#002114",
+                    "surface-variant": "#dae2fd",
+                    "on-surface": "#131b2e",
+                    "background": "#faf8ff",
+                    "on-primary-fixed": "#001b3d",
+                    "surface-container-highest": "#dae2fd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .font-label { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar Shell -->
+<header class="bg-slate-50 dark:bg-slate-950 docked full-width top-0 z-50 flex justify-between items-center w-full px-6 py-3 max-w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-[#1B365D] dark:text-white uppercase font-headline">Forensic Ledger</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1B365D] font-headline font-semibold tracking-tight" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1B365D] font-headline font-semibold tracking-tight" href="#">Cases</a>
+<a class="text-[#1B365D] dark:text-white border-b-2 border-[#1B365D] pb-1 font-headline font-semibold tracking-tight" href="#">Entities</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1B365D] font-headline font-semibold tracking-tight" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<input class="bg-surface-container-highest border-none rounded-xl px-4 py-1.5 text-sm w-64 focus:ring-2 focus:ring-primary/40" placeholder="Search evidence..." type="text"/>
+</div>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><span class="material-symbols-outlined text-slate-500">notifications</span></button>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><span class="material-symbols-outlined text-slate-500">settings</span></button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Investigator Profile" data-alt="professional portrait of a senior financial investigator in a modern office setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ1LJvj-YYWMh_KO36fF0V0whgfOV8LU_LW0LFC2ZDyyBIb08qebvB-t-hhHVgXRhubwIVHNM60Jv8hKV_v1PBUBt5C_yplFMulXleTsP8FI59MCk_xuVYgEz-yAXZNsHhQKepfr47dUYDoirbVQ0CgPZhuOTKXSxHEKujDUBzPLwVC68QTfFBUQDfK5N3NEJewDTF8e3X3zUeMn5lJPHqYtqvd0yow3bnbimKkW9tVGw2-0LKG9AFL7utn9AKJfmcJHORn6oS2A"/>
+</div>
+</div>
+</header>
+<!-- Main Layout Container -->
+<div class="flex min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="bg-slate-100 dark:bg-slate-900 h-screen w-64 fixed left-0 top-0 flex flex-col z-40 border-r border-slate-200/10 dark:border-slate-800/20 pt-16">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm">folder_open</span>
+</div>
+<div>
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Case #FIR-2024-0892</p>
+<p class="font-headline font-bold text-xs text-primary">Det. Sarah Jenkins</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-label text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">folder_open</span> Evidence Vault
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-label text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">query_stats</span> Analysis
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-label text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">hub</span> Network Maps
+                </a>
+<a class="flex items-center gap-3 bg-white dark:bg-slate-800 text-[#1B365D] dark:text-white font-bold border-l-4 border-[#1B365D] px-4 py-3 font-label text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">schedule</span> Timeline
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-label text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">history</span> Audit Log
+                </a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant/10">
+<button class="w-full py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg font-headline font-bold text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition-all mb-4">
+                    New Analysis
+                </button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 text-slate-500 text-xs px-4 py-2 hover:text-primary" href="#"><span class="material-symbols-outlined text-sm">help_outline</span> Support</a>
+<a class="flex items-center gap-3 text-slate-500 text-xs px-4 py-2 hover:text-primary" href="#"><span class="material-symbols-outlined text-sm">archive</span> Archive</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 pt-16 bg-surface-container-low min-h-screen">
+<div class="max-w-7xl mx-auto p-8">
+<!-- Breadcrumbs & Header -->
+<div class="mb-8">
+<div class="flex items-center gap-2 text-xs font-label text-on-surface-variant mb-2">
+<span>WORKBENCH</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary font-bold">MERGED TIMELINE</span>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight">All Transactions</h1>
+<p class="text-on-surface-variant font-body mt-1">Cross-account chronological reconciliation for case FIR-2024-0892.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-highest text-primary font-headline font-bold text-sm rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-headline font-bold text-sm rounded-lg hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">download</span> Export Ledger
+                            </button>
+</div>
+</div>
+</div>
+<!-- Account Toggle Chips -->
+<div class="flex flex-wrap gap-2 mb-8 items-center">
+<span class="text-[10px] font-label font-bold text-on-surface-variant uppercase mr-2 tracking-widest">Active Sources:</span>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-headline font-bold border border-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></span> HDFC Sav 8420
+                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-headline font-bold border border-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span> Kotak 7894
+                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-highest text-on-surface-variant rounded-full text-xs font-headline font-bold hover:bg-outline-variant/20 transition-colors">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span> ICICI Corp 0021
+                    </button>
+<button class="flex items-center gap-1 ml-2 text-primary font-label text-xs font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">add</span> Manage Sources
+                    </button>
+</div>
+<!-- Forensic Ledger Card -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/15 shadow-sm">
+<div class="bg-surface-container-high px-6 py-3 flex justify-between items-center border-b border-outline-variant/10">
+<span class="font-label text-xs font-bold text-on-surface-variant uppercase tracking-widest">Evidence ID: TX-TIMELINE-2024-05</span>
+<div class="flex gap-4">
+<span class="flex items-center gap-1 text-[10px] font-label font-bold text-on-surface-variant">
+<span class="w-2 h-2 rounded-sm bg-tertiary-container/20 border border-tertiary-container/30"></span> INFLOW
+                            </span>
+<span class="flex items-center gap-1 text-[10px] font-label font-bold text-on-surface-variant">
+<span class="w-2 h-2 rounded-sm bg-error-container/20 border border-error-container/30"></span> OUTFLOW
+                            </span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Date / Time</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Source Account</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Entity / Description</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Evidence ID</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-right">Amount (INR)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Oct 24, 2024</div>
+<div class="font-label text-[10px] text-on-surface-variant">14:32:01</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-1 h-4 bg-tertiary-fixed rounded-full"></span>
+<span class="font-body text-sm font-medium text-on-surface-variant">HDFC Sav 8420</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Reliance Retail Ltd.</div>
+<div class="font-body text-xs text-on-surface-variant">POS Transaction - BKC Branch</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-[10px] bg-surface-container-high px-2 py-1 rounded text-primary font-medium">8293-AX9-002</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="bg-error-container/20 inline-block px-3 py-1 rounded-lg">
+<span class="font-body text-sm font-bold text-error">- 1,240.00</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-surface-container-low/20 hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Oct 24, 2024</div>
+<div class="font-label text-[10px] text-on-surface-variant">09:15:44</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-1 h-4 bg-secondary-fixed rounded-full"></span>
+<span class="font-body text-sm font-medium text-on-surface-variant">Kotak 7894</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">NEFT: Global Exports LLC</div>
+<div class="font-body text-xs text-on-surface-variant">Inbound Settlement Ref: #88219</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-[10px] bg-surface-container-high px-2 py-1 rounded text-primary font-medium">9910-KL2-451</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="bg-tertiary-container/10 inline-block px-3 py-1 rounded-lg">
+<span class="font-body text-sm font-bold text-on-tertiary-container">+ 35,000.00</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Oct 23, 2024</div>
+<div class="font-label text-[10px] text-on-surface-variant">22:01:10</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-1 h-4 bg-tertiary-fixed rounded-full"></span>
+<span class="font-body text-sm font-medium text-on-surface-variant">HDFC Sav 8420</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">ATM Withdrawal</div>
+<div class="font-body text-xs text-on-surface-variant">Mumbai South Hub - ATM #092</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-[10px] bg-surface-container-high px-2 py-1 rounded text-primary font-medium">1102-PP4-991</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="bg-error-container/20 inline-block px-3 py-1 rounded-lg">
+<span class="font-body text-sm font-bold text-error">- 10,000.00</span>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="bg-surface-container-low/20 hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Oct 22, 2024</div>
+<div class="font-label text-[10px] text-on-surface-variant">11:12:00</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-1 h-4 bg-secondary-fixed rounded-full"></span>
+<span class="font-body text-sm font-medium text-on-surface-variant">Kotak 7894</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="font-headline text-sm font-bold text-on-surface">Subscription: AWS</div>
+<div class="font-body text-xs text-on-surface-variant">Recurrent Billing - USD 2.40</div>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-[10px] bg-surface-container-high px-2 py-1 rounded text-primary font-medium">4452-MM3-112</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="bg-error-container/20 inline-block px-3 py-1 rounded-lg">
+<span class="font-body text-sm font-bold text-error">- 200.00</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Summary Footer -->
+<div class="bg-surface-container-low px-6 py-6 border-t border-outline-variant/20">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex gap-12">
+<div>
+<p class="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Net Inflow</p>
+<p class="font-headline text-2xl font-extrabold text-on-tertiary-container">+ 35,000.00</p>
+<p class="text-[10px] font-body text-on-surface-variant">1 Credit event</p>
+</div>
+<div>
+<p class="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Net Outflow</p>
+<p class="font-headline text-2xl font-extrabold text-error">- 11,440.00</p>
+<p class="text-[10px] font-body text-on-surface-variant">3 Debit events</p>
+</div>
+</div>
+<div class="text-right border-l-2 border-outline-variant/20 pl-8 h-full flex flex-col justify-center">
+<p class="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Net Period Change</p>
+<p class="font-headline text-3xl font-extrabold text-primary">+ 23,560.00</p>
+<p class="text-[10px] font-body text-on-surface-variant">Period: Oct 22 - Oct 24, 2024</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Forensic Insight Grid (Asymmetric) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+<div class="md:col-span-2 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 flex gap-6">
+<div class="w-1/3 bg-surface-container-low rounded-lg p-4 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-4xl text-primary-fixed-dim mb-2">query_stats</span>
+<h4 class="font-headline font-bold text-sm text-on-surface">Analysis Velocity</h4>
+<p class="text-[10px] font-body text-on-surface-variant mt-1">42 transactions per week avg.</p>
+</div>
+<div class="w-2/3">
+<h4 class="font-headline font-bold text-on-surface mb-2">Pattern Detection</h4>
+<p class="text-sm text-on-surface-variant font-body mb-4 leading-relaxed">No high-risk velocity anomalies detected in the current 48-hour window. Cross-referencing entities with OFAC database...</p>
+<div class="flex gap-4">
+<div class="px-3 py-1 bg-tertiary-container/10 rounded-md">
+<span class="font-label text-[10px] font-bold text-on-tertiary-container">CLEAN SCAN</span>
+</div>
+<div class="px-3 py-1 bg-surface-container-high rounded-md">
+<span class="font-label text-[10px] font-bold text-primary">ENTITY VERIFIED</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-primary to-primary-container p-6 rounded-xl text-white flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined mb-4">shield</span>
+<h4 class="font-headline font-bold text-lg leading-tight">Evidence Integrity Lockdown</h4>
+</div>
+<p class="text-xs font-body opacity-80 mb-6">Current ledger view is cryptographically hashed for audit permanence.</p>
+<button class="w-full py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg font-label text-xs font-bold uppercase tracking-widest">
+                            Review Hash Log
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Case Overview | Forensic Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space_Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#faf8ff",
+                    "surface": "#faf8ff",
+                    "tertiary-container": "#003e29",
+                    "on-primary-fixed-variant": "#2e476f",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#d5e3fc",
+                    "surface-dim": "#d2d9f4",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#1b365d",
+                    "primary": "#002046",
+                    "on-tertiary-fixed-variant": "#005137",
+                    "primary-fixed-dim": "#aec7f7",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#57657a",
+                    "tertiary-fixed-dim": "#68dba9",
+                    "surface-container-high": "#e2e7ff",
+                    "on-primary-container": "#87a0cd",
+                    "secondary-fixed-dim": "#b9c7df",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#44474e",
+                    "primary-fixed": "#d6e3ff",
+                    "outline": "#74777f",
+                    "on-tertiary-container": "#39b282",
+                    "on-secondary-fixed": "#0d1c2e",
+                    "outline-variant": "#c4c6cf",
+                    "inverse-surface": "#283044",
+                    "inverse-on-surface": "#eef0ff",
+                    "surface-container-low": "#f2f3ff",
+                    "tertiary-fixed": "#85f8c4",
+                    "on-secondary-fixed-variant": "#3a485b",
+                    "secondary-container": "#d5e3fc",
+                    "tertiary": "#002618",
+                    "secondary": "#515f74",
+                    "inverse-primary": "#aec7f7",
+                    "on-background": "#131b2e",
+                    "surface-tint": "#465f88",
+                    "surface-container": "#eaedff",
+                    "on-tertiary-fixed": "#002114",
+                    "surface-variant": "#dae2fd",
+                    "on-surface": "#131b2e",
+                    "background": "#faf8ff",
+                    "on-primary-fixed": "#001b3d",
+                    "surface-container-highest": "#dae2fd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #002046 0%, #1b365d 100%);
+        }
+        .ghost-border {
+            border: 1px solid rgba(196, 198, 207, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-fixed-dim">
+<!-- TopNavBar -->
+<nav class="fixed top-0 z-50 w-full px-6 py-3 bg-slate-50 dark:bg-slate-950 flex justify-between items-center bg-gradient-to-b from-slate-200/50 to-transparent">
+<div class="text-xl font-bold tracking-tighter text-[#1B365D] dark:text-white uppercase font-headline">Forensic Ledger</div>
+<div class="hidden md:flex items-center gap-8 font-headline font-semibold tracking-tight">
+<a class="text-slate-500 hover:text-[#1B365D] transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-[#1B365D] border-b-2 border-[#1B365D] pb-1" href="#">Cases</a>
+<a class="text-slate-500 hover:text-[#1B365D] transition-colors duration-200" href="#">Entities</a>
+<a class="text-slate-500 hover:text-[#1B365D] transition-colors duration-200" href="#">Reports</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-lg">
+<span class="material-symbols-outlined text-[#1B365D]">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-lg">
+<span class="material-symbols-outlined text-[#1B365D]">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Investigator Profile" class="w-full h-full object-cover" data-alt="professional male portrait with high-end suit and glasses in a corporate forensic analyst setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdKGBgE48jUgKQEfjYOJamdL3oFSldP_vS39VbPJ9sKGi6uD5KYoQVWp9pqKoJSP8XumWiYKF7TEZ2NCPfeov_S7ZNWpl-KkD9S1JYjzZMF7WSAYXq3kFcLY6AVMUHCwhU1NM36-_Ul62zI5Nd8Qr7fo6QuqhlJ_w0Py-0N6y7J0q1QT2-GVCASY7iSAGbB3M7uxgtSrs_nZG_-E3i8skkMkKzEsPxFlFMTMdsktAJYocqR2iwSFYWjSS1Kv7XgO2UkmEM1qpNLA"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-100 dark:bg-slate-900 border-r border-slate-200/10 z-40 flex flex-col pt-20">
+<div class="px-6 py-4 mb-4">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-[#1B365D] text-3xl">folder_shared</span>
+<div>
+<h3 class="font-headline font-bold text-sm text-[#1B365D]">Case #FIR-2024-0892</h3>
+<p class="font-label text-[10px] text-slate-500 uppercase tracking-widest">Lead: Det. Sarah Jenkins</p>
+</div>
+</div>
+<button class="w-full mt-4 bg-primary-gradient text-white py-2 rounded-xl font-headline font-bold text-xs hover:opacity-90 active:scale-[0.98] transition-all">
+                New Analysis
+            </button>
+</div>
+<nav class="flex-1 font-label text-sm tracking-wide">
+<a class="flex items-center gap-3 text-slate-500 px-6 py-4 hover:bg-slate-200/50 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span>Evidence Vault</span>
+</a>
+<a class="flex items-center gap-3 bg-white text-[#1B365D] font-bold border-l-4 border-[#1B365D] px-6 py-4" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span>Analysis</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 px-6 py-4 hover:bg-slate-200/50 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span>Network Maps</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 px-6 py-4 hover:bg-slate-200/50 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">schedule</span>
+<span>Timeline</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 px-6 py-4 hover:bg-slate-200/50 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Audit Log</span>
+</a>
+</nav>
+<div class="p-6 border-t border-slate-200/10 font-label text-xs uppercase tracking-widest text-slate-500">
+<a class="flex items-center gap-3 py-2 hover:text-[#1B365D] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 py-2 hover:text-[#1B365D] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">archive</span>
+<span>Archive</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-20 p-8 min-h-screen">
+<!-- Header Section -->
+<header class="mb-10 flex justify-between items-end">
+<div>
+<div class="font-label text-xs text-on-surface-variant uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                    Priority: High Financial Crimes
+                </div>
+<h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight">FIR # 2026/AEC/0471</h1>
+<p class="text-on-surface-variant mt-2 font-body max-w-xl">
+                    Deep forensic investigation into suspected layered transactions and unauthorized entity transfers across major banking networks.
+                </p>
+</div>
+<button class="bg-primary-gradient text-white px-8 py-4 rounded-xl font-headline font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined">terminal</span>
+                Open Case Workbench
+            </button>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Left Column: Persons Involved -->
+<section class="col-span-8 flex flex-col gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl ghost-border">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">groups</span>
+                            Persons in this case
+                        </h2>
+<span class="font-label text-[10px] text-on-surface-variant uppercase bg-surface-container-high px-2 py-1 rounded">2 Subject Identifiers Found</span>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<!-- Suraj Shyam More Card -->
+<div class="bg-surface-container-lowest rounded-xl p-5 ghost-border shadow-sm">
+<div class="flex items-start gap-4 mb-6">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="middle-aged south asian man in business attire, professional studio headshot for forensic identification" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHi-mUZYqH6PmZKmxI106sbThOBkkc8YjXOJp775dUuN5EWqiDKhNpiqGWjfHkH5h8pC2m1esmFEoGMXaePg3N_pr9RUgi_QGNoJ8Sc9PG8PJg4hR7jfPUAiB7giq7zozHi8wT4qjidXsPtgz93qgrpUhTbhXOD3T5FkOwEwIOyTFaW4AF9-QYtYcMKF-i0NnEa8mZor7tULXV9TtrHLXupfk4HJwsV2e5nLTq-2yWQBi3rzddawMhXajwPtldrcRb63aL5_9bNg"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight">Suraj Shyam More</h3>
+<span class="font-label text-[10px] text-error font-medium uppercase tracking-tight bg-error-container/20 px-2 py-0.5 rounded">Primary Suspect</span>
+<div class="mt-2 font-label text-[10px] text-on-surface-variant">ID: PS-002-91</div>
+</div>
+</div>
+<div class="space-y-3">
+<!-- Account 1 -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-white flex items-center justify-center font-label text-xs font-bold text-red-600 border border-slate-100">K</div>
+<div>
+<div class="font-body text-xs font-semibold">Kotak Mahindra</div>
+<div class="font-label text-[10px] text-on-surface-variant">**** 8921</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Account 2 -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-white flex items-center justify-center font-label text-xs font-bold text-blue-700 border border-slate-100">H</div>
+<div>
+<div class="font-body text-xs font-semibold">HDFC Bank</div>
+<div class="font-label text-[10px] text-on-surface-variant">**** 4402</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Meera Patel Card -->
+<div class="bg-surface-container-lowest rounded-xl p-5 ghost-border shadow-sm">
+<div class="flex items-start gap-4 mb-6">
+<div class="w-14 h-14 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="professional south asian woman, serious expression, high-end professional lighting, investigator or witness portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnx-5uZ2GTWUYI7NZL5yJLKuug3XIXeGlB9sPKV5Ffuzjkl4TIeYpqJhjpheTlIJrzUhTxhki3c4S-X-OyMXU3SInCYAGnOMrqknPE_Yzee7I7xGPWxx3BHV728oXUbmObplD9vC7JREnBjkZfdp3a1kQPfhTOUjVV0K59R9hNF9njGbzLQTjSpoxPpXlv9vzOfB9DEWY74j0uFTODQv49Hc9I1FgEXWYUACGAqoFcoJfWReoVEplPH3NgC1XhgTCOYIS2Fahthw"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight">Meera Patel</h3>
+<span class="font-label text-[10px] text-on-secondary-container font-medium uppercase tracking-tight bg-secondary-container/30 px-2 py-0.5 rounded">Key Associate</span>
+<div class="mt-2 font-label text-[10px] text-on-surface-variant">ID: KA-912-41</div>
+</div>
+</div>
+<div class="mt-4 p-4 rounded-xl border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center opacity-60">
+<span class="material-symbols-outlined text-on-surface-variant mb-1">add_card</span>
+<span class="font-label text-[10px] uppercase">Link Financial Entity</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Analysis Preview / Transactions -->
+<div class="bg-surface-container-low p-6 rounded-xl ghost-border flex-1">
+<h3 class="font-headline font-bold text-lg mb-4">Anomalous Flow Analysis</h3>
+<div class="space-y-1">
+<div class="grid grid-cols-5 font-label text-[10px] text-on-surface-variant uppercase tracking-widest px-4 py-2 border-b border-outline-variant/10">
+<div class="col-span-2">Origin Entity</div>
+<div>Reference</div>
+<div class="text-right">Amount</div>
+<div class="text-right">Certainty</div>
+</div>
+<div class="grid grid-cols-5 items-center font-body text-sm px-4 py-3 bg-surface-container-lowest rounded-lg mb-2">
+<div class="col-span-2 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-semibold">Kotak - Suraj More</span>
+</div>
+<div class="font-label text-xs">TX-9102-AQ</div>
+<div class="text-right font-medium text-error">₹ 14,50,000.00</div>
+<div class="text-right">
+<span class="text-[10px] font-label bg-tertiary-container/10 text-on-tertiary-container px-2 py-1 rounded">98% Match</span>
+</div>
+</div>
+<div class="grid grid-cols-5 items-center font-body text-sm px-4 py-3 bg-surface-container-lowest rounded-lg">
+<div class="col-span-2 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="font-semibold">Unknown Node</span>
+</div>
+<div class="font-label text-xs">RTGS-22-XB</div>
+<div class="text-right font-medium">₹ 2,10,000.00</div>
+<div class="text-right">
+<span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded">Processing</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Evidence Drop & Summary -->
+<section class="col-span-4 flex flex-col gap-6">
+<!-- FileDropZone -->
+<div class="bg-white rounded-xl ghost-border p-8 flex flex-col items-center justify-center border-2 border-dashed border-primary/20 hover:border-primary/40 transition-colors group cursor-pointer relative overflow-hidden h-[300px]">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="z-10 flex flex-col items-center">
+<div class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
+</div>
+<h3 class="font-headline font-extrabold text-xl mb-1 text-on-surface">FileDropZone</h3>
+<p class="text-on-surface-variant text-sm font-body text-center px-4">
+                            Drag &amp; drop bank statements (PDF, CSV) to initiate forensic ingestion.
+                        </p>
+<div class="mt-6 flex gap-2">
+<span class="px-3 py-1 rounded bg-surface-container-high font-label text-[10px] uppercase text-on-surface-variant">OCR Analysis Ready</span>
+<span class="px-3 py-1 rounded bg-surface-container-high font-label text-[10px] uppercase text-on-surface-variant">Batch Upload</span>
+</div>
+</div>
+</div>
+<!-- Case Metadata -->
+<div class="bg-surface-container-low p-6 rounded-xl ghost-border">
+<div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4 border-b border-outline-variant/10 pb-2">Evidence Metadata</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Files Uploaded</span>
+<span class="font-label text-xs font-bold">14 Documents</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Total Volume</span>
+<span class="font-label text-xs font-bold">2.4 GB</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Last Activity</span>
+<span class="font-label text-xs font-bold">2m ago</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label text-[10px] uppercase">Processing Status</span>
+<span class="font-label text-[10px] text-on-tertiary-container">74% Complete</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-gradient w-[74%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Navigation -->
+<div class="bg-primary-container p-6 rounded-xl shadow-inner text-white flex flex-col gap-3">
+<div class="font-headline font-bold text-sm flex items-center gap-2 text-primary-fixed">
+<span class="material-symbols-outlined">auto_graph</span>
+                        Forensic Recommendations
+                    </div>
+<p class="text-xs text-on-primary-container leading-relaxed">
+                        Trace back the HDFC account transactions of Suraj More. 3 layering hops detected within the 24h window of FIR filing.
+                    </p>
+<a class="mt-2 text-xs font-label uppercase tracking-widest text-white border-b border-white/30 self-start hover:border-white transition-colors" href="#">Generate Graph Report</a>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual FAB (Hidden on this transactional detail view per logic) -->
+</body></html>

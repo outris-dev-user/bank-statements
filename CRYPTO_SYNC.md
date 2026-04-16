@@ -89,6 +89,7 @@ Frontend coupling is **higher** than initially scoped. Most UI pieces will be **
 |---|---|---|---|
 | 2026-04-15 | (initial) | none yet | Repo skeleton created. Waiting on Phase 1 crypto-team cleanup. |
 | 2026-04-16 | (crypto shipped all cleanup) | none yet | Crypto team delivered faster than expected. Ready to begin Tier 1 sync. Next step: R23-R27 walk-through, then copy 10 READY files. |
+| 2026-04-16 | `9e7d7b8` | 10 Tier-1 files synced | `models/case.py`, `models/investigation.py`, `analysis/velocity_analyzer.py`, `analysis/signal_assembler.py`, `analysis/transaction_pool.py`, `analysis/entity_classification.py`, `analysis/pattern_framework.py`, `graph/bfs_trace.py`, `graph/graph_store.py`, `auth/jwt.py`. See [core/COMPAT_NOTES.md](core/COMPAT_NOTES.md) for per-file importability — 6 are fully clean, 4 need shims before actual backend use (only matters in Phase 2+). R23-R27 walk-through still pending. |
 
 ## Local divergence (things we changed after syncing)
 

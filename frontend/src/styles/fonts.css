@@ -1,0 +1,10 @@
+/**
+ * LedgerFlow tri-font strategy:
+ *   - Manrope       → headlines, display
+ *   - Inter         → body, tabular numeric (the workhorse)
+ *   - Space Grotesk → forensic labels, raw IDs, timestamps
+ *
+ * Lifted from the "Forensic Ledger" design system
+ * (docs/sample_ux/forensic_ledger/DESIGN.md).
+ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap');

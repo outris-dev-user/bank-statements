@@ -54,3 +54,7 @@ secrets/
 *.onnx
 *.pt
 models/
+
+# Raw UX tool exports (large binary archives)
+docs/sample_ux/*.zip
+docs/*.zip
