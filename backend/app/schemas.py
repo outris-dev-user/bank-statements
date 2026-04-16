@@ -174,6 +174,16 @@ class EntityCreate(BaseModel):
     linked_person_id: Optional[str] = None
 
 
+class PatternHit(BaseModel):
+    """One forensic pattern's aggregate result across the case."""
+    name: str             # e.g. "STRUCTURING_SUSPECTED"
+    label: str            # human-readable display name
+    description: str
+    severity: str         # "low" / "medium" / "high"
+    count: int            # number of transactions with this flag
+    sample_txn_ids: list[str] = Field(default_factory=list)
+
+
 class CaseSummary(BaseModel):
     """Payload for GET /api/cases/:id/summary."""
     total_dr: float
@@ -187,3 +197,4 @@ class CaseSummary(BaseModel):
     monthly: list[MonthlyPoint]
     top_counterparties: list[TopCounterparty]
     categories: list[CategoryBreakdown]
+    patterns: list[PatternHit] = Field(default_factory=list)

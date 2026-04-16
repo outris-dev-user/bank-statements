@@ -74,6 +74,9 @@ export const fetchCaseTransactions = (
 export const fetchStatement = (id: string) =>
   request<Statement>(`/api/statements/${encodeURIComponent(id)}`);
 
+export const statementPdfUrl = (statementId: string): string =>
+  `${BASE}/api/statements/${encodeURIComponent(statementId)}/pdf`;
+
 export interface MonthlyPoint {
   month: string;
   dr_total: number;
@@ -95,6 +98,15 @@ export interface CategoryBreakdown {
   total_cr: number;
 }
 
+export interface PatternHit {
+  name: string;
+  label: string;
+  description: string;
+  severity: "low" | "medium" | "high";
+  count: number;
+  sample_txn_ids: string[];
+}
+
 export interface CaseSummary {
   total_dr: number;
   total_cr: number;
@@ -107,6 +119,7 @@ export interface CaseSummary {
   monthly: MonthlyPoint[];
   top_counterparties: TopCounterparty[];
   categories: CategoryBreakdown[];
+  patterns: PatternHit[];
 }
 
 export const fetchCaseSummary = (caseId: string) =>

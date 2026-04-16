@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import React from "react";
-import { Flag, CheckCircle, Loader2 } from "lucide-react";
+import { Flag, CheckCircle, Loader2, FileText } from "lucide-react";
 import type { Transaction } from "../data";
 import { usePatchTransaction } from "../lib/queries";
 import { CATEGORIES } from "../lib/constants";
+import { statementPdfUrl } from "../lib/api";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -403,6 +404,16 @@ export function TransactionTable({
                               >
                                 Edit…
                               </button>
+                              <a
+                                href={statementPdfUrl(txn.statement_id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-3 py-1.5 text-sm border border-border rounded hover:bg-card flex items-center gap-1.5"
+                              >
+                                <FileText className="w-3.5 h-3.5" />
+                                Open source PDF
+                              </a>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { CheckCircle, Flag, AlertTriangle, Loader2, Zap } from "lucide-react";
+import { CheckCircle, Flag, AlertTriangle, Loader2, Zap, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useCaseSummary, useRunPatterns } from "../lib/queries";
+import type { PatternHit } from "../lib/api";
 
 const CATEGORY_COLORS = [
   "var(--fl-emerald-500)", "var(--fl-amber-500)", "var(--fl-navy-500)",
@@ -83,6 +84,9 @@ export function SummaryView({ caseId }: SummaryViewProps) {
         </div>
       )}
 
+      {/* Forensic patterns — a scoreboard showing each detector's hit count */}
+      <PatternsCard patterns={data.patterns} />
+
       {/* Monthly chart */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h3 className="text-sm font-semibold text-foreground mb-3">Monthly credits vs debits</h3>
@@ -136,6 +140,68 @@ export function SummaryView({ caseId }: SummaryViewProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PatternsCard({ patterns }: { patterns: PatternHit[] }) {
+  const total = patterns.reduce((s, p) => s + p.count, 0);
+  const hit = patterns.filter((p) => p.count > 0);
+  const quiet = patterns.filter((p) => p.count === 0);
+
+  const severityBadge = (sev: string) => {
+    if (sev === "high") return "bg-destructive/10 text-destructive border-destructive/30";
+    if (sev === "medium") return "bg-amber-50 text-amber-800 border-amber-300";
+    return "bg-slate-50 text-slate-700 border-slate-200";
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          {total > 0 ? <ShieldAlert className="w-4 h-4 text-amber-600" /> : <ShieldCheck className="w-4 h-4 text-[color:var(--fl-emerald-500)]" />}
+          Forensic patterns
+          <span className="text-xs text-muted-foreground font-normal">{total} total hits across {patterns.length} detectors</span>
+        </h3>
+      </div>
+
+      {hit.length === 0 ? (
+        <div className="bg-background border border-border rounded-lg p-4 text-sm text-muted-foreground">
+          No pattern hits yet. Detectors ran but didn't flag anything.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {hit.map((p) => (
+            <div key={p.name} className={`border rounded-lg p-3 ${severityBadge(p.severity)}`}>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-sm font-medium">{p.label}</div>
+                <div className="text-lg font-semibold tabular-nums">{p.count}</div>
+              </div>
+              <div className="text-xs opacity-80 leading-snug">{p.description}</div>
+              {p.sample_txn_ids.length > 0 && (
+                <div className="text-xs mt-2 font-mono opacity-70">
+                  examples: {p.sample_txn_ids.slice(0, 3).join(", ")}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {quiet.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {quiet.map((p) => (
+            <span
+              key={p.name}
+              className="text-xs px-2 py-1 rounded border border-border text-muted-foreground bg-background"
+              title={p.description}
+            >
+              <ShieldCheck className="w-3 h-3 inline mr-1" />
+              {p.label}: 0
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

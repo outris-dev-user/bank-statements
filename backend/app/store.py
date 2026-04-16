@@ -31,9 +31,38 @@ from app.db import (
 from app.schemas import (
     Case, Person, Account, Statement, Transaction, EntityValue,
     CaseDetail, TransactionPage, TransactionPatch,
-    CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown,
+    CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown, PatternHit,
     Entity, EntityDetail, EntityCreate,
 )
+
+
+PATTERN_META = {
+    "STRUCTURING_SUSPECTED": {
+        "label": "Structuring suspected",
+        "description": "≥3 transactions between ₹9L and ₹10L within 30 days — classic attempt to dodge FIU-IND CTR reporting.",
+        "severity": "high",
+    },
+    "VELOCITY_SPIKE": {
+        "label": "Velocity spike",
+        "description": "≥10 transactions within a 24-hour window on the same account.",
+        "severity": "medium",
+    },
+    "ROUND_AMOUNT_CLUSTER": {
+        "label": "Round-amount cluster",
+        "description": "≥5 transactions of round amounts (multiples of ₹10k or ₹50k) on the same account.",
+        "severity": "medium",
+    },
+    "SUM_CHECK_CONTRIBUTOR": {
+        "label": "Sum-check contributor",
+        "description": "Transaction contributes to a mismatch between declared and extracted totals.",
+        "severity": "low",
+    },
+    "NEEDS_REVIEW": {
+        "label": "Needs manual review",
+        "description": "Counterparty or channel couldn't be extracted with confidence.",
+        "severity": "low",
+    },
+}
 
 
 # ───── row → schema conversion ─────
@@ -165,6 +194,15 @@ def get_statement(statement_id: str) -> Optional[Statement]:
     with get_session() as s:
         row = s.get(StatementRow, statement_id)
         return _statement_row_to_schema(row) if row else None
+
+
+def get_statement_pdf_path(statement_id: str) -> Optional[tuple[str, str]]:
+    """Return (absolute_path, filename) for a statement's source PDF, or None."""
+    with get_session() as s:
+        row = s.get(StatementRow, statement_id)
+        if not row or not row.source_file_path:
+            return None
+        return row.source_file_path, row.source_file_name
 
 
 def get_transaction(txn_id: str) -> Optional[Transaction]:
@@ -382,7 +420,80 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
                     ))
 
         s.commit()
-        return {"entities_created": created, "entities_updated": updated, "groups": len(groups)}
+
+        # Second pass — merge auto-created entities whose canonical_keys are
+        # substring-equivalent. Catches cases like AMAZON ⊂ AMAZONPAY where
+        # token-equality alone leaves them separate.
+        merged = _merge_substring_entities(case_id)
+        return {
+            "entities_created": created,
+            "entities_updated": updated,
+            "entities_merged": merged,
+            "groups": len(groups),
+        }
+
+
+def _merge_substring_entities(case_id: str, min_key_len: int = 5) -> int:
+    """Merge `auto_created` entities whose canonical_keys substring-match.
+    The entity with more linked transactions wins; the other's name and
+    aliases become its aliases, and all its links are rewired.
+    Manual entities are never auto-merged.
+    Returns the count of merged-away entities.
+    """
+    with get_session() as s:
+        ents = s.query(EntityRow).filter_by(case_id=case_id).all()
+        counts = {}
+        for e in ents:
+            counts[e.id] = s.query(TransactionEntityLinkRow).filter_by(entity_id=e.id).count()
+        # Sort by count desc so big entities absorb smaller variants.
+        ents.sort(key=lambda e: -counts.get(e.id, 0))
+        absorbed: set[str] = set()
+        merged = 0
+
+        for i, winner in enumerate(ents):
+            if winner.id in absorbed:
+                continue
+            w_key = (winner.canonical_key or "").replace(" ", "")
+            if len(w_key) < min_key_len:
+                continue
+            winner_aliases = json.loads(winner.aliases_json or "[]")
+
+            for j in range(i + 1, len(ents)):
+                loser = ents[j]
+                if loser.id in absorbed or not loser.auto_created:
+                    continue
+                l_key = (loser.canonical_key or "").replace(" ", "")
+                if len(l_key) < min_key_len:
+                    continue
+                # Substring check both directions; prefer longer-substring-contains-shorter
+                short, long = (l_key, w_key) if len(l_key) < len(w_key) else (w_key, l_key)
+                if short in long:
+                    # Rewire links from loser to winner (dedupe)
+                    loser_links = s.query(TransactionEntityLinkRow).filter_by(entity_id=loser.id).all()
+                    for link in loser_links:
+                        existing = s.query(TransactionEntityLinkRow).filter_by(
+                            entity_id=winner.id,
+                            transaction_id=link.transaction_id,
+                            role=link.role,
+                        ).first()
+                        if existing:
+                            s.delete(link)
+                        else:
+                            link.entity_id = winner.id
+                    # Merge names/aliases into winner
+                    if loser.name and loser.name != winner.name and loser.name not in winner_aliases:
+                        winner_aliases.append(loser.name)
+                    for a in json.loads(loser.aliases_json or "[]"):
+                        if a and a not in winner_aliases and a != winner.name:
+                            winner_aliases.append(a)
+                    s.delete(loser)
+                    absorbed.add(loser.id)
+                    merged += 1
+
+            winner.aliases_json = json.dumps(winner_aliases)
+
+        s.commit()
+        return merged
 
 
 def list_entities(case_id: str) -> Optional[list[Entity]]:
@@ -533,6 +644,7 @@ def case_summary(case_id: str) -> Optional[CaseSummary]:
         cp_agg: dict[str, dict] = {}
         cat_agg: dict[str, dict] = {}
 
+        pattern_hits: dict[str, dict] = {}
         for r in rows:
             amt = float(r.amount)
             if r.direction == "Dr":
@@ -542,6 +654,11 @@ def case_summary(case_id: str) -> Optional[CaseSummary]:
 
             flags = json.loads(r.flags_json or "[]")
             flag_count += len(flags)
+            for f in flags:
+                p = pattern_hits.setdefault(f, {"count": 0, "samples": []})
+                p["count"] += 1
+                if len(p["samples"]) < 5:
+                    p["samples"].append(r.id)
             if r.review_status == "reviewed":
                 reviewed += 1
             elif r.review_status == "flagged":
@@ -590,6 +707,34 @@ def case_summary(case_id: str) -> Optional[CaseSummary]:
             for k, v in sorted(cat_agg.items(), key=lambda kv: kv[1]["count"], reverse=True)
         ]
 
+        # Surface every known pattern (including the zero-hit ones) so the UI
+        # can show a complete scoreboard — investigators want to see what was
+        # checked, not just what fired.
+        patterns: list[PatternHit] = []
+        for name, meta in PATTERN_META.items():
+            hit = pattern_hits.get(name, {"count": 0, "samples": []})
+            patterns.append(PatternHit(
+                name=name,
+                label=meta["label"],
+                description=meta["description"],
+                severity=meta["severity"],
+                count=hit["count"],
+                sample_txn_ids=hit["samples"],
+            ))
+        # Also include any patterns we didn't know about (forward-compat)
+        for name, hit in pattern_hits.items():
+            if name in PATTERN_META:
+                continue
+            patterns.append(PatternHit(
+                name=name,
+                label=name.replace("_", " ").title(),
+                description="",
+                severity="low",
+                count=hit["count"],
+                sample_txn_ids=hit["samples"],
+            ))
+        patterns.sort(key=lambda p: (-p.count, p.name))
+
         return CaseSummary(
             total_dr=round(total_dr, 2),
             total_cr=round(total_cr, 2),
@@ -602,6 +747,7 @@ def case_summary(case_id: str) -> Optional[CaseSummary]:
             monthly=monthly_list,
             top_counterparties=top_counterparties,
             categories=categories,
+            patterns=patterns,
         )
 
 

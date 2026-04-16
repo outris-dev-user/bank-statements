@@ -2,6 +2,7 @@ import { X, FileText, Info, Loader2, AlertCircle } from "lucide-react";
 import type { Transaction } from "../data";
 import { useState } from "react";
 import { usePatchTransaction } from "../lib/queries";
+import { statementPdfUrl } from "../lib/api";
 
 interface EditDrawerProps {
   transaction: Transaction;
@@ -58,10 +59,15 @@ export function EditDrawer({ transaction, onClose }: EditDrawerProps) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-foreground">Raw OCR</label>
-            <button className="text-xs text-primary hover:text-primary/80 flex items-center gap-1">
+            <a
+              href={statementPdfUrl(transaction.statement_id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+            >
               <FileText className="w-3.5 h-3.5" />
-              Source PDF p.4
-            </button>
+              Open source PDF
+            </a>
           </div>
           <div className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground font-mono">
             {transaction.raw_description}

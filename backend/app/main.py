@@ -32,6 +32,7 @@ from pathlib import Path
 import pdfplumber
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app import store as store_mod
@@ -257,6 +258,23 @@ def get_statement(statement_id: str) -> Statement:
     if not stmt:
         raise HTTPException(404, f"Statement {statement_id} not found")
     return stmt
+
+
+@app.get("/api/statements/{statement_id}/pdf")
+def get_statement_pdf(statement_id: str):
+    """Stream the original source PDF for a statement (inline in browser)."""
+    result = store_mod.get_statement_pdf_path(statement_id)
+    if not result:
+        raise HTTPException(404, f"Source PDF for statement {statement_id} not found")
+    path, filename = result
+    pdf_path = Path(path)
+    if not pdf_path.exists():
+        raise HTTPException(404, f"PDF file missing on disk: {path}")
+    return FileResponse(
+        str(pdf_path),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 # ───── transactions ─────
