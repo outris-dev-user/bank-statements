@@ -35,13 +35,20 @@
 
 ### 1. `core/` — synced from the crypto investigation platform
 
-Imported as-is (with provenance headers) at commit `9e7d7b8`. Today, **zero modules are actively imported from our backend** — they're staged for Phase 2/3 use. See `core/COMPAT_NOTES.md` for per-file readiness.
+Imported as-is (with provenance headers) at commit `9e7d7b8`. See `core/COMPAT_NOTES.md` for per-file readiness.
 
 Modules:
 - `models/case.py`, `models/investigation.py` — case/investigation base types
 - `analysis/velocity_analyzer.py`, `analysis/signal_assembler.py`, `analysis/transaction_pool.py`, `analysis/entity_classification.py`, `analysis/pattern_framework.py`
 - `graph/bfs_trace.py`, `graph/graph_store.py` — runtime-checkable `GraphStore` Protocol (Neo4j online / NetworkX offline)
 - `auth/jwt.py`
+
+**Active imports today** (grep `from core.`):
+| Module                                     | Used by                                           | Notes                                              |
+|--------------------------------------------|---------------------------------------------------|----------------------------------------------------|
+| `core.analysis.entity_classification`      | `backend/app/store.py::_classify_entity_type`     | Drives the entity-type label (merchant / salary / finance / government / counterparty) using our domain vocabulary in `plugins/bank/vocabularies.py`. |
+
+Everything else in `core/` is still staged for Phase 3 use — in particular `core.graph.bfs_trace` (multi-hop tracing primitives) and `core.graph.graph_store` (the `GraphStore` Protocol for swapping between NetworkX offline and Neo4j online). Planned wiring is listed in [implementation_plan.md](implementation_plan.md).
 
 ### 2. `plugins/bank/` — domain-specific bank logic
 

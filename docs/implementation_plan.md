@@ -105,14 +105,18 @@ Working checklist grouped by phase. Tick items (`[x]`) as they ship. Items marke
 
 ### Graph canvas
 - [x] Backend `GET /api/cases/{id}/graph` — returns nodes (persons, accounts, entities) + edges (owns, flow_in, flow_out) with aggregated amounts
-- [x] Graph tab in Workbench — react-flow (`@xyflow/react`) canvas with three-lane layout
-- [x] Edge thickness scales with log(amount); colour-coded by direction
+- [x] Graph tab in Workbench — react-flow (`@xyflow/react`) canvas
+- [x] ELK layout via `elkjs` — three algorithms (layered / force / radial), user-switchable from the filter bar
+- [x] Draggable nodes, zoom/pan controls, minimap
+- [x] Edge thickness scales with log(amount); colour-coded by direction; dimmed when a non-incident node is selected
 - [x] Filter by node type (persons / accounts / entities) + minimum flow amount
-- [ ] Wire `core/graph/graph_store.py` Protocol — swap the aggregation above for the shared in-process `NetworkXStore` (and Neo4j for the online SaaS target)
-- [ ] Click-through from a graph node to the transaction list scoped to that node
+- [x] Click a node → inspector drawer opens on the right (canvas + inspector share the tab as a split layout)
+- [x] Inspector shows: type, ID, meta fields, flow-in/out KPIs, all incident edges (with amounts), "Open in Workbench" link
+- [ ] Click-through from an inspector edge into a filtered transaction list
 - [ ] Date-range filter on the graph
 - [ ] Export graph view to PNG / PDF for case reports
-- [ ] Better layout — Dagre or force-directed (three-lane is only a Phase 3 scaffold)
+- [ ] Wire `core/graph/graph_store.py` Protocol — swap our ad-hoc aggregation for the shared `NetworkXStore` (and Neo4j for the online SaaS target)
+- [ ] Wire `core/graph/bfs_trace.py` — multi-hop expansion UI ("show accounts within 3 hops of this one")
 
 ### Advanced forensic patterns
 - [ ] Multi-hop exposure (BFS over the transaction graph, bounded by hop count + amount threshold)
@@ -153,6 +157,19 @@ Working checklist grouped by phase. Tick items (`[x]`) as they ship. Items marke
 - [ ] CI/CD — GitHub Actions for test + build + benchmark regression
 
 ---
+
+## Core re-use from the crypto platform
+
+The `core/` directory holds domain-agnostic primitives synced from the crypto investigation platform at `9e7d7b8`. Active wiring:
+
+- [x] `core.analysis.entity_classification.infer_category_from_name` — drives entity-type labels (merchant / salary / finance / government / utility / bank / counterparty) using the vocabulary in `plugins/bank/vocabularies.py`. Called from `store._classify_entity_type`.
+- [ ] `core.graph.bfs_trace` — use `expand_one_hop` + `BFSExpansionContext` to power multi-hop tracing in the graph tab
+- [ ] `core.graph.graph_store` — implement a `NetworkXStore` against this Protocol; swap the ad-hoc aggregation in `store.case_graph`
+- [ ] `core.analysis.pattern_framework` — port `plugins/bank/patterns/*` to its detector plugin interface so crypto + bank share the runner
+- [ ] `core.analysis.signal_assembler` — use for assembling per-entity risk scores
+- [ ] `core.analysis.velocity_analyzer` — replace our `plugins/bank/patterns/velocity.py` once we need finer windows
+- [ ] `core.models.case`, `core.models.investigation` — adopt as the case/investigation base types (currently we have our own lightweight ORM rows)
+- [ ] `core.auth.jwt` — use as the auth module once we add a login screen
 
 ## Known bugs / followups
 

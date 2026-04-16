@@ -444,6 +444,23 @@ def _entity_stats(session, entity_id: str) -> dict:
     return {"txn_count": len(rows), "total_dr": total_dr, "total_cr": total_cr}
 
 
+def _classify_entity_type(name: str) -> str:
+    """Assign one of merchant / bank / government / salary / finance /
+    utility / counterparty based on keyword match. Delegates to the shared
+    `core.analysis.entity_classification` module with our vocabulary.
+
+    This is the first active import of a crypto-synced `core/` module in
+    the backend — see docs/architecture.md "core/ re-use" section.
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
+    from core.analysis.entity_classification import infer_category_from_name
+    from plugins.bank.vocabularies import ENTITY_TYPE_KEYWORDS
+
+    return infer_category_from_name(name, ENTITY_TYPE_KEYWORDS) or "counterparty"
+
+
 def resolve_entities_for_case(case_id: str) -> Optional[dict]:
     """Cluster transactions by canonical counterparty key into entities.
     Idempotent: re-running is safe — we update names/aliases, insert new
@@ -477,12 +494,14 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
             most_common_name = max(g["names"].items(), key=lambda kv: kv[1])[0]
             aliases = sorted(a for a in g["aliases"] if a != most_common_name)
 
+            inferred_type = _classify_entity_type(most_common_name)
+
             ent = existing.get(key)
             if not ent:
                 eid = _next_id(s, "e", EntityRow)
                 ent = EntityRow(
                     id=eid, case_id=case_id, name=most_common_name, canonical_key=key,
-                    entity_type="counterparty", aliases_json=json.dumps(aliases),
+                    entity_type=inferred_type, aliases_json=json.dumps(aliases),
                     created_at=now, auto_created=True,
                 )
                 s.add(ent)
@@ -491,6 +510,7 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
             else:
                 if ent.auto_created:
                     ent.name = most_common_name
+                    ent.entity_type = inferred_type
                 ent.aliases_json = json.dumps(aliases)
                 updated += 1
 
