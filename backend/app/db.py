@@ -118,6 +118,37 @@ class TransactionRow(Base):
     statement: Mapped[StatementRow] = relationship(back_populates="transactions")
 
 
+class EntityRow(Base):
+    """Resolved counterparty entity — one row per distinct real-world party
+    within a case. Created automatically by clustering similar counterparty
+    values, or manually by the investigator.
+    """
+    __tablename__ = "entities"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("cases.id"), index=True)
+    name: Mapped[str] = mapped_column(String)
+    canonical_key: Mapped[str] = mapped_column(String, index=True)
+    entity_type: Mapped[str] = mapped_column(String, default="counterparty")  # counterparty / merchant / person / unknown
+    pan: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    linked_person_id: Mapped[Optional[str]] = mapped_column(ForeignKey("persons.id"), nullable=True, index=True)
+    aliases_json: Mapped[str] = mapped_column(String, default="[]")
+    created_at: Mapped[str] = mapped_column(String)
+    auto_created: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class TransactionEntityLinkRow(Base):
+    """Many-to-many link between a transaction and a resolved entity. A txn
+    may be linked to multiple entities (e.g., payer and payee on a relay).
+    """
+    __tablename__ = "transaction_entity_links"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    transaction_id: Mapped[str] = mapped_column(ForeignKey("transactions.id"), index=True)
+    entity_id: Mapped[str] = mapped_column(ForeignKey("entities.id"), index=True)
+    role: Mapped[str] = mapped_column(String, default="counterparty")
+
+
 class EditEventRow(Base):
     __tablename__ = "edit_events"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

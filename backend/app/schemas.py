@@ -136,6 +136,44 @@ class CategoryBreakdown(BaseModel):
     total_cr: float
 
 
+class Entity(BaseModel):
+    """Resolved counterparty entity — one per distinct real-world party."""
+    id: str
+    case_id: str
+    name: str
+    canonical_key: str
+    entity_type: str = "counterparty"
+    pan: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    linked_person_id: Optional[str] = None
+    aliases: list[str] = Field(default_factory=list)
+    created_at: str
+    auto_created: bool = True
+    txn_count: int = 0
+    total_dr: float = 0.0
+    total_cr: float = 0.0
+
+
+class EntityDetail(BaseModel):
+    entity: Entity
+    transactions: list[Transaction]
+
+
+class EntityLinkRequest(BaseModel):
+    entity_id: str
+    role: str = "counterparty"
+
+
+class EntityCreate(BaseModel):
+    name: str
+    entity_type: str = "counterparty"
+    pan: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    linked_person_id: Optional[str] = None
+
+
 class CaseSummary(BaseModel):
     """Payload for GET /api/cases/:id/summary."""
     total_dr: float

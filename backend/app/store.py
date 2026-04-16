@@ -25,12 +25,14 @@ from typing import Optional, Tuple
 from app.db import (
     Base, engine, get_session,
     CaseRow, PersonRow, AccountRow, StatementRow, TransactionRow, EditEventRow,
+    EntityRow, TransactionEntityLinkRow,
     init_db,
 )
 from app.schemas import (
     Case, Person, Account, Statement, Transaction, EntityValue,
     CaseDetail, TransactionPage, TransactionPatch,
     CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown,
+    Entity, EntityDetail, EntityCreate,
 )
 
 
@@ -257,6 +259,217 @@ def list_transaction_audit(txn_id: str) -> Optional[list[dict]]:
             {"field": e.field, "old": e.old_value, "new": e.new_value, "at": e.at, "by": e.actor}
             for e in events
         ]
+
+
+# ───── entity resolution ─────
+
+_ENTITY_STOP = {"upi", "neft", "imps", "rtgs", "pos", "atm", "ecs", "nach",
+                 "cheque", "chq", "cash", "by", "to", "the", "ltd", "pvt",
+                 "services", "service", "india", "pay", "payment", "inr", "rs"}
+
+
+def _canonical_key(name: str) -> str:
+    """Normalise a counterparty string to a stable matching key.
+
+    Example: "AMZN PAY IN * AMAZON INDIA" -> "amazon india".
+    The key is only for clustering — the display name stays whatever the
+    user most recently edited or the most-frequent extracted variant.
+    """
+    import re as _re
+    if not name:
+        return ""
+    s = name.lower()
+    s = _re.sub(r"[^a-z0-9\s]", " ", s)
+    tokens = [t for t in s.split() if t and t not in _ENTITY_STOP and not t.isdigit() and len(t) > 1]
+    # Keep most-signal tokens: longest 3.
+    tokens.sort(key=lambda t: (-len(t), t))
+    key = " ".join(sorted(tokens[:3]))
+    return key
+
+
+def _entity_row_to_schema(row: EntityRow, stats: Optional[dict] = None) -> Entity:
+    stats = stats or {}
+    return Entity(
+        id=row.id,
+        case_id=row.case_id,
+        name=row.name,
+        canonical_key=row.canonical_key,
+        entity_type=row.entity_type,
+        pan=row.pan,
+        phone=row.phone,
+        notes=row.notes,
+        linked_person_id=row.linked_person_id,
+        aliases=json.loads(row.aliases_json or "[]"),
+        created_at=row.created_at,
+        auto_created=bool(row.auto_created),
+        txn_count=stats.get("txn_count", 0),
+        total_dr=round(stats.get("total_dr", 0.0), 2),
+        total_cr=round(stats.get("total_cr", 0.0), 2),
+    )
+
+
+def _entity_stats(session, entity_id: str) -> dict:
+    from sqlalchemy import select
+    links = session.query(TransactionEntityLinkRow).filter_by(entity_id=entity_id).all()
+    txn_ids = [l.transaction_id for l in links]
+    if not txn_ids:
+        return {"txn_count": 0, "total_dr": 0.0, "total_cr": 0.0}
+    rows = session.query(TransactionRow).filter(TransactionRow.id.in_(txn_ids)).all()
+    total_dr = sum(float(r.amount) for r in rows if r.direction == "Dr")
+    total_cr = sum(float(r.amount) for r in rows if r.direction == "Cr")
+    return {"txn_count": len(rows), "total_dr": total_dr, "total_cr": total_cr}
+
+
+def resolve_entities_for_case(case_id: str) -> Optional[dict]:
+    """Cluster transactions by canonical counterparty key into entities.
+    Idempotent: re-running is safe — we update names/aliases, insert new
+    entities for unseen keys, and keep old links in place.
+    """
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        txns = s.query(TransactionRow).filter_by(case_id=case_id).all()
+
+        # group txn IDs by canonical key
+        groups: dict[str, dict] = {}
+        for r in txns:
+            ents = json.loads(r.entities_json or "{}")
+            cp = (ents.get("counterparty") or {}).get("value") or ""
+            key = _canonical_key(cp)
+            if not key:
+                continue
+            g = groups.setdefault(key, {"txn_ids": [], "names": {}, "aliases": set()})
+            g["txn_ids"].append(r.id)
+            g["names"][cp] = g["names"].get(cp, 0) + 1
+            g["aliases"].add(cp)
+
+        # upsert entities
+        existing = {e.canonical_key: e for e in s.query(EntityRow).filter_by(case_id=case_id).all()}
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        created = 0
+        updated = 0
+
+        for key, g in groups.items():
+            most_common_name = max(g["names"].items(), key=lambda kv: kv[1])[0]
+            aliases = sorted(a for a in g["aliases"] if a != most_common_name)
+
+            ent = existing.get(key)
+            if not ent:
+                eid = _next_id(s, "e", EntityRow)
+                ent = EntityRow(
+                    id=eid, case_id=case_id, name=most_common_name, canonical_key=key,
+                    entity_type="counterparty", aliases_json=json.dumps(aliases),
+                    created_at=now, auto_created=True,
+                )
+                s.add(ent)
+                s.flush()
+                created += 1
+            else:
+                if ent.auto_created:
+                    ent.name = most_common_name
+                ent.aliases_json = json.dumps(aliases)
+                updated += 1
+
+            # ensure a link exists for every txn in the group
+            existing_links = {
+                l.transaction_id for l in s.query(TransactionEntityLinkRow)
+                .filter_by(entity_id=ent.id, role="counterparty").all()
+            }
+            for tid in g["txn_ids"]:
+                if tid not in existing_links:
+                    s.add(TransactionEntityLinkRow(
+                        transaction_id=tid, entity_id=ent.id, role="counterparty",
+                    ))
+
+        s.commit()
+        return {"entities_created": created, "entities_updated": updated, "groups": len(groups)}
+
+
+def list_entities(case_id: str) -> Optional[list[Entity]]:
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        rows = s.query(EntityRow).filter_by(case_id=case_id).all()
+        return [_entity_row_to_schema(r, _entity_stats(s, r.id)) for r in rows]
+
+
+def get_entity(entity_id: str) -> Optional[EntityDetail]:
+    with get_session() as s:
+        row = s.get(EntityRow, entity_id)
+        if not row:
+            return None
+        links = s.query(TransactionEntityLinkRow).filter_by(entity_id=entity_id).all()
+        txn_ids = [l.transaction_id for l in links]
+        txns = []
+        if txn_ids:
+            txn_rows = (
+                s.query(TransactionRow)
+                .filter(TransactionRow.id.in_(txn_ids))
+                .order_by(TransactionRow.txn_date.desc(), TransactionRow.row_index.asc())
+                .all()
+            )
+            txns = [_txn_row_to_schema(r) for r in txn_rows]
+        return EntityDetail(
+            entity=_entity_row_to_schema(row, _entity_stats(s, entity_id)),
+            transactions=txns,
+        )
+
+
+def create_entity(case_id: str, body: EntityCreate) -> Optional[Entity]:
+    with get_session() as s:
+        if not s.get(CaseRow, case_id):
+            return None
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        eid = _next_id(s, "e", EntityRow)
+        row = EntityRow(
+            id=eid, case_id=case_id, name=body.name,
+            canonical_key=_canonical_key(body.name),
+            entity_type=body.entity_type, pan=body.pan, phone=body.phone,
+            notes=body.notes, linked_person_id=body.linked_person_id,
+            aliases_json="[]", created_at=now, auto_created=False,
+        )
+        s.add(row)
+        s.commit()
+        return _entity_row_to_schema(row, {"txn_count": 0, "total_dr": 0.0, "total_cr": 0.0})
+
+
+def link_transaction_to_entity(txn_id: str, entity_id: str, role: str = "counterparty") -> Optional[bool]:
+    with get_session() as s:
+        if not s.get(TransactionRow, txn_id) or not s.get(EntityRow, entity_id):
+            return None
+        existing = s.query(TransactionEntityLinkRow).filter_by(
+            transaction_id=txn_id, entity_id=entity_id, role=role,
+        ).first()
+        if existing:
+            return True
+        s.add(TransactionEntityLinkRow(transaction_id=txn_id, entity_id=entity_id, role=role))
+        s.commit()
+        return True
+
+
+def unlink_transaction_from_entity(txn_id: str, entity_id: str) -> Optional[bool]:
+    with get_session() as s:
+        links = s.query(TransactionEntityLinkRow).filter_by(
+            transaction_id=txn_id, entity_id=entity_id,
+        ).all()
+        if not links:
+            return False
+        for l in links:
+            s.delete(l)
+        s.commit()
+        return True
+
+
+def list_entities_for_transaction(txn_id: str) -> Optional[list[Entity]]:
+    with get_session() as s:
+        if not s.get(TransactionRow, txn_id):
+            return None
+        links = s.query(TransactionEntityLinkRow).filter_by(transaction_id=txn_id).all()
+        ids = [l.entity_id for l in links]
+        if not ids:
+            return []
+        rows = s.query(EntityRow).filter(EntityRow.id.in_(ids)).all()
+        return [_entity_row_to_schema(r, _entity_stats(s, r.id)) for r in rows]
 
 
 # ───── forensic patterns ─────
@@ -533,6 +746,10 @@ def ingest_statement(
         run_patterns_for_case(case_id)
     except Exception:
         pass
+    try:
+        resolve_entities_for_case(case_id)
+    except Exception:
+        pass
     return out
 
 
@@ -637,6 +854,10 @@ def init_and_seed(reset: bool = False) -> None:
     for cid in case_ids:
         try:
             run_patterns_for_case(cid)
+        except Exception:
+            pass
+        try:
+            resolve_entities_for_case(cid)
         except Exception:
             pass
 

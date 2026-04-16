@@ -5,6 +5,7 @@ import { TransactionTable } from "./TransactionTable";
 import { EditDrawer } from "./EditDrawer";
 import { MultiSelect } from "./MultiSelect";
 import { SummaryView } from "./SummaryView";
+import { EntitiesView } from "./EntitiesView";
 import type { Transaction } from "../data";
 import { useCase, useCaseTransactions, usePatchTransaction } from "../lib/queries";
 
@@ -220,6 +221,15 @@ export function Workbench() {
             Summary
             {activeTab === 'summary' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
           </button>
+          <button
+            onClick={() => setActiveTab('entities')}
+            className={`px-4 py-2 font-medium text-sm transition-colors relative ${
+              activeTab === 'entities' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Entities
+            {activeTab === 'entities' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+          </button>
           <button className="px-4 py-2 font-medium text-sm text-muted-foreground relative flex items-center gap-1.5 group">
             Graph
             <Info className="w-3.5 h-3.5" />
@@ -231,6 +241,8 @@ export function Workbench() {
 
         {activeTab === 'summary' ? (
           <SummaryView caseId={caseId!} />
+        ) : activeTab === 'entities' ? (
+          <EntitiesView caseId={caseId!} />
         ) : (<>
         {currentAccount && (
           <div className="bg-card border border-border rounded-lg p-4 mb-4">

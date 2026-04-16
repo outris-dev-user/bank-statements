@@ -118,6 +118,56 @@ export const runPatterns = (caseId: string) =>
     { method: "POST" },
   );
 
+export interface Entity {
+  id: string;
+  case_id: string;
+  name: string;
+  canonical_key: string;
+  entity_type: string;
+  pan?: string;
+  phone?: string;
+  notes?: string;
+  linked_person_id?: string;
+  aliases: string[];
+  created_at: string;
+  auto_created: boolean;
+  txn_count: number;
+  total_dr: number;
+  total_cr: number;
+}
+
+export interface EntityDetailPayload {
+  entity: Entity;
+  transactions: Transaction[];
+}
+
+export const fetchEntities = (caseId: string) =>
+  request<Entity[]>(`/api/cases/${encodeURIComponent(caseId)}/entities`);
+
+export const fetchEntity = (entityId: string) =>
+  request<EntityDetailPayload>(`/api/entities/${encodeURIComponent(entityId)}`);
+
+export const resolveEntities = (caseId: string) =>
+  request<{ status: string; entities_created: number; entities_updated: number; groups: number }>(
+    `/api/cases/${encodeURIComponent(caseId)}/resolve-entities`,
+    { method: "POST" },
+  );
+
+export const linkTransactionEntity = (txnId: string, entityId: string, role = "counterparty") =>
+  request<{ status: string }>(`/api/transactions/${encodeURIComponent(txnId)}/entity-links`, {
+    method: "POST",
+    body: JSON.stringify({ entity_id: entityId, role }),
+  });
+
+export const unlinkTransactionEntity = (txnId: string, entityId: string) =>
+  request<{ status: string }>(
+    `/api/transactions/${encodeURIComponent(txnId)}/entity-links/${encodeURIComponent(entityId)}`,
+    { method: "DELETE" },
+  );
+
+export const fetchTransactionEntities = (txnId: string) =>
+  request<Entity[]>(`/api/transactions/${encodeURIComponent(txnId)}/entities`);
+
 export interface TransactionPatch {
   entities?: Transaction["entities"];
   tags?: string[];

@@ -37,7 +37,7 @@ from pydantic import BaseModel
 from app import store as store_mod
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
-    Statement, CaseSummary,
+    Statement, CaseSummary, Entity, EntityDetail, EntityCreate, EntityLinkRequest,
 )
 
 # Import the bank parser from plugins/bank (separate tree, no coupling)
@@ -278,6 +278,64 @@ def get_transaction_audit(txn_id: str) -> list[dict]:
 
 
 # ───── dev / admin ─────
+
+# ───── entities ─────
+
+@app.get("/api/cases/{case_id}/entities", response_model=list[Entity])
+def list_case_entities(case_id: str) -> list[Entity]:
+    entities = store_mod.list_entities(case_id)
+    if entities is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return entities
+
+
+@app.post("/api/cases/{case_id}/entities", response_model=Entity, status_code=201)
+def create_case_entity(case_id: str, body: EntityCreate) -> Entity:
+    entity = store_mod.create_entity(case_id, body)
+    if entity is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return entity
+
+
+@app.post("/api/cases/{case_id}/resolve-entities")
+def resolve_case_entities(case_id: str) -> dict:
+    result = store_mod.resolve_entities_for_case(case_id)
+    if result is None:
+        raise HTTPException(404, f"Case {case_id} not found")
+    return {"status": "ok", **result}
+
+
+@app.get("/api/entities/{entity_id}", response_model=EntityDetail)
+def get_entity(entity_id: str) -> EntityDetail:
+    detail = store_mod.get_entity(entity_id)
+    if not detail:
+        raise HTTPException(404, f"Entity {entity_id} not found")
+    return detail
+
+
+@app.post("/api/transactions/{txn_id}/entity-links")
+def link_transaction_entity(txn_id: str, body: EntityLinkRequest) -> dict:
+    result = store_mod.link_transaction_to_entity(txn_id, body.entity_id, body.role)
+    if result is None:
+        raise HTTPException(404, f"Transaction {txn_id} or entity {body.entity_id} not found")
+    return {"status": "linked", "transaction_id": txn_id, "entity_id": body.entity_id}
+
+
+@app.delete("/api/transactions/{txn_id}/entity-links/{entity_id}")
+def unlink_transaction_entity(txn_id: str, entity_id: str) -> dict:
+    result = store_mod.unlink_transaction_from_entity(txn_id, entity_id)
+    if result is None or result is False:
+        raise HTTPException(404, f"Link (transaction={txn_id}, entity={entity_id}) not found")
+    return {"status": "unlinked"}
+
+
+@app.get("/api/transactions/{txn_id}/entities", response_model=list[Entity])
+def list_transaction_entities(txn_id: str) -> list[Entity]:
+    ents = store_mod.list_entities_for_transaction(txn_id)
+    if ents is None:
+        raise HTTPException(404, f"Transaction {txn_id} not found")
+    return ents
+
 
 @app.post("/api/cases/{case_id}/run-patterns")
 def run_patterns(case_id: str) -> dict:

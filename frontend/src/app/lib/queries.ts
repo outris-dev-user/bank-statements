@@ -10,10 +10,15 @@ import {
   fetchCases,
   fetchCaseSummary,
   fetchCaseTransactions,
+  fetchEntities,
+  fetchEntity,
   fetchHealth,
   fetchTransactionAudit,
+  linkTransactionEntity,
   patchTransaction,
+  resolveEntities,
   runPatterns,
+  unlinkTransactionEntity,
   type TransactionPatch,
 } from "./api";
 
@@ -24,6 +29,8 @@ export const qk = {
   caseSummary: (id: string) => ["case", id, "summary"] as const,
   caseTxns: (id: string, accountId?: string) =>
     ["case", id, "transactions", accountId ?? "all"] as const,
+  caseEntities: (id: string) => ["case", id, "entities"] as const,
+  entity: (id: string) => ["entity", id] as const,
   txnAudit: (id: string) => ["transaction", id, "audit"] as const,
 };
 
@@ -64,6 +71,54 @@ export const useRunPatterns = () => {
     onSuccess: (_data, caseId) => {
       qc.invalidateQueries({ queryKey: ["case", caseId] });
       qc.invalidateQueries({ queryKey: qk.caseSummary(caseId) });
+    },
+  });
+};
+
+export const useEntities = (caseId: string | undefined) =>
+  useQuery({
+    queryKey: qk.caseEntities(caseId ?? ""),
+    queryFn: () => fetchEntities(caseId!),
+    enabled: !!caseId,
+  });
+
+export const useEntity = (entityId: string | undefined) =>
+  useQuery({
+    queryKey: qk.entity(entityId ?? ""),
+    queryFn: () => fetchEntity(entityId!),
+    enabled: !!entityId,
+  });
+
+export const useResolveEntities = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (caseId: string) => resolveEntities(caseId),
+    onSuccess: (_data, caseId) => {
+      qc.invalidateQueries({ queryKey: qk.caseEntities(caseId) });
+    },
+  });
+};
+
+export const useLinkEntity = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ txnId, entityId }: { txnId: string; entityId: string }) =>
+      linkTransactionEntity(txnId, entityId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["entity"] });
+      qc.invalidateQueries({ queryKey: ["case"] });
+    },
+  });
+};
+
+export const useUnlinkEntity = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ txnId, entityId }: { txnId: string; entityId: string }) =>
+      unlinkTransactionEntity(txnId, entityId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["entity"] });
+      qc.invalidateQueries({ queryKey: ["case"] });
     },
   });
 };
