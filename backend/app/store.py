@@ -165,10 +165,16 @@ def get_case(case_id: str) -> Optional[CaseDetail]:
         persons = s.query(PersonRow).filter_by(case_id=case_id).all()
         person_ids = [p.id for p in persons]
         accounts = s.query(AccountRow).filter(AccountRow.person_id.in_(person_ids)).all() if person_ids else []
+        account_ids = [a.id for a in accounts]
+        statements = (
+            s.query(StatementRow).filter(StatementRow.account_id.in_(account_ids)).all()
+            if account_ids else []
+        )
         return CaseDetail(
             case=_case_row_to_schema(row, _case_counts(s, case_id)),
             persons=[_person_row_to_schema(p) for p in persons],
             accounts=[_account_row_to_schema(a) for a in accounts],
+            statements=[_statement_row_to_schema(st) for st in statements],
         )
 
 
@@ -194,6 +200,70 @@ def get_statement(statement_id: str) -> Optional[Statement]:
     with get_session() as s:
         row = s.get(StatementRow, statement_id)
         return _statement_row_to_schema(row) if row else None
+
+
+def delete_statement(statement_id: str) -> Optional[dict]:
+    """Delete a statement, its transactions, and the owning account if this
+    was its last statement. Returns a small summary of what was removed, or
+    None if the statement doesn't exist.
+    """
+    with get_session() as s:
+        stmt = s.get(StatementRow, statement_id)
+        if not stmt:
+            return None
+
+        account_id = stmt.account_id
+
+        # Audit events → transactions → entity links → transactions → statement.
+        # Order matters for FK integrity on SQLite.
+        txns = s.query(TransactionRow).filter_by(statement_id=statement_id).all()
+        txn_ids = [t.id for t in txns]
+
+        deleted_audits = 0
+        deleted_links = 0
+        if txn_ids:
+            deleted_audits = (
+                s.query(EditEventRow)
+                .filter(EditEventRow.transaction_id.in_(txn_ids))
+                .delete(synchronize_session=False)
+            )
+            deleted_links = (
+                s.query(TransactionEntityLinkRow)
+                .filter(TransactionEntityLinkRow.transaction_id.in_(txn_ids))
+                .delete(synchronize_session=False)
+            )
+
+        deleted_txns = (
+            s.query(TransactionRow)
+            .filter_by(statement_id=statement_id)
+            .delete(synchronize_session=False)
+        )
+        s.delete(stmt)
+
+        # If this was the account's last statement, remove the account too —
+        # an "empty" account in the UI is almost always a mistaken upload.
+        remaining = s.query(StatementRow).filter_by(account_id=account_id).count()
+        deleted_account = False
+        if remaining == 0:
+            acc = s.get(AccountRow, account_id)
+            if acc is not None:
+                s.delete(acc)
+                deleted_account = True
+        else:
+            # Keep the account but decrement its txn count.
+            acc = s.get(AccountRow, account_id)
+            if acc is not None:
+                acc.transaction_count = max(0, acc.transaction_count - deleted_txns)
+
+        s.commit()
+        return {
+            "statement_id": statement_id,
+            "transactions_deleted": deleted_txns,
+            "audit_events_deleted": deleted_audits,
+            "entity_links_deleted": deleted_links,
+            "account_deleted": deleted_account,
+            "account_id": account_id,
+        }
 
 
 def get_statement_pdf_path(statement_id: str) -> Optional[tuple[str, str]]:

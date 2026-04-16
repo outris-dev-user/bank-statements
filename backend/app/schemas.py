@@ -101,10 +101,11 @@ class TransactionPatch(BaseModel):
 
 
 class CaseDetail(BaseModel):
-    """Composite payload for GET /api/cases/:id — case + persons + accounts."""
+    """Composite payload for GET /api/cases/:id — case + persons + accounts + statements."""
     case: Case
     persons: list[Person]
     accounts: list[Account]
+    statements: list[Statement] = Field(default_factory=list)
 
 
 class TransactionPage(BaseModel):

@@ -45,6 +45,7 @@ export interface CaseDetail {
   case: Case;
   persons: Person[];
   accounts: Account[];
+  statements: Statement[];
 }
 
 export const fetchCase = (caseId: string) =>
@@ -76,6 +77,12 @@ export const fetchStatement = (id: string) =>
 
 export const statementPdfUrl = (statementId: string): string =>
   `${BASE}/api/statements/${encodeURIComponent(statementId)}/pdf`;
+
+export const deleteStatement = (statementId: string) =>
+  request<{ status: string; transactions_deleted: number; account_deleted: boolean }>(
+    `/api/statements/${encodeURIComponent(statementId)}`,
+    { method: "DELETE" },
+  );
 
 export interface MonthlyPoint {
   month: string;

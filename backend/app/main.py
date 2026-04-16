@@ -252,12 +252,60 @@ async def upload_statement(
     }
 
 
+@app.post("/api/statements/preview")
+async def preview_statement(file: UploadFile = File(...)) -> dict:
+    """Detect bank / account number / period from a PDF without persisting it.
+    The frontend shows these to the investigator before committing the upload.
+    """
+    if not file.filename:
+        raise HTTPException(400, "Missing file")
+    content = await file.read()
+    tmp = UPLOAD_DIR / f"_preview_{int(datetime.utcnow().timestamp())}_{re.sub(r'[^A-Za-z0-9._-]', '_', file.filename)}"
+    tmp.write_bytes(content)
+    try:
+        with pdfplumber.open(tmp) as pdf:
+            text = "\n".join((p.extract_text() or "") for p in pdf.pages)
+        bank_key = detect_bank(text)
+        txns = parse_text(text)
+        defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
+        period_start, period_end = _guess_period(text)
+        return {
+            "bank_detected": bank_key,
+            "bank_label": defaults["display"],
+            "account_type": defaults["account_type"],
+            "account_number_guess": _guess_account_number(text),
+            "period_start": period_start,
+            "period_end": period_end,
+            "transaction_count": len(txns),
+            "filename": file.filename,
+        }
+    except Exception as exc:
+        raise HTTPException(400, f"Could not read PDF: {exc}") from exc
+    finally:
+        try:
+            tmp.unlink()
+        except Exception:
+            pass
+
+
 @app.get("/api/statements/{statement_id}", response_model=Statement)
 def get_statement(statement_id: str) -> Statement:
     stmt = store_mod.get_statement(statement_id)
     if not stmt:
         raise HTTPException(404, f"Statement {statement_id} not found")
     return stmt
+
+
+@app.delete("/api/statements/{statement_id}")
+def delete_statement(statement_id: str) -> dict:
+    """Remove a statement, its transactions, audit entries, and any entity
+    links. If this was the owning account's last statement the account is
+    removed too — empty accounts are nearly always mistaken uploads.
+    """
+    result = store_mod.delete_statement(statement_id)
+    if result is None:
+        raise HTTPException(404, f"Statement {statement_id} not found")
+    return {"status": "deleted", **result}
 
 
 @app.get("/api/statements/{statement_id}/pdf")
