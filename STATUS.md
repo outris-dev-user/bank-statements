@@ -1,0 +1,147 @@
+# LedgerFlow — project status
+
+**As of:** 2026-04-16
+
+## Where we are
+
+Phase 1 scaffold is **buildable and runnable** with real extracted data end-to-end. Neither the backend (FastAPI) nor the graph canvas are wired yet — those are Phase 1 completion and Phase 3 respectively.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   9 PDFs    →   pdfplumber + parser.py   →   858 transactions   │
+│  (5 banks)      plugins/bank/extraction/      (99–100% sum-     │
+│                                               check accuracy)   │
+│                                 │                                │
+│                                 ▼                                │
+│                 tools/export-for-frontend.py                    │
+│                                 │                                │
+│                                 ▼                                │
+│                    realData.ts (TypeScript,                     │
+│                     858 rows, 2 cases)                          │
+│                                 │                                │
+│                                 ▼                                │
+│                    data/index.ts facade                         │
+│                                 │                                │
+│                                 ▼                                │
+│     frontend/ (Vite + React + Tailwind 4 + shadcn/ui)           │
+│          • CaseDashboard                                        │
+│          • CaseOverview (persons → accounts → files)            │
+│          • Workbench (tabs, filters, flag badges)               │
+│          • TransactionTable (expand-in-place, inter-file sep)   │
+│          • EditDrawer (key-value entities, bulk-link suggest)   │
+│          • UploadModal                                          │
+│   Forensic Ledger theme applied (tri-font, navy primary,        │
+│   tonal layering, Dr/Cr colored borders).                        │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## What works today
+
+- **Extraction** — 99–100% sum-check accuracy across HDFC CC, IDFC, HDFC Savings, ICICI, Kotak on 9 test PDFs / 858 transactions. See [benchmarks/SUMMARY.md](benchmarks/SUMMARY.md).
+- **Parser → frontend export** — `python tools/export-for-frontend.py` regenerates `frontend/src/app/data/realData.ts` from the latest benchmark output.
+- **Frontend builds** — `cd frontend && npm run build` produces `dist/` (284 KB → 715 KB after real data; 126 KB gzipped).
+- **Frontend runs** — `npm run dev` serves on :5173 in ~580 ms.
+- **Data model** — `Case → Person → Account → Statement → Transaction` with key-value `entities` matches [docs/data-model.md](docs/data-model.md).
+- **Design system** — LedgerFlow branded, tri-font, MD3 + shadcn token families coexist.
+
+## What's in the repo (top-level)
+
+```
+bank-analyser/
+├── README.md                        # overview
+├── ARCHITECTURE.md                  # 3-layer core/plugin/deploy design
+├── STATUS.md                        # this file
+├── CRYPTO_SYNC.md                   # sync ledger
+├── benchmarks/                      # extractor + parser validation (CI)
+│   ├── parser.py/extractors.py      # [MOVED to plugins/bank/extraction/]
+│   ├── run.py / sum_check.py
+│   ├── SUMMARY.md                   # 12-tool benchmark, 9 PDFs
+│   └── ground_truth/                # HDFC CC + IDFC hand-labeled
+├── plugins/bank/
+│   ├── extraction/
+│   │   ├── parser.py                # 5-bank router + parser
+│   │   └── extractors.py            # 12 PDF extractor wrappers
+│   └── README.md
+├── core/                            # synced from crypto @ 9e7d7b8
+│   ├── models/case.py, investigation.py
+│   ├── analysis/velocity, signal, pattern_framework,
+│   │             entity_classification, transaction_pool
+│   ├── graph/bfs_trace, graph_store
+│   ├── auth/jwt
+│   └── COMPAT_NOTES.md              # per-file importability
+├── frontend/                        # LedgerFlow UI (Vite + React + Tailwind 4)
+│   ├── src/app/components/          # 7 app components + shadcn/ui library
+│   ├── src/app/data/                # index.ts facade + realData.ts + mockData.ts
+│   ├── src/styles/                  # theme.css (Forensic Ledger palette)
+│   └── README.md
+├── data/pdf/                        # 9 test statements, 5 banks
+├── deployment/
+│   ├── saas/ (placeholder)
+│   └── lea-offline/ (placeholder)
+├── docs/
+│   ├── ux-decisions.md              # 12 UX decisions resolved
+│   ├── ux-wireframes.md             # 6 ASCII wireframes
+│   ├── ux-phases.md                 # phased UX plan
+│   ├── data-model.md                # backend schema
+│   ├── for-crypto-team.md           # proposal we sent
+│   ├── from-crypto-team.md          # their response
+│   └── sample_ux/                   # Stitch + Forensic Ledger DESIGN.md
+└── tools/
+    ├── export-for-frontend.py       # benchmark JSON → realData.ts
+    └── sync-from-crypto.sh          # placeholder sync script
+```
+
+## What's NOT in the repo yet
+
+- **Backend service** (FastAPI). No `/api/cases/`, `/api/statements/`, `/api/transactions/` endpoints yet. The frontend reads static `realData.ts` for now.
+- **Persistence layer** (SQLite / Postgres). No database migrations, no ORM wiring.
+- **Real upload pipeline**. UploadModal is UI only — clicking upload doesn't actually ingest a PDF.
+- **Edit writeback**. EditDrawer's Save button is a `console.log`. Audit log is not persisted.
+- **Graph canvas**. `Graph` tab in Workbench is disabled with "Coming in Phase 3" tooltip.
+- **Forensic patterns**. `plugins/bank/patterns/` is empty. Flags in the frontend come from the extraction-confidence heuristic only.
+- **Enrichment**. PEP / sanctions / FIU-IND lookups not wired.
+- **Authentication**. No login screen. `auth/jwt.py` is synced from crypto but not used yet.
+
+## Git history (last 7 commits)
+
+```
+e38680f  Wire realData via facade + fix case-scoping + generalise bank labels
+edbd309  Phase 1 frontend scaffold + first crypto sync + real-data adapter
+d9772bb  CRYPTO_SYNC.md: crypto team shipped all cleanup
+d3b6457  Lock in Phase 1 UX + data model
+f6f21c5  Add UX sprint artifacts: decisions matrix + wireframes
+eb07c0d  Incorporate crypto team feedback + add phased UX plan
+86a0a38  Initial repo: bank-statement extraction + benchmark harness
+```
+
+## Immediate next steps (in priority order)
+
+1. **Browser smoke test** — open `http://localhost:5173`, walk through Cases → Overview → Workbench → expand a row → open EditDrawer. Just to feel the UX. (User can do this; `npm run dev`.)
+2. **Fix whatever breaks / looks wrong** from the smoke test — typical issues: overflow in narrow columns, flag icon placement, category colors.
+3. **Back-fill opening/closing balance** in `realData.ts` — currently 0 because our parser doesn't yet expose them. Add a small routine to `plugins/bank/extraction/parser.py` to pull those from the "Opening Balance" / "Closing Balance" strings each bank prints.
+4. **Wire the Python backend** (FastAPI). Minimal endpoints:
+   - `GET /api/cases` (read)
+   - `GET /api/cases/:id/transactions` (read)
+   - `PATCH /api/transactions/:id` (edit + audit)
+   - `POST /api/statements` (upload + parse)
+   - Behind the scenes uses `plugins/bank/extraction/` + SQLite.
+5. **Replace the `realData.ts` static data** with a thin HTTP client (`src/app/lib/api.ts`) — delete the facade's magic once real endpoints are up.
+6. **Schedule R23-R27 walk-through with crypto team** — needed before we actually use synced `core/` code in the backend (we synced the files but haven't imported them yet, so no blocker today).
+
+## Open UX decisions still to validate
+
+These were decided in [docs/ux-decisions.md](docs/ux-decisions.md) but haven't been seen with real 858-row data yet. Browser smoke test will surface:
+
+- Does the left-border Dr/Cr color read clearly at scanning distance, or does the row need more chrome?
+- Does the expand-in-place feel right for row peek, or does a bottom sheet work better?
+- Is the "(unknown: …)" counterparty placeholder for low-confidence rows a nag or a useful prompt?
+- Does the inter-file separator `── April 2021 statement ends │ May 2021 statement begins ──` look acceptable at the real data's scale (87 + 153 rows in the Kotak case)?
+- At 554 rows in the HDFC Savings account, does the table need virtualisation to scroll smoothly?
+
+## Dependencies and blockers
+
+- **Crypto team:** 0 blockers. They shipped all Phase 1 + Phase 2 cleanup. R23-R27 walk-through is scheduled (not yet time-boxed).
+- **Internal:** 0 blockers. All decisions made.
+- **External:** 0.
