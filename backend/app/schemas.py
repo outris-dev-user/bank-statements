@@ -95,6 +95,7 @@ class TransactionPatch(BaseModel):
     entities: Optional[dict[str, EntityValue]] = None
     tags: Optional[list[str]] = None
     amount: Optional[float] = None
+    direction: Optional[Direction] = None
     txn_date: Optional[str] = None
     review_status: Optional[ReviewStatus] = None
 

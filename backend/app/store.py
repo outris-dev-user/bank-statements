@@ -170,6 +170,10 @@ def get_transaction(txn_id: str) -> Optional[Transaction]:
         return _txn_row_to_schema(row) if row else None
 
 
+def _signed(amount: float, direction: str) -> float:
+    return float(amount) if direction == "Cr" else -float(amount)
+
+
 def patch_transaction(txn_id: str, patch: TransactionPatch) -> Optional[Transaction]:
     with get_session() as s:
         row = s.get(TransactionRow, txn_id)
@@ -177,7 +181,14 @@ def patch_transaction(txn_id: str, patch: TransactionPatch) -> Optional[Transact
             return None
         now = datetime.utcnow().isoformat(timespec="seconds")
         updates = patch.model_dump(exclude_unset=True)
-        # Record each changed field in the audit log
+
+        # Capture pre-update amount/direction so we can compute a balance delta
+        # if either changes. Cascade uses the PDF-display order (row_index
+        # ascending) so running balances stay consistent with what the bank
+        # printed — some banks print latest-first, others oldest-first.
+        pre_amount = float(row.amount)
+        pre_direction = row.direction
+
         for field, new_val in updates.items():
             if field == "entities":
                 old_val = row.entities_json
@@ -189,6 +200,9 @@ def patch_transaction(txn_id: str, patch: TransactionPatch) -> Optional[Transact
             elif field == "amount":
                 old_val = str(row.amount)
                 row.amount = float(new_val)
+            elif field == "direction":
+                old_val = row.direction
+                row.direction = new_val
             elif field == "txn_date":
                 old_val = row.txn_date
                 row.txn_date = new_val
@@ -202,9 +216,35 @@ def patch_transaction(txn_id: str, patch: TransactionPatch) -> Optional[Transact
                 field=field, old_value=str(old_val)[:500], new_value=str(new_val)[:500], at=now,
             ))
         row.edit_count += 1
+
+        delta = _signed(row.amount, row.direction) - _signed(pre_amount, pre_direction)
+        if delta != 0:
+            _shift_balances_from(s, row.statement_id, row.row_index, delta)
+
         s.commit()
         s.refresh(row)
         return _txn_row_to_schema(row)
+
+
+def _shift_balances_from(session, statement_id: str, from_row_index: int, delta: float) -> None:
+    """Apply `delta` to running_balance on the row at `from_row_index` and
+    every row after it (row_index ascending) in the statement. Preserves the
+    walk direction the PDF used, so it works whether the statement is printed
+    oldest-first or latest-first.
+    """
+    if delta == 0:
+        return
+    txns = (
+        session.query(TransactionRow)
+        .filter(TransactionRow.statement_id == statement_id)
+        .filter(TransactionRow.row_index >= from_row_index)
+        .all()
+    )
+    for t in txns:
+        t.running_balance = float(t.running_balance) + delta
+    stmt = session.get(StatementRow, statement_id)
+    if stmt is not None:
+        stmt.closing_balance = float(stmt.closing_balance) + delta
 
 
 def list_transaction_audit(txn_id: str) -> Optional[list[dict]]:

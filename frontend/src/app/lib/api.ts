@@ -78,9 +78,12 @@ export interface TransactionPatch {
   entities?: Transaction["entities"];
   tags?: string[];
   amount?: number;
+  direction?: Transaction["direction"];
   txn_date?: string;
   review_status?: Transaction["review_status"];
 }
+
+export type { Person } from "../data/mockData";
 
 export const patchTransaction = (id: string, patch: TransactionPatch) =>
   request<Transaction>(`/api/transactions/${encodeURIComponent(id)}`, {
