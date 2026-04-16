@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Person } from "../data";
+import { API_BASE, apiAuthHeaders } from "../lib/api";
 import { AddPersonDialog } from "./AddPersonDialog";
 
 interface UploadModalProps {
@@ -39,8 +40,6 @@ interface UploadResult {
 
 type Status = "pick" | "previewing" | "preview_ready" | "uploading" | "done" | "error";
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
-
 export function UploadModal({ onClose, caseId, personId, persons }: UploadModalProps) {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -73,7 +72,11 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     fd.append("file", f);
     fd.append("case_id", caseId);
     try {
-      const res = await fetch(`${API_BASE}/api/statements/preview`, { method: "POST", body: fd });
+      const res = await fetch(`${API_BASE}/api/statements/preview`, {
+        method: "POST",
+        body: fd,
+        headers: apiAuthHeaders(),
+      });
       if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
       const data: PreviewResult = await res.json();
       setPreview(data);
@@ -133,7 +136,11 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     fd.append("account_number", accountNumber.trim());
     fd.append("holder_name", holderName || "Unknown");
     try {
-      const res = await fetch(`${API_BASE}/api/cases/${caseId}/statements`, { method: "POST", body: fd });
+      const res = await fetch(`${API_BASE}/api/cases/${caseId}/statements`, {
+        method: "POST",
+        body: fd,
+        headers: apiAuthHeaders(),
+      });
       if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
       const data: UploadResult = await res.json();
       setResult(data);

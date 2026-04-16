@@ -30,12 +30,13 @@ from datetime import datetime
 from pathlib import Path
 
 import pdfplumber
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app import store as store_mod
+from app.auth import api_key_middleware, require_api_key
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
     Statement, CaseSummary, Entity, EntityDetail, EntityCreate, EntityLinkRequest,
@@ -46,6 +47,9 @@ from app.schemas import (
 REPO = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO))
 from plugins.bank.extraction.parser import parse_text, detect_bank  # noqa: E402
+from app.entity_inference import (  # noqa: E402
+    infer_counterparty, infer_channel, infer_category, iso_date,
+)
 
 
 app = FastAPI(
@@ -54,13 +58,28 @@ app = FastAPI(
     description="Forensic bank-statement analysis backend.",
 )
 
+def _allowed_origins() -> list[str]:
+    """Read ALLOWED_ORIGINS env var (comma-separated). Falls back to the
+    local dev vite + preview ports.
+    """
+    raw = os.environ.get("ALLOWED_ORIGINS")
+    if not raw:
+        return ["http://localhost:5173", "http://localhost:4173"]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:4173"],
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API-key enforcement. Active only when LEDGERFLOW_API_KEY is set in env.
+# Declared AFTER CORS so the CORS middleware runs first on each request and
+# can answer preflight even if the key is missing.
+app.middleware("http")(api_key_middleware)
 
 
 @app.on_event("startup")
@@ -464,6 +483,266 @@ async def preview_statement(
         }
     except Exception as exc:
         raise HTTPException(400, f"Could not read PDF: {exc}") from exc
+    finally:
+        try:
+            tmp.unlink()
+        except Exception:
+            pass
+
+
+_OPENING_BALANCE_RX = [
+    re.compile(r"Opening\s*Balance[^\d-]{0,20}(-?[\d,]+\.\d{2})", re.I),
+    re.compile(r"OpeningBalance[^\d-]{0,20}(-?[\d,]+\.\d{2})", re.I),
+    re.compile(r"B/F\s*Balance[^\d-]{0,20}(-?[\d,]+\.\d{2})", re.I),
+]
+_CLOSING_BALANCE_RX = [
+    re.compile(r"Closing\s*Balance[^\d-]{0,20}(-?[\d,]+\.\d{2})", re.I),
+    re.compile(r"ClosingBalance[^\d-]{0,20}(-?[\d,]+\.\d{2})", re.I),
+]
+
+
+def _parse_amount(raw: str) -> float | None:
+    try:
+        return float(raw.replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _guess_balances(text: str) -> tuple[float | None, float | None]:
+    opening = closing = None
+    for rx in _OPENING_BALANCE_RX:
+        m = rx.search(text)
+        if m:
+            opening = _parse_amount(m.group(1))
+            break
+    for rx in _CLOSING_BALANCE_RX:
+        m = rx.search(text)
+        if m:
+            closing = _parse_amount(m.group(1))
+            break
+    return opening, closing
+
+
+# Chunks that the UPI/NEFT/IMPS narrations put before the merchant name —
+# safe to strip when they appear as leading tokens, so the first useful token
+# is actually the merchant.
+_NARRATION_NOISE = re.compile(
+    r"^(?:DR|CR|TO|FROM|P2A|P2M|P2P|PAY|PAYMENT|TRF|TRANSFER|INB|REV|IMPS|NEFT|RTGS|UPI|POS|ATM)$",
+    re.I,
+)
+
+
+def _counterparty_from_description(desc: str, channel: str) -> str:
+    """More forgiving counterparty extractor than `infer_counterparty`.
+
+    Strategy: strip the channel prefix, split on /, drop leading tokens that
+    are direction markers, numbers, or common noise words; the first remaining
+    token with at least 3 letters is the merchant. Falls back to the shared
+    heuristic if nothing survives.
+    """
+    text = desc.strip()
+    # Drop the leading channel prefix (UPI/ NEFT/ IMPS/ etc).
+    text = re.sub(r"^(UPI|NEFT|IMPS|RTGS|POS|ATM|ECS|NACH|CHQ|CHEQUE)[\s\-/:]*", "", text, flags=re.I)
+    parts = [p.strip() for p in re.split(r"[/|]", text) if p.strip()]
+    for part in parts:
+        # Skip tokens that are pure digits, direction markers, or noise.
+        if _NARRATION_NOISE.match(part):
+            continue
+        letters = sum(1 for c in part if c.isalpha())
+        digits = sum(1 for c in part if c.isdigit())
+        if letters < 3:
+            continue
+        if digits > letters:  # looks like a ref number
+            continue
+        # Trim trailing ref/serial chunks on this token itself.
+        cleaned = re.sub(r"[-\s]+\d{6,}.*$", "", part).strip()
+        return cleaned[:80] or part[:80]
+    # Fallback: the shared inference.
+    fallback = infer_counterparty(desc, channel)
+    return fallback if fallback != "(unknown)" else (desc[:60] or "(unknown)")
+
+
+def _shape_transaction(raw: dict) -> dict:
+    desc = raw.get("description", "")
+    channel = infer_channel(desc)
+    direction = "debit" if raw.get("type") == "Dr" else "credit"
+    return {
+        "date": iso_date(raw.get("date", "")),
+        "amount": raw.get("amount"),
+        "direction": direction,
+        "description": desc,
+        "counterparty": _counterparty_from_description(desc, channel),
+        "channel": channel,
+        "category": infer_category(desc),
+        "balance_after": raw.get("balance"),  # only populated by hdfc_savings today
+    }
+
+
+MAX_EXTRACT_BYTES = 25 * 1024 * 1024  # 25 MB — bank statements are small; guard against mis-uploads.
+ALLOWED_PDF_MIMES = {"application/pdf", "application/octet-stream", "binary/octet-stream", ""}
+
+
+def _err(code: str, message: str, extra: dict | None = None) -> dict:
+    """Consistent error envelope. FastAPI wraps this in `{"detail": ...}`."""
+    body: dict = {"error_code": code, "message": message}
+    if extra:
+        body["extra"] = extra
+    return body
+
+
+@app.post("/api/extract")
+async def extract_statement(
+    file: UploadFile = File(...),
+    password: str | None = Form(default=None),
+) -> dict:
+    """Standalone PDF → structured bank-statement extraction.
+
+    Input  : multipart `file` (required, PDF, ≤25 MB), `password` (optional).
+    Output : `{bank, account, period, balance, summary, transactions, meta}`.
+             Dates are ISO-8601. `direction` is "debit" | "credit". Counterparty,
+             channel and category are inferred from the raw narration.
+
+    `meta.issues[]` carries non-fatal signals the caller should surface:
+      - "scanned_pdf_no_text_layer"  : pdfplumber got no text — likely an image PDF
+      - "unknown_bank_format"        : bank couldn't be auto-detected; tried all parsers
+      - "zero_transactions_extracted": parser ran but found no rows
+
+    Error responses use a structured envelope — see api_reference_bank_statement.md.
+    """
+    # ── validation ────────────────────────────────────────────────────────
+    if not file.filename:
+        raise HTTPException(400, _err("MISSING_FILE", "No file was uploaded."))
+
+    fname = file.filename
+    if not fname.lower().endswith(".pdf"):
+        raise HTTPException(415, _err(
+            "INVALID_FILE_TYPE",
+            "Only PDF files are supported.",
+            {"filename": fname, "expected_extension": ".pdf"},
+        ))
+
+    if file.content_type and file.content_type.lower() not in ALLOWED_PDF_MIMES:
+        raise HTTPException(415, _err(
+            "INVALID_FILE_TYPE",
+            "Expected application/pdf.",
+            {"received_content_type": file.content_type},
+        ))
+
+    content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(400, _err("EMPTY_FILE", "Uploaded file is empty (0 bytes)."))
+
+    if len(content) > MAX_EXTRACT_BYTES:
+        raise HTTPException(413, _err(
+            "FILE_TOO_LARGE",
+            f"File exceeds the {MAX_EXTRACT_BYTES // (1024*1024)} MB limit.",
+            {"size_bytes": len(content), "max_bytes": MAX_EXTRACT_BYTES},
+        ))
+
+    if not content.startswith(b"%PDF-"):
+        raise HTTPException(415, _err(
+            "INVALID_PDF_SIGNATURE",
+            "File does not start with %PDF- — it is not a valid PDF.",
+            {"first_bytes_hex": content[:8].hex()},
+        ))
+
+    tmp = UPLOAD_DIR / f"_extract_{int(datetime.utcnow().timestamp())}_{re.sub(r'[^A-Za-z0-9._-]', '_', fname)}"
+    tmp.write_bytes(content)
+    try:
+        # ── open with pdfplumber ─────────────────────────────────────────
+        try:
+            with pdfplumber.open(tmp, password=password or "") as pdf:
+                page_count = len(pdf.pages)
+                text = "\n".join((p.extract_text() or "") for p in pdf.pages)
+        except Exception as exc:
+            msg = str(exc).lower()
+            if "password" in msg or "encrypt" in msg:
+                code = "PDF_PASSWORD_INCORRECT" if password else "PDF_PASSWORD_REQUIRED"
+                hint = (
+                    "Incorrect password for the encrypted PDF."
+                    if password else
+                    "PDF is password-protected. Provide the correct `password` form field."
+                )
+                raise HTTPException(401, _err(code, hint)) from exc
+            raise HTTPException(422, _err(
+                "PDF_UNREADABLE",
+                "Could not read the PDF — file may be corrupted or malformed.",
+                {"underlying_error": str(exc)[:200]},
+            )) from exc
+
+        bank_key = detect_bank(text)
+        defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
+
+        # ── scanned / image PDF branch ───────────────────────────────────
+        if not text.strip():
+            return {
+                "bank": {"key": "unknown", "label": "Unknown", "account_type": None},
+                "account": {"number_masked": None, "holder_name": None},
+                "period": {"start": None, "end": None},
+                "balance": {"opening": None, "closing": None, "currency": "INR"},
+                "summary": {
+                    "transaction_count": 0, "total_debit": 0.0,
+                    "total_credit": 0.0, "net_change": 0.0,
+                },
+                "transactions": [],
+                "meta": {
+                    "filename": fname,
+                    "page_count": page_count,
+                    "parser": None,
+                    "text_empty": True,
+                    "issues": ["scanned_pdf_no_text_layer"],
+                    "note": "pdfplumber returned no text — likely a scanned/image PDF. Send a text-layer PDF, or retry once the OCR fallback is enabled.",
+                },
+            }
+
+        # ── parse transactions ───────────────────────────────────────────
+        raw_txns = parse_text(text)
+        shaped = [_shape_transaction(t) for t in raw_txns]
+
+        period_start, period_end = _guess_period(text)
+        if not period_start or not period_end:
+            txn_start, txn_end = _period_from_txns(raw_txns)
+            period_start = period_start or txn_start
+            period_end = period_end or txn_end
+
+        opening, closing = _guess_balances(text)
+
+        total_debit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "debit")
+        total_credit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "credit")
+
+        issues: list[str] = []
+        if bank_key == "unknown":
+            issues.append("unknown_bank_format")
+        if not shaped:
+            issues.append("zero_transactions_extracted")
+
+        return {
+            "bank": {
+                "key": bank_key,
+                "label": defaults["display"],
+                "account_type": defaults["account_type"],
+            },
+            "account": {
+                "number_masked": _guess_account_number(text),
+                "holder_name": _guess_holder_name(text),
+            },
+            "period": {"start": period_start, "end": period_end},
+            "balance": {"opening": opening, "closing": closing, "currency": "INR"},
+            "summary": {
+                "transaction_count": len(shaped),
+                "total_debit": round(total_debit, 2),
+                "total_credit": round(total_credit, 2),
+                "net_change": round(total_credit - total_debit, 2),
+            },
+            "transactions": shaped,
+            "meta": {
+                "filename": fname,
+                "page_count": page_count,
+                "parser": bank_key if bank_key != "unknown" else None,
+                "text_empty": False,
+                "issues": issues,
+            },
+        }
     finally:
         try:
             tmp.unlink()

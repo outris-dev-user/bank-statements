@@ -6,16 +6,28 @@
  * this file is unused.
  *
  * Base URL is `import.meta.env.VITE_API_URL` (defaults to http://localhost:8000).
+ * When `VITE_API_KEY` is set (Railway prod build), every request attaches an
+ * `X-API-Key` header so the backend's key gate accepts the call.
  */
 import type { Case, Person, Account, Statement, Transaction } from "../data/mockData";
 
-const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
+export const API_BASE =
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
+
+const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? "";
+
+/** Header map to attach to every fetch against the backend. Keeps the
+ *  key in one place so UploadModal (multipart) and request() (JSON) agree. */
+export function apiAuthHeaders(): Record<string, string> {
+  return API_KEY ? { "X-API-Key": API_KEY } : {};
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       "content-type": "application/json",
+      ...apiAuthHeaders(),
       ...(init?.headers ?? {}),
     },
   });
