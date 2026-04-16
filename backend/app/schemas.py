@@ -193,6 +193,14 @@ class GraphNode(BaseModel):
     meta: dict = Field(default_factory=dict)
 
 
+class GraphEdgeSample(BaseModel):
+    id: str
+    txn_date: str
+    amount: float
+    direction: Literal["Dr", "Cr"]
+    raw_description: str
+
+
 class GraphEdge(BaseModel):
     id: str
     source: str
@@ -201,6 +209,7 @@ class GraphEdge(BaseModel):
     total_amount: float = 0.0
     txn_count: int = 0
     sample_txn_ids: list[str] = Field(default_factory=list)
+    sample_txns: list[GraphEdgeSample] = Field(default_factory=list)
 
 
 class CaseGraph(BaseModel):

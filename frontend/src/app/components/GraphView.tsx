@@ -13,7 +13,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import ELK from "elkjs/lib/elk.bundled.js";
-import { Filter, Loader2, X, ExternalLink } from "lucide-react";
+import { Filter, Loader2, X, ExternalLink, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { useCaseGraph } from "../lib/queries";
 import type { GraphNode, GraphEdge } from "../lib/api";
 
@@ -32,7 +32,7 @@ const PALETTE = {
 const NODE_W = 240;
 const NODE_H = 52;
 
-type LayoutMode = "layered" | "force" | "radial";
+type LayoutMode = "layered" | "stress" | "radial";
 
 const ELK_ALGORITHMS: Record<LayoutMode, Record<string, string>> = {
   layered: {
@@ -45,11 +45,13 @@ const ELK_ALGORITHMS: Record<LayoutMode, Record<string, string>> = {
     "elk.layered.edgeRouting": "ORTHOGONAL",
     "elk.layered.thoroughness": "10",
   },
-  force: {
-    "elk.algorithm": "force",
-    "elk.force.iterations": "300",
+  // Stress (majorisation) converges more reliably than `force` on the
+  // bank-case graph, and is what the crypto team uses for organic mode.
+  stress: {
+    "elk.algorithm": "stress",
+    "elk.stress.desiredEdgeLength": "240",
+    "elk.stress.iterationLimit": "500",
     "elk.spacing.nodeNode": "80",
-    "elk.force.repulsivePower": "1",
   },
   radial: {
     "elk.algorithm": "radial",
@@ -97,7 +99,7 @@ async function computeElkLayout(
   return positions;
 }
 
-function buildEdges(edges: GraphEdge[], highlightId?: string): Edge[] {
+function buildEdges(edges: GraphEdge[], highlightId?: string, matchSet?: Set<string> | null): Edge[] {
   return edges.map((e) => {
     const isFlow = e.kind !== "owns";
     const strokeWidth = isFlow ? Math.min(6, 1 + Math.log10(Math.max(1, e.total_amount) / 1000)) : 1;
@@ -105,13 +107,15 @@ function buildEdges(edges: GraphEdge[], highlightId?: string): Edge[] {
       e.kind === "flow_out" ? "#dc2626"
       : e.kind === "flow_in" ? "#16a34a"
       : "#94a3b8";
-    const dim = highlightId && e.source !== highlightId && e.target !== highlightId;
+    const selDim = highlightId && e.source !== highlightId && e.target !== highlightId;
+    const searchDim = matchSet ? !(matchSet.has(e.source) || matchSet.has(e.target)) : false;
+    const dim = selDim || searchDim;
     return {
       id: e.id,
       source: e.source,
       target: e.target,
       label: isFlow ? `${e.txn_count}× ${formatINR(e.total_amount)}` : undefined,
-      style: { stroke: color, strokeWidth, opacity: dim ? 0.15 : 1 },
+      style: { stroke: color, strokeWidth, opacity: dim ? 0.12 : 1 },
       labelStyle: { fontSize: 10, fill: "#334155" },
       labelBgStyle: { fill: "#fff", opacity: 0.9 },
       markerEnd: { type: MarkerType.ArrowClosed, color },
@@ -130,6 +134,7 @@ export function GraphView({ caseId }: GraphViewProps) {
   const [layout, setLayout] = useState<LayoutMode>("layered");
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [layingOut, setLayingOut] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -162,6 +167,17 @@ export function GraphView({ caseId }: GraphViewProps) {
     return { nodes, edges };
   }, [data, showPersons, showAccounts, showEntities, minAmount, hideOrphans]);
 
+  // Match-set for the search input. Empty string → no dimming.
+  const matchSet = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return null;
+    const hits = new Set<string>();
+    for (const n of filtered.nodes) {
+      if (n.label.toLowerCase().includes(q)) hits.add(n.id);
+    }
+    return hits;
+  }, [search, filtered.nodes]);
+
   // (Re-)compute ELK layout whenever filtered graph or mode changes.
   useEffect(() => {
     if (!filtered.nodes.length) {
@@ -176,6 +192,7 @@ export function GraphView({ caseId }: GraphViewProps) {
         if (cancelled) return;
         const next: Node[] = filtered.nodes.map((n) => {
           const pos = positions.get(n.id) ?? { x: 0, y: 0 };
+          const dim = matchSet ? !matchSet.has(n.id) : false;
           return {
             id: n.id,
             position: pos,
@@ -191,12 +208,12 @@ export function GraphView({ caseId }: GraphViewProps) {
                 </div>
               ),
             },
-            style: nodeStyle(n.type),
+            style: { ...nodeStyle(n.type), opacity: dim ? 0.25 : 1 },
             draggable: true,
           };
         });
         setRfNodes(next);
-        setRfEdges(buildEdges(filtered.edges, selectedNode?.id));
+        setRfEdges(buildEdges(filtered.edges, selectedNode?.id, matchSet));
       })
       .catch((e) => console.error("ELK layout failed:", e))
       .finally(() => { if (!cancelled) setLayingOut(false); });
@@ -204,11 +221,20 @@ export function GraphView({ caseId }: GraphViewProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, layout]);
 
-  // Dim non-incident edges when a node is selected.
+  // Re-apply highlight/selection overlays when selection or search changes
+  // without re-laying out.
   useEffect(() => {
-    setRfEdges(buildEdges(filtered.edges, selectedNode?.id));
+    setRfNodes((prev) =>
+      prev.map((n) => {
+        const gn = filtered.nodes.find((x) => x.id === n.id);
+        if (!gn) return n;
+        const dim = matchSet ? !matchSet.has(n.id) : false;
+        return { ...n, style: { ...nodeStyle(gn.type), opacity: dim ? 0.25 : 1 } };
+      }),
+    );
+    setRfEdges(buildEdges(filtered.edges, selectedNode?.id, matchSet));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode]);
+  }, [selectedNode, matchSet]);
 
   const onNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     const gn = data?.nodes.find((n) => n.id === node.id);
@@ -223,6 +249,24 @@ export function GraphView({ caseId }: GraphViewProps) {
     <div className="space-y-3">
       {/* Filter bar */}
       <div className="bg-card border border-border rounded-lg p-3 flex items-center gap-4 flex-wrap text-sm">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Find entity / account…"
+            className="pl-8 pr-6 py-1.5 border border-border rounded text-sm w-56 focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Filter className="w-4 h-4" />
           Nodes
@@ -248,7 +292,7 @@ export function GraphView({ caseId }: GraphViewProps) {
             className="px-2 py-1 border border-border rounded text-sm bg-card"
           >
             <option value="layered">Layered (L→R hierarchy)</option>
-            <option value="force">Force (organic)</option>
+            <option value="stress">Stress (organic)</option>
             <option value="radial">Radial</option>
           </select>
         </label>
@@ -282,7 +326,7 @@ export function GraphView({ caseId }: GraphViewProps) {
         className="bg-card border border-border rounded-lg grid gap-0 overflow-hidden"
         style={{
           height: "72vh",
-          gridTemplateColumns: selectedNode ? "1fr 380px" : "1fr 0px",
+          gridTemplateColumns: selectedNode ? "1fr 520px" : "1fr 0px",
           transition: "grid-template-columns 180ms ease",
         }}
       >
@@ -318,6 +362,7 @@ export function GraphView({ caseId }: GraphViewProps) {
         {selectedNode && (
           <NodeInspector
             node={selectedNode}
+            allNodes={data.nodes}
             edges={data.edges}
             onClose={() => setSelectedNode(null)}
             caseId={caseId}
@@ -341,15 +386,25 @@ export function GraphView({ caseId }: GraphViewProps) {
 
 function NodeInspector({
   node,
+  allNodes,
   edges,
   onClose,
   caseId,
 }: {
   node: GraphNode;
+  allNodes: GraphNode[];
   edges: GraphEdge[];
   onClose: () => void;
   caseId: string;
 }) {
+  const [expandedEdgeId, setExpandedEdgeId] = useState<string | null>(null);
+
+  const nodeById = useMemo(() => {
+    const m = new Map<string, GraphNode>();
+    for (const n of allNodes) m.set(n.id, n);
+    return m;
+  }, [allNodes]);
+
   const incident = edges.filter((e) => e.source === node.id || e.target === node.id);
   const flowIn = incident.filter((e) => e.kind === "flow_in" && e.target === node.id);
   const flowOut = incident.filter((e) => e.kind === "flow_out" && e.source === node.id);
@@ -357,7 +412,6 @@ function NodeInspector({
   const totalOut = flowOut.reduce((s, e) => s + e.total_amount, 0);
   const palette = PALETTE[node.type as keyof typeof PALETTE];
 
-  // Extract bare id from "account:a1" / "entity:e12" / "person:p1"
   const [kind, bareId] = node.id.split(":");
 
   const workbenchLink = (() => {
@@ -365,6 +419,13 @@ function NodeInspector({
     if (kind === "person" || kind === "entity") return `/cases/${caseId}/workbench`;
     return null;
   })();
+
+  // Sort incident edges: flows by total_amount desc, owns first for persons.
+  const sortedIncident = [...incident].sort((a, b) => {
+    if (a.kind === "owns" && b.kind !== "owns") return -1;
+    if (b.kind === "owns" && a.kind !== "owns") return 1;
+    return b.total_amount - a.total_amount;
+  });
 
   return (
     <div className="border-l border-border bg-card flex flex-col min-w-0">
@@ -381,36 +442,33 @@ function NodeInspector({
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-sm">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">ID</div>
-          <div className="font-mono text-foreground text-xs">{bareId}</div>
+        <div className="flex items-center gap-6">
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">ID</div>
+            <div className="font-mono text-foreground text-xs">{bareId}</div>
+          </div>
+          {node.type === "account" && node.meta.bank && (
+            <div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">Bank</div>
+              <div className="text-foreground">{node.meta.bank} · {node.meta.type}</div>
+            </div>
+          )}
+          {node.type === "account" && node.meta.holder_name && node.meta.holder_name !== "Unknown" && (
+            <div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">Holder</div>
+              <div className="text-foreground">{node.meta.holder_name}</div>
+            </div>
+          )}
         </div>
-
-        {node.type === "account" && (
-          <>
-            {node.meta.bank && (
-              <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Bank</div>
-                <div className="text-foreground">{node.meta.bank} · {node.meta.type}</div>
-              </div>
-            )}
-            {node.meta.holder_name && node.meta.holder_name !== "Unknown" && (
-              <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Holder</div>
-                <div className="text-foreground">{node.meta.holder_name}</div>
-              </div>
-            )}
-          </>
-        )}
 
         {node.type === "entity" && Array.isArray(node.meta.aliases) && node.meta.aliases.length > 0 && (
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Aliases</div>
             <div className="flex flex-wrap gap-1">
-              {node.meta.aliases.slice(0, 8).map((a: string) => (
+              {node.meta.aliases.slice(0, 10).map((a: string) => (
                 <span key={a} className="text-xs px-1.5 py-0.5 bg-background border border-border rounded text-foreground">{a}</span>
               ))}
-              {node.meta.aliases.length > 8 && <span className="text-xs text-muted-foreground">+{node.meta.aliases.length - 8}</span>}
+              {node.meta.aliases.length > 10 && <span className="text-xs text-muted-foreground">+{node.meta.aliases.length - 10}</span>}
             </div>
           </div>
         )}
@@ -420,40 +478,83 @@ function NodeInspector({
             <div className="bg-background border border-border rounded p-2">
               <div className="text-xs text-muted-foreground">Flow in</div>
               <div className="text-base font-semibold text-[color:var(--fl-emerald-500)] tabular-nums">{formatINR(totalIn)}</div>
-              <div className="text-xs text-muted-foreground">{flowIn.reduce((s, e) => s + e.txn_count, 0)} txns</div>
+              <div className="text-xs text-muted-foreground">{flowIn.reduce((s, e) => s + e.txn_count, 0)} txns across {flowIn.length} source{flowIn.length !== 1 ? "s" : ""}</div>
             </div>
             <div className="bg-background border border-border rounded p-2">
               <div className="text-xs text-muted-foreground">Flow out</div>
               <div className="text-base font-semibold text-destructive tabular-nums">{formatINR(totalOut)}</div>
-              <div className="text-xs text-muted-foreground">{flowOut.reduce((s, e) => s + e.txn_count, 0)} txns</div>
+              <div className="text-xs text-muted-foreground">{flowOut.reduce((s, e) => s + e.txn_count, 0)} txns across {flowOut.length} target{flowOut.length !== 1 ? "s" : ""}</div>
             </div>
           </div>
         )}
 
-        {incident.length > 0 && (
+        {sortedIncident.length > 0 && (
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-              Connected edges ({incident.length})
+              Connected edges ({sortedIncident.length})
             </div>
-            <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
-              {incident.slice(0, 50).map((e) => (
-                <div key={e.id} className="text-xs border border-border rounded px-2 py-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-foreground">
-                      {e.kind === "owns" ? "owns" : e.source === node.id ? "out →" : "← in"}
-                    </span>
-                    <span className="text-muted-foreground tabular-nums">
-                      {e.kind !== "owns" && `${e.txn_count}× ${formatINR(e.total_amount)}`}
-                    </span>
+            <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
+              {sortedIncident.map((e) => {
+                const otherId = e.source === node.id ? e.target : e.source;
+                const otherNode = nodeById.get(otherId);
+                const otherLabel = otherNode?.label ?? otherId;
+                const isExpanded = expandedEdgeId === e.id;
+                const isOut = e.source === node.id;
+                const directionLabel =
+                  e.kind === "owns" ? "owns"
+                  : isOut ? "→ to"
+                  : "← from";
+                const directionColor =
+                  e.kind === "owns" ? "text-muted-foreground"
+                  : e.kind === "flow_out" ? "text-destructive"
+                  : "text-[color:var(--fl-emerald-500)]";
+                return (
+                  <div key={e.id} className="border border-border rounded bg-background">
+                    <button
+                      onClick={() => setExpandedEdgeId(isExpanded ? null : e.id)}
+                      className="w-full px-2.5 py-2 text-xs flex items-center gap-2 hover:bg-muted/50 rounded-t"
+                    >
+                      {e.kind !== "owns" ? (
+                        isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                                   : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      ) : (
+                        <span className="w-3.5 flex-shrink-0" />
+                      )}
+                      <span className={`font-medium ${directionColor} flex-shrink-0`}>{directionLabel}</span>
+                      <span className="text-foreground truncate text-left flex-1" title={otherLabel}>
+                        {otherLabel}
+                      </span>
+                      {e.kind !== "owns" && (
+                        <span className="text-muted-foreground tabular-nums flex-shrink-0">
+                          {e.txn_count}× · {formatINR(e.total_amount)}
+                        </span>
+                      )}
+                    </button>
+                    {isExpanded && e.sample_txns.length > 0 && (
+                      <div className="border-t border-border px-2 py-1.5 space-y-1 bg-card">
+                        {e.sample_txns.map((t) => (
+                          <div key={t.id} className="text-[11px] flex items-center gap-2">
+                            <span className="text-muted-foreground font-mono w-16 flex-shrink-0">
+                              {new Date(t.txn_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                            </span>
+                            <span className={`tabular-nums w-20 text-right flex-shrink-0 ${t.direction === "Dr" ? "text-destructive" : "text-[color:var(--fl-emerald-500)]"}`}>
+                              {t.direction === "Dr" ? "−" : "+"}{formatINR(t.amount)}
+                            </span>
+                            <span className="text-muted-foreground truncate" title={t.raw_description}>
+                              {t.raw_description}
+                            </span>
+                          </div>
+                        ))}
+                        {e.txn_count > e.sample_txns.length && (
+                          <div className="text-[11px] text-muted-foreground italic">
+                            +{e.txn_count - e.sample_txns.length} more — open in Workbench to see all
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-muted-foreground font-mono text-[10px] mt-0.5 truncate">
-                    {e.source === node.id ? e.target : e.source}
-                  </div>
-                </div>
-              ))}
-              {incident.length > 50 && (
-                <div className="text-xs text-muted-foreground">+{incident.length - 50} more</div>
-              )}
+                );
+              })}
             </div>
           </div>
         )}

@@ -104,6 +104,14 @@ export interface GraphNode {
   meta: Record<string, any>;
 }
 
+export interface GraphEdgeSample {
+  id: string;
+  txn_date: string;
+  amount: number;
+  direction: "Dr" | "Cr";
+  raw_description: string;
+}
+
 export interface GraphEdge {
   id: string;
   source: string;
@@ -112,6 +120,7 @@ export interface GraphEdge {
   total_amount: number;
   txn_count: number;
   sample_txn_ids: string[];
+  sample_txns: GraphEdgeSample[];
 }
 
 export interface CaseGraph {

@@ -33,7 +33,7 @@ from app.schemas import (
     CaseDetail, TransactionPage, TransactionPatch,
     CaseSummary, MonthlyPoint, TopCounterparty, CategoryBreakdown, PatternHit,
     Entity, EntityDetail, EntityCreate,
-    GraphNode, GraphEdge, CaseGraph,
+    GraphNode, GraphEdge, GraphEdgeSample, CaseGraph,
 )
 
 
@@ -761,30 +761,43 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
             if l.transaction_id not in txn_entity:
                 txn_entity[l.transaction_id] = l.entity_id
 
-        # Aggregate account ↔ entity flows
+        # Aggregate account ↔ entity flows, keeping ALL contributing txns
+        # (not just IDs) so the frontend can render a date/amount breakdown
+        # without a round-trip.
         flow: dict[tuple[str, str, str], dict] = {}  # (account, entity, direction)
         for t in txns:
             ent = txn_entity.get(t.id)
             if not ent:
                 continue
-            if t.direction == "Dr":
-                key = (t.account_id, ent, "out")
-            else:
-                key = (t.account_id, ent, "in")
-            bucket = flow.setdefault(key, {"total": 0.0, "count": 0, "samples": []})
+            key = (t.account_id, ent, "out" if t.direction == "Dr" else "in")
+            bucket = flow.setdefault(key, {"total": 0.0, "count": 0, "txns": []})
             bucket["total"] += float(t.amount)
             bucket["count"] += 1
-            if len(bucket["samples"]) < 5:
-                bucket["samples"].append(t.id)
+            bucket["txns"].append(t)
 
         for (acc_id, ent_id, direction), v in flow.items():
+            # Sort contributing txns newest first and keep the first 20 for the
+            # inline expansion. Any heavier drilldown goes through the
+            # Workbench. 20 is comfortably above a typical edge's count.
+            sorted_txns = sorted(v["txns"], key=lambda t: (t.txn_date or "", t.row_index), reverse=True)
+            samples = [
+                GraphEdgeSample(
+                    id=t.id,
+                    txn_date=t.txn_date,
+                    amount=float(t.amount),
+                    direction=t.direction,
+                    raw_description=(t.raw_description or "")[:140],
+                )
+                for t in sorted_txns[:20]
+            ]
+            sample_ids = [t.id for t in sorted_txns[:5]]
             if direction == "out":
                 edges.append(GraphEdge(
                     id=f"out:{acc_id}:{ent_id}",
                     source=f"account:{acc_id}", target=f"entity:{ent_id}",
                     kind="flow_out",
                     total_amount=round(v["total"], 2), txn_count=v["count"],
-                    sample_txn_ids=v["samples"],
+                    sample_txn_ids=sample_ids, sample_txns=samples,
                 ))
             else:
                 edges.append(GraphEdge(
@@ -792,7 +805,7 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                     source=f"entity:{ent_id}", target=f"account:{acc_id}",
                     kind="flow_in",
                     total_amount=round(v["total"], 2), txn_count=v["count"],
-                    sample_txn_ids=v["samples"],
+                    sample_txn_ids=sample_ids, sample_txns=samples,
                 ))
 
         return CaseGraph(case_id=case_id, nodes=nodes, edges=edges)
