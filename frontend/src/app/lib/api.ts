@@ -11,8 +11,29 @@
  */
 import type { Case, Person, Account, Statement, Transaction } from "../data/mockData";
 
-export const API_BASE =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
+const RAW_API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
+
+/** Normalise whatever came in via VITE_API_URL: strip trailing slash, and
+ *  complain loudly if the scheme prefix is missing so the next misconfig
+ *  surfaces at boot instead of as a mysterious JSON parse error 20 requests
+ *  later. A bare hostname like `backend.up.railway.app` is almost always
+ *  a paste error — fetch() treats it as a relative path. */
+function normaliseBase(raw: string): string {
+  const trimmed = raw.trim().replace(/\/+$/, "");
+  if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+    // Surface a clear diagnostic at module load. We don't auto-prepend https://
+    // because "which scheme?" is a deploy-time decision, not a library guess.
+    // eslint-disable-next-line no-console
+    console.error(
+      `[api] VITE_API_URL is missing a scheme — got "${trimmed}". ` +
+      `fetch() will treat this as a relative path and requests will hit the frontend's own origin. ` +
+      `Set VITE_API_URL to e.g. "https://your-backend.up.railway.app".`,
+    );
+  }
+  return trimmed;
+}
+
+export const API_BASE = normaliseBase(RAW_API_URL);
 
 const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? "";
 
@@ -23,19 +44,41 @@ export function apiAuthHeaders(): Record<string, string> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "content-type": "application/json",
-      ...apiAuthHeaders(),
-      ...(init?.headers ?? {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "content-type": "application/json",
+        ...apiAuthHeaders(),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch (networkErr) {
+    throw new Error(
+      `Network error calling ${API_BASE}${path} — ${networkErr instanceof Error ? networkErr.message : String(networkErr)}. ` +
+      `Check VITE_API_URL (baked value: "${API_BASE}") and the backend's ALLOWED_ORIGINS.`,
+    );
+  }
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`${res.status} ${res.statusText} — ${body.slice(0, 200)}`);
   }
-  return res.json() as Promise<T>;
+  // Detect "response is HTML where JSON was expected" — the classic symptom
+  // of VITE_API_URL being wrong (request hit the frontend's SPA fallback).
+  const text = await res.text();
+  if (text.trimStart().startsWith("<")) {
+    throw new Error(
+      `API returned HTML instead of JSON — the request probably hit the frontend's own origin. ` +
+      `VITE_API_URL was baked as "${API_BASE}". Requested path: "${path}". ` +
+      `Set VITE_API_URL to the backend's public URL with the scheme prefix and rebuild.`,
+    );
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(`API returned invalid JSON for ${path}: ${text.slice(0, 200)}`);
+  }
 }
 
 // ───────────────── endpoints ─────────────────
