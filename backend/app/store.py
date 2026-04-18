@@ -1237,7 +1237,17 @@ def ingest_statement(
 def seed_from_benchmarks() -> None:
     """If the DB is empty, seed the same case/person/account structure the
     export-for-frontend script produces. Idempotent: no-op once seeded.
+
+    Seed source files (`tools/export-for-frontend.py` and `benchmarks/`) are
+    **not** shipped in the production Docker image — they're dev-only. When
+    the source files aren't present (Railway), we skip cleanly and let the
+    DB stay empty; real data arrives via uploads.
     """
+    from pathlib import Path as _Path
+    repo = _Path(__file__).parent.parent.parent
+    seed_script = repo / "tools" / "export-for-frontend.py"
+    if not seed_script.exists():
+        return
     with get_session() as s:
         if s.query(CaseRow).count() > 0:
             return
