@@ -79,14 +79,24 @@ export function FlowEdge({
           </marker>
         </defs>
       </svg>
-      {/* Invisible wide hit-area so thin edges are still easy to click. */}
+      {/* Invisible wide hit-area so thin edges are still easy to click.
+          `<title>` renders as a native browser tooltip on hover. */}
       <path
         d={edgePath}
         fill="none"
         stroke="transparent"
         strokeWidth={Math.max(18, thickness + 16)}
         style={{ cursor: "pointer" }}
-      />
+      >
+        {isFlow && (
+          <title>
+            {type === "flow_out" ? "Out" : "In"}: {txnCount} txn{txnCount === 1 ? "" : "s"}
+            {" · "}
+            {formatINR(totalAmount)} — click to inspect
+          </title>
+        )}
+        {!isFlow && <title>Ownership</title>}
+      </path>
       <BaseEdge
         id={id}
         path={edgePath}

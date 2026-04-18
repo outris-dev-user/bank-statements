@@ -131,14 +131,22 @@ export interface GraphEdge {
   kind: "owns" | "flow_in" | "flow_out";
   total_amount: number;
   txn_count: number;
+  date_min?: string;
+  date_max?: string;
   sample_txn_ids: string[];
   sample_txns: GraphEdgeSample[];
+}
+
+export interface MonthlyActivityPoint {
+  month: string; // "YYYY-MM"
+  count: number;
 }
 
 export interface CaseGraph {
   case_id: string;
   nodes: GraphNode[];
   edges: GraphEdge[];
+  monthly_activity?: MonthlyActivityPoint[];
 }
 
 export const fetchCaseGraph = (caseId: string) =>

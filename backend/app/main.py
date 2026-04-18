@@ -22,6 +22,7 @@ Env:
     LEDGERFLOW_RESET_DB=1   # reset + reseed on startup (dev only)
 """
 from __future__ import annotations
+import json
 import os
 import re
 import shutil
@@ -30,12 +31,13 @@ from datetime import datetime
 from pathlib import Path
 
 import pdfplumber
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app import store as store_mod
+from app import extraction_log
 from app.auth import api_key_middleware, require_api_key
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
@@ -592,162 +594,215 @@ def _err(code: str, message: str, extra: dict | None = None) -> dict:
 
 @app.post("/api/extract")
 async def extract_statement(
+    request: Request,
     file: UploadFile = File(...),
     password: str | None = Form(default=None),
+    submitted_by: str | None = Form(default=None),
 ) -> dict:
     """Standalone PDF → structured bank-statement extraction.
 
-    Input  : multipart `file` (required, PDF, ≤25 MB), `password` (optional).
+    Input  : multipart `file` (required, PDF, ≤25 MB), `password` (optional),
+             `submitted_by` (optional free-text tag — e.g. "rahul-cousin" —
+             persisted in the extraction log so we can triage later uploads).
+             You can also send the tag as the `X-Submitter` header.
     Output : `{bank, account, period, balance, summary, transactions, meta}`.
-             Dates are ISO-8601. `direction` is "debit" | "credit". Counterparty,
-             channel and category are inferred from the raw narration.
 
-    `meta.issues[]` carries non-fatal signals the caller should surface:
-      - "scanned_pdf_no_text_layer"  : pdfplumber got no text — likely an image PDF
-      - "unknown_bank_format"        : bank couldn't be auto-detected; tried all parsers
-      - "zero_transactions_extracted": parser ran but found no rows
-
-    Error responses use a structured envelope — see api_reference_bank_statement.md.
+    Every call is recorded in the `extraction_log` table regardless of
+    success, and every valid PDF is archived by content hash in the PDF store.
+    See api_reference_bank_statement.md for the full contract.
     """
-    # ── validation ────────────────────────────────────────────────────────
-    if not file.filename:
-        raise HTTPException(400, _err("MISSING_FILE", "No file was uploaded."))
+    # Context we collect as we go — log at the end (finally) whether we
+    # succeed, raise, or short-circuit on a soft failure.
+    submitter = (submitted_by or request.headers.get("x-submitter") or "").strip() or None
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
 
-    fname = file.filename
-    if not fname.lower().endswith(".pdf"):
-        raise HTTPException(415, _err(
-            "INVALID_FILE_TYPE",
-            "Only PDF files are supported.",
-            {"filename": fname, "expected_extension": ".pdf"},
-        ))
+    log_ctx: dict = {
+        "filename": (file.filename or ""),
+        "file_size": 0,
+        "file_hash": None,
+        "pdf_stored_path": None,
+        "was_password_protected": bool(password),
+        "http_status": 200,
+        "success": False,
+        "response": None,
+        "error_code": None,
+        "submitter_label": submitter,
+        "client_ip": client_ip,
+        "user_agent": user_agent,
+    }
 
-    if file.content_type and file.content_type.lower() not in ALLOWED_PDF_MIMES:
-        raise HTTPException(415, _err(
-            "INVALID_FILE_TYPE",
-            "Expected application/pdf.",
-            {"received_content_type": file.content_type},
-        ))
+    def _raise(status: int, code: str, message: str, extra: dict | None = None):
+        log_ctx["http_status"] = status
+        log_ctx["error_code"] = code
+        raise HTTPException(status, _err(code, message, extra))
 
-    content = await file.read()
-    if len(content) == 0:
-        raise HTTPException(400, _err("EMPTY_FILE", "Uploaded file is empty (0 bytes)."))
-
-    if len(content) > MAX_EXTRACT_BYTES:
-        raise HTTPException(413, _err(
-            "FILE_TOO_LARGE",
-            f"File exceeds the {MAX_EXTRACT_BYTES // (1024*1024)} MB limit.",
-            {"size_bytes": len(content), "max_bytes": MAX_EXTRACT_BYTES},
-        ))
-
-    if not content.startswith(b"%PDF-"):
-        raise HTTPException(415, _err(
-            "INVALID_PDF_SIGNATURE",
-            "File does not start with %PDF- — it is not a valid PDF.",
-            {"first_bytes_hex": content[:8].hex()},
-        ))
-
-    tmp = UPLOAD_DIR / f"_extract_{int(datetime.utcnow().timestamp())}_{re.sub(r'[^A-Za-z0-9._-]', '_', fname)}"
-    tmp.write_bytes(content)
     try:
-        # ── open with pdfplumber ─────────────────────────────────────────
+        # ── validation ────────────────────────────────────────────────────
+        if not file.filename:
+            _raise(400, "MISSING_FILE", "No file was uploaded.")
+
+        fname = file.filename
+        log_ctx["filename"] = fname
+
+        if not fname.lower().endswith(".pdf"):
+            _raise(415, "INVALID_FILE_TYPE",
+                   "Only PDF files are supported.",
+                   {"filename": fname, "expected_extension": ".pdf"})
+
+        if file.content_type and file.content_type.lower() not in ALLOWED_PDF_MIMES:
+            _raise(415, "INVALID_FILE_TYPE",
+                   "Expected application/pdf.",
+                   {"received_content_type": file.content_type})
+
+        content = await file.read()
+        log_ctx["file_size"] = len(content)
+
+        if len(content) == 0:
+            _raise(400, "EMPTY_FILE", "Uploaded file is empty (0 bytes).")
+
+        if len(content) > MAX_EXTRACT_BYTES:
+            _raise(413, "FILE_TOO_LARGE",
+                   f"File exceeds the {MAX_EXTRACT_BYTES // (1024*1024)} MB limit.",
+                   {"size_bytes": len(content), "max_bytes": MAX_EXTRACT_BYTES})
+
+        if not content.startswith(b"%PDF-"):
+            _raise(415, "INVALID_PDF_SIGNATURE",
+                   "File does not start with %PDF- — it is not a valid PDF.",
+                   {"first_bytes_hex": content[:8].hex()})
+
+        # ── archive the PDF bytes (content-addressed) ─────────────────────
         try:
-            with pdfplumber.open(tmp, password=password or "") as pdf:
-                page_count = len(pdf.pages)
-                text = "\n".join((p.extract_text() or "") for p in pdf.pages)
+            fh, rel_path = extraction_log.store_pdf_bytes(content)
+            log_ctx["file_hash"] = fh
+            log_ctx["pdf_stored_path"] = rel_path
         except Exception as exc:
-            msg = str(exc).lower()
-            if "password" in msg or "encrypt" in msg:
-                code = "PDF_PASSWORD_INCORRECT" if password else "PDF_PASSWORD_REQUIRED"
-                hint = (
-                    "Incorrect password for the encrypted PDF."
-                    if password else
-                    "PDF is password-protected. Provide the correct `password` form field."
-                )
-                raise HTTPException(401, _err(code, hint)) from exc
-            raise HTTPException(422, _err(
-                "PDF_UNREADABLE",
-                "Could not read the PDF — file may be corrupted or malformed.",
-                {"underlying_error": str(exc)[:200]},
-            )) from exc
+            # Never fail the extraction just because the archive write failed.
+            print(f"[extract] PDF archive failed: {exc!r}")
 
-        bank_key = detect_bank(text)
-        defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
+        tmp = UPLOAD_DIR / f"_extract_{int(datetime.utcnow().timestamp())}_{re.sub(r'[^A-Za-z0-9._-]', '_', fname)}"
+        tmp.write_bytes(content)
+        try:
+            # ── open with pdfplumber ─────────────────────────────────────
+            try:
+                with pdfplumber.open(tmp, password=password or "") as pdf:
+                    page_count = len(pdf.pages)
+                    text = "\n".join((p.extract_text() or "") for p in pdf.pages)
+            except Exception as exc:
+                msg = str(exc).lower()
+                if "password" in msg or "encrypt" in msg:
+                    code = "PDF_PASSWORD_INCORRECT" if password else "PDF_PASSWORD_REQUIRED"
+                    hint = (
+                        "Incorrect password for the encrypted PDF."
+                        if password else
+                        "PDF is password-protected. Provide the correct `password` form field."
+                    )
+                    _raise(401, code, hint)
+                _raise(422, "PDF_UNREADABLE",
+                       "Could not read the PDF — file may be corrupted or malformed.",
+                       {"underlying_error": str(exc)[:200]})
 
-        # ── scanned / image PDF branch ───────────────────────────────────
-        if not text.strip():
-            return {
-                "bank": {"key": "unknown", "label": "Unknown", "account_type": None},
-                "account": {"number_masked": None, "holder_name": None},
-                "period": {"start": None, "end": None},
-                "balance": {"opening": None, "closing": None, "currency": "INR"},
-                "summary": {
-                    "transaction_count": 0, "total_debit": 0.0,
-                    "total_credit": 0.0, "net_change": 0.0,
+            bank_key = detect_bank(text)
+            defaults = BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])
+
+            # ── scanned / image PDF branch ───────────────────────────────
+            if not text.strip():
+                response = {
+                    "bank": {"key": "unknown", "label": "Unknown", "account_type": None},
+                    "account": {"number_masked": None, "holder_name": None},
+                    "period": {"start": None, "end": None},
+                    "balance": {"opening": None, "closing": None, "currency": "INR"},
+                    "summary": {
+                        "transaction_count": 0, "total_debit": 0.0,
+                        "total_credit": 0.0, "net_change": 0.0,
+                    },
+                    "transactions": [],
+                    "meta": {
+                        "filename": fname,
+                        "page_count": page_count,
+                        "parser": None,
+                        "text_empty": True,
+                        "issues": ["scanned_pdf_no_text_layer"],
+                        "note": "pdfplumber returned no text — likely a scanned/image PDF. Send a text-layer PDF, or retry once the OCR fallback is enabled.",
+                    },
+                }
+                log_ctx["success"] = True
+                log_ctx["response"] = response
+                return response
+
+            # ── parse transactions ───────────────────────────────────────
+            raw_txns = parse_text(text)
+            shaped = [_shape_transaction(t) for t in raw_txns]
+
+            period_start, period_end = _guess_period(text)
+            if not period_start or not period_end:
+                txn_start, txn_end = _period_from_txns(raw_txns)
+                period_start = period_start or txn_start
+                period_end = period_end or txn_end
+
+            opening, closing = _guess_balances(text)
+
+            total_debit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "debit")
+            total_credit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "credit")
+
+            issues: list[str] = []
+            if bank_key == "unknown":
+                issues.append("unknown_bank_format")
+            if not shaped:
+                issues.append("zero_transactions_extracted")
+
+            response = {
+                "bank": {
+                    "key": bank_key,
+                    "label": defaults["display"],
+                    "account_type": defaults["account_type"],
                 },
-                "transactions": [],
+                "account": {
+                    "number_masked": _guess_account_number(text),
+                    "holder_name": _guess_holder_name(text),
+                },
+                "period": {"start": period_start, "end": period_end},
+                "balance": {"opening": opening, "closing": closing, "currency": "INR"},
+                "summary": {
+                    "transaction_count": len(shaped),
+                    "total_debit": round(total_debit, 2),
+                    "total_credit": round(total_credit, 2),
+                    "net_change": round(total_credit - total_debit, 2),
+                },
+                "transactions": shaped,
                 "meta": {
                     "filename": fname,
                     "page_count": page_count,
-                    "parser": None,
-                    "text_empty": True,
-                    "issues": ["scanned_pdf_no_text_layer"],
-                    "note": "pdfplumber returned no text — likely a scanned/image PDF. Send a text-layer PDF, or retry once the OCR fallback is enabled.",
+                    "parser": bank_key if bank_key != "unknown" else None,
+                    "text_empty": False,
+                    "issues": issues,
                 },
             }
-
-        # ── parse transactions ───────────────────────────────────────────
-        raw_txns = parse_text(text)
-        shaped = [_shape_transaction(t) for t in raw_txns]
-
-        period_start, period_end = _guess_period(text)
-        if not period_start or not period_end:
-            txn_start, txn_end = _period_from_txns(raw_txns)
-            period_start = period_start or txn_start
-            period_end = period_end or txn_end
-
-        opening, closing = _guess_balances(text)
-
-        total_debit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "debit")
-        total_credit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "credit")
-
-        issues: list[str] = []
-        if bank_key == "unknown":
-            issues.append("unknown_bank_format")
-        if not shaped:
-            issues.append("zero_transactions_extracted")
-
-        return {
-            "bank": {
-                "key": bank_key,
-                "label": defaults["display"],
-                "account_type": defaults["account_type"],
-            },
-            "account": {
-                "number_masked": _guess_account_number(text),
-                "holder_name": _guess_holder_name(text),
-            },
-            "period": {"start": period_start, "end": period_end},
-            "balance": {"opening": opening, "closing": closing, "currency": "INR"},
-            "summary": {
-                "transaction_count": len(shaped),
-                "total_debit": round(total_debit, 2),
-                "total_credit": round(total_credit, 2),
-                "net_change": round(total_credit - total_debit, 2),
-            },
-            "transactions": shaped,
-            "meta": {
-                "filename": fname,
-                "page_count": page_count,
-                "parser": bank_key if bank_key != "unknown" else None,
-                "text_empty": False,
-                "issues": issues,
-            },
-        }
+            log_ctx["success"] = True
+            log_ctx["response"] = response
+            return response
+        finally:
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
     finally:
-        try:
-            tmp.unlink()
-        except Exception:
-            pass
+        # Always record — validation reject, password error, unreadable, or
+        # success. Gives us the full picture of what users are sending us.
+        extraction_log.record(
+            filename=log_ctx["filename"],
+            file_size=log_ctx["file_size"],
+            file_hash=log_ctx["file_hash"],
+            pdf_stored_path=log_ctx["pdf_stored_path"],
+            was_password_protected=log_ctx["was_password_protected"],
+            http_status=log_ctx["http_status"],
+            success=log_ctx["success"],
+            response=log_ctx["response"],
+            error_code=log_ctx["error_code"],
+            submitter_label=log_ctx["submitter_label"],
+            client_ip=log_ctx["client_ip"],
+            user_agent=log_ctx["user_agent"],
+        )
 
 
 @app.get("/api/statements/{statement_id}", response_model=Statement)
@@ -879,3 +934,105 @@ def dev_reset() -> dict:
     """Drop all tables and re-seed from benchmark output. Dev only."""
     store_mod.init_and_seed(reset=True)
     return {"status": "reset+seeded", **store_mod.counts()}
+
+
+# ───── admin: browse the extraction log ─────
+
+@app.get("/api/admin/extractions")
+def list_extractions(
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    success: bool | None = Query(default=None),
+    bank: str | None = Query(default=None),
+    submitter: str | None = Query(default=None),
+) -> dict:
+    """Browse every /api/extract call we've logged. Filterable by success,
+    bank key, and submitter label. Includes pagination. The full response
+    JSON is excluded from the list view — fetch a single row for that.
+    """
+    from app.db import ExtractionLogRow, get_session
+    with get_session() as s:
+        q = s.query(ExtractionLogRow)
+        if success is not None:
+            q = q.filter(ExtractionLogRow.success == success)
+        if bank:
+            q = q.filter(ExtractionLogRow.bank_key_detected == bank)
+        if submitter:
+            q = q.filter(ExtractionLogRow.submitter_label == submitter)
+        total = q.count()
+        rows = (
+            q.order_by(ExtractionLogRow.received_at.desc())
+            .offset(offset).limit(limit).all()
+        )
+        items = [
+            {
+                "id": r.id,
+                "received_at": r.received_at,
+                "filename": r.filename,
+                "file_size": r.file_size,
+                "file_hash": r.file_hash,
+                "was_password_protected": r.was_password_protected,
+                "bank_key_detected": r.bank_key_detected,
+                "page_count": r.page_count,
+                "transaction_count": r.transaction_count,
+                "issues": json.loads(r.issues_json or "[]"),
+                "success": r.success,
+                "http_status": r.http_status,
+                "error_code": r.error_code,
+                "submitter_label": r.submitter_label,
+                "client_ip": r.client_ip,
+            }
+            for r in rows
+        ]
+        return {"total": total, "offset": offset, "limit": limit, "items": items}
+
+
+@app.get("/api/admin/extractions/{extraction_id}")
+def get_extraction(extraction_id: str) -> dict:
+    """Full detail — includes the response JSON we returned to the caller."""
+    from app.db import ExtractionLogRow, get_session
+    with get_session() as s:
+        r = s.get(ExtractionLogRow, extraction_id)
+        if not r:
+            raise HTTPException(404, f"Extraction {extraction_id} not found")
+        return {
+            "id": r.id,
+            "received_at": r.received_at,
+            "filename": r.filename,
+            "file_size": r.file_size,
+            "file_hash": r.file_hash,
+            "pdf_stored_path": r.pdf_stored_path,
+            "was_password_protected": r.was_password_protected,
+            "bank_key_detected": r.bank_key_detected,
+            "page_count": r.page_count,
+            "transaction_count": r.transaction_count,
+            "issues": json.loads(r.issues_json or "[]"),
+            "success": r.success,
+            "http_status": r.http_status,
+            "error_code": r.error_code,
+            "response": json.loads(r.response_json) if r.response_json else None,
+            "submitter_label": r.submitter_label,
+            "client_ip": r.client_ip,
+            "user_agent": r.user_agent,
+        }
+
+
+@app.get("/api/admin/extractions/{extraction_id}/pdf")
+def download_extraction_pdf(extraction_id: str):
+    """Stream the archived PDF. 404 if we never stored it (e.g. rejected at
+    validation for non-PDF signature)."""
+    from app.db import ExtractionLogRow, get_session
+    with get_session() as s:
+        r = s.get(ExtractionLogRow, extraction_id)
+        if not r:
+            raise HTTPException(404, f"Extraction {extraction_id} not found")
+        if not r.pdf_stored_path:
+            raise HTTPException(404, "No PDF was archived for this extraction (validation rejected before archive).")
+        path = extraction_log.resolve_pdf_path(r.pdf_stored_path)
+        if not path.exists():
+            raise HTTPException(410, "PDF was logged but is no longer on disk.")
+        return FileResponse(
+            str(path),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{r.filename}"'},
+        )

@@ -1,7 +1,11 @@
 """SQLAlchemy setup + ORM models.
 
-One SQLite file per deployment. Schema created on startup (no Alembic
-yet — will add when the schema starts moving in production).
+Storage backend is driven by the `DATABASE_URL` env var. On Railway (prod)
+this is set by the Postgres add-on to `postgres://...`; locally it's unset
+and we fall back to a SQLite file at `backend/ledgerflow.sqlite`.
+
+Railway hands out a `postgres://` URL; SQLAlchemy 2.x requires the explicit
+driver name `postgresql+psycopg://`, so we rewrite the prefix transparently.
 
 The ORM models are the *storage* shape. The Pydantic schemas in
 `schemas.py` are the *wire* shape. They're intentionally decoupled so
@@ -9,6 +13,7 @@ we can evolve storage without breaking API contracts.
 """
 from __future__ import annotations
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -23,9 +28,30 @@ from sqlalchemy.orm import (
 BACKEND = Path(__file__).parent.parent
 REPO = BACKEND.parent
 DB_PATH = BACKEND / "ledgerflow.sqlite"
-DB_URL = f"sqlite:///{DB_PATH}"
 
-engine = create_engine(DB_URL, echo=False, future=True, connect_args={"check_same_thread": False})
+
+def _resolve_db_url() -> str:
+    raw = os.environ.get("DATABASE_URL", "").strip()
+    if not raw:
+        return f"sqlite:///{DB_PATH}"
+    # Normalise Railway / Heroku-style scheme to SQLAlchemy 2.x driver form.
+    if raw.startswith("postgres://"):
+        raw = "postgresql+psycopg://" + raw[len("postgres://"):]
+    elif raw.startswith("postgresql://") and "+psycopg" not in raw.split("://", 1)[0]:
+        raw = "postgresql+psycopg://" + raw[len("postgresql://"):]
+    return raw
+
+
+DB_URL = _resolve_db_url()
+
+_engine_kwargs: dict = {"echo": False, "future": True}
+if DB_URL.startswith("sqlite"):
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    # Postgres: pool_pre_ping avoids "server closed the connection" after idle.
+    _engine_kwargs["pool_pre_ping"] = True
+
+engine = create_engine(DB_URL, **_engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)
 
 
@@ -147,6 +173,36 @@ class TransactionEntityLinkRow(Base):
     transaction_id: Mapped[str] = mapped_column(ForeignKey("transactions.id"), index=True)
     entity_id: Mapped[str] = mapped_column(ForeignKey("entities.id"), index=True)
     role: Mapped[str] = mapped_column(String, default="counterparty")
+
+
+class ExtractionLogRow(Base):
+    """One row per `/api/extract` call — success or failure.
+
+    Separate from the case-store tables. The data-collection experiment uses
+    this to accumulate real-world bank PDFs (stored on the mounted volume)
+    alongside what we extracted, so we can later benchmark parser quality
+    against real user uploads.
+    """
+    __tablename__ = "extraction_log"
+    id: Mapped[str] = mapped_column(String, primary_key=True)          # uuid4
+    received_at: Mapped[str] = mapped_column(String, index=True)       # ISO-8601 UTC
+    filename: Mapped[str] = mapped_column(String)
+    file_size: Mapped[int] = mapped_column(Integer, default=0)
+    file_hash: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)  # sha256 of bytes
+    pdf_stored_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)         # relative path in PDF store
+    was_password_protected: Mapped[bool] = mapped_column(Boolean, default=False)
+    bank_key_detected: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)
+    page_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    transaction_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    issues_json: Mapped[str] = mapped_column(String, default="[]")     # list[str] — meta.issues
+    success: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    http_status: Mapped[int] = mapped_column(Integer, default=0)
+    error_code: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)
+    response_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)           # full JSON body we returned
+    submitter_label: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)
+    client_ip: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    feedback_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)           # later: submitter feedback
 
 
 class EditEventRow(Base):

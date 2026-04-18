@@ -208,6 +208,11 @@ class GraphEdge(BaseModel):
     kind: Literal["owns", "flow_in", "flow_out"]
     total_amount: float = 0.0
     txn_count: int = 0
+    # ISO date of the first and last contributing txn. Used by the canvas
+    # date-range filter to include/exclude edges by their activity window.
+    # Empty for `owns` edges (no transactions).
+    date_min: str = ""
+    date_max: str = ""
     sample_txn_ids: list[str] = Field(default_factory=list)
     sample_txns: list[GraphEdgeSample] = Field(default_factory=list)
 
@@ -216,6 +221,9 @@ class CaseGraph(BaseModel):
     case_id: str
     nodes: list[GraphNode]
     edges: list[GraphEdge]
+    # Monthly txn activity buckets ("2024-03" → count), used by the canvas
+    # date-range filter's mini bar chart. Sorted chronologically.
+    monthly_activity: list[dict] = Field(default_factory=list)
 
 
 class CaseSummary(BaseModel):

@@ -748,21 +748,33 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
             flagged = False
             needs_review = False
             total = 0.0
+            flagged_ids: list[str] = []
+            needs_review_ids: list[str] = []
+            pattern_hits: dict[str, int] = {}
             for tid in txn_ids:
                 t = txn_by_id.get(tid)
                 if not t:
                     continue
                 flags = set(json.loads(t.flags_json or "[]"))
-                if t.review_status == "flagged" or (flags & PATTERN_FLAG_NAMES):
+                is_flagged = t.review_status == "flagged" or bool(flags & PATTERN_FLAG_NAMES)
+                is_needs_review = "NEEDS_REVIEW" in flags
+                if is_flagged:
                     flagged = True
-                if "NEEDS_REVIEW" in flags:
+                    flagged_ids.append(tid)
+                if is_needs_review:
                     needs_review = True
+                    needs_review_ids.append(tid)
+                for name in flags & PATTERN_FLAG_NAMES:
+                    pattern_hits[name] = pattern_hits.get(name, 0) + 1
                 total += float(t.amount)
             return {
                 "flagged": flagged,
                 "needs_review": needs_review,
                 "high_value": total >= HIGH_VALUE_THRESHOLD,
                 "total_amount": round(total, 2),
+                "flagged_txn_ids": flagged_ids,
+                "needs_review_txn_ids": needs_review_ids,
+                "pattern_hits": pattern_hits,
             }
 
         entity_txns: dict[str, list[str]] = {}
@@ -783,6 +795,9 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                     "needs_review": stats["needs_review"],
                     "high_value": stats["high_value"],
                     "total_amount": stats["total_amount"],
+                    "flagged_txn_ids": stats["flagged_txn_ids"],
+                    "needs_review_txn_ids": stats["needs_review_txn_ids"],
+                    "pattern_hits": stats["pattern_hits"],
                 },
             ))
 
@@ -798,6 +813,9 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                 n.meta["needs_review"] = stats["needs_review"]
                 n.meta["high_value"] = stats["high_value"]
                 n.meta["total_amount"] = stats["total_amount"]
+                n.meta["flagged_txn_ids"] = stats["flagged_txn_ids"]
+                n.meta["needs_review_txn_ids"] = stats["needs_review_txn_ids"]
+                n.meta["pattern_hits"] = stats["pattern_hits"]
 
         edges: list[GraphEdge] = []
 
@@ -847,12 +865,17 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                 for t in sorted_txns[:20]
             ]
             sample_ids = [t.id for t in sorted_txns[:5]]
+            # date_min / date_max from the full contributing set, not the sample
+            all_dates = [t.txn_date for t in v["txns"] if t.txn_date]
+            date_min = min(all_dates) if all_dates else ""
+            date_max = max(all_dates) if all_dates else ""
             if direction == "out":
                 edges.append(GraphEdge(
                     id=f"out:{acc_id}:{ent_id}",
                     source=f"account:{acc_id}", target=f"entity:{ent_id}",
                     kind="flow_out",
                     total_amount=round(v["total"], 2), txn_count=v["count"],
+                    date_min=date_min, date_max=date_max,
                     sample_txn_ids=sample_ids, sample_txns=samples,
                 ))
             else:
@@ -861,10 +884,25 @@ def case_graph(case_id: str) -> Optional[CaseGraph]:
                     source=f"entity:{ent_id}", target=f"account:{acc_id}",
                     kind="flow_in",
                     total_amount=round(v["total"], 2), txn_count=v["count"],
+                    date_min=date_min, date_max=date_max,
                     sample_txn_ids=sample_ids, sample_txns=samples,
                 ))
 
-        return CaseGraph(case_id=case_id, nodes=nodes, edges=edges)
+        # Monthly activity buckets for the canvas date-range filter.
+        monthly: dict[str, int] = {}
+        for t in txns:
+            if not t.txn_date:
+                continue
+            key = t.txn_date[:7]  # "YYYY-MM"
+            monthly[key] = monthly.get(key, 0) + 1
+        monthly_activity = [
+            {"month": k, "count": v} for k, v in sorted(monthly.items())
+        ]
+
+        return CaseGraph(
+            case_id=case_id, nodes=nodes, edges=edges,
+            monthly_activity=monthly_activity,
+        )
 
 
 # ───── forensic patterns ─────
