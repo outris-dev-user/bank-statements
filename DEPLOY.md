@@ -27,7 +27,7 @@ Both deploy from the same GitHub repo; each Railway service uses its own `railwa
 | `LEDGERFLOW_PDF_STORE_DIR` | optional → recommended | Absolute path where uploaded PDFs are archived (content-addressed by sha256). On Railway, mount a **volume** and set this to the mount path (e.g. `/data/pdf_store`). Without a volume, archived PDFs are lost on every redeploy. |
 | `PORT`               | auto | Railway injects. |
 | `LEDGERFLOW_RESET_DB`| no  | Set to `1` once to reset+reseed the case store on startup. Does **not** drop `extraction_log`. |
-
+ minor edit
 ### Generate an API key
 Any 32-byte URL-safe random string is fine:
 ```
