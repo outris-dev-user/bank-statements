@@ -61,21 +61,35 @@ app = FastAPI(
 )
 
 def _allowed_origins() -> list[str]:
-    """Read ALLOWED_ORIGINS env var (comma-separated). Falls back to the
-    local dev vite + preview ports.
+    """Read ALLOWED_ORIGINS env var (comma-separated). Each origin is
+    normalised: trailing slashes stripped, surrounding whitespace removed,
+    empty entries dropped. Falls back to the local dev vite + preview ports.
+
+    Browsers send the `Origin` header *without* a trailing slash, so a
+    stored origin like `https://foo.up.railway.app/` would never match —
+    we strip the slash to make paste-errors harmless.
     """
     raw = os.environ.get("ALLOWED_ORIGINS")
     if not raw:
         return ["http://localhost:5173", "http://localhost:4173"]
-    return [o.strip() for o in raw.split(",") if o.strip()]
+    return [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
 
+
+# Explicit header list — `*` is ambiguous under `allow_credentials=True` in
+# some CORS implementations, and the frontend only needs these two.
+_CORS_HEADERS = ["Content-Type", "X-API-Key", "X-Submitter", "Authorization"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins(),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # We authenticate via the X-API-Key header, not cookies. Disabling
+    # credentials avoids the extra constraints browsers put on CORS when
+    # credentials mode is on (wildcard origins disallowed, stricter header
+    # echoing, etc.).
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=_CORS_HEADERS,
+    expose_headers=["Content-Disposition"],  # so admin PDF download can expose filename
 )
 
 # API-key enforcement. Active only when LEDGERFLOW_API_KEY is set in env.
