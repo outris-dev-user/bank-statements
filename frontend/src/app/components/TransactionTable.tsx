@@ -319,7 +319,43 @@ export function TransactionTable({
                         {txn.entities.channel?.value || '-'}
                       </td>
                       <td className="px-4 py-3 text-sm text-foreground">
-                        {renderTextCell(txn, "counterparty")}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {renderTextCell(txn, "counterparty")}
+                          {txn.is_self_transfer && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 uppercase tracking-wide"
+                              title="Counterparty is the holder's own account — investigator signal for inside-network money movement."
+                            >
+                              self
+                            </span>
+                          )}
+                          {txn.llm_entity_type && txn.llm_entity_type !== 'unknown' && !txn.is_self_transfer && (
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide ${
+                                txn.llm_entity_type === 'related_party'
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : txn.llm_entity_type === 'government'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : txn.llm_entity_type === 'bank'
+                                  ? 'bg-slate-200 text-slate-700'
+                                  : txn.llm_entity_type === 'individual'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}
+                              title={`Counterparty type (LLM-inferred): ${txn.llm_entity_type}`}
+                            >
+                              {txn.llm_entity_type.replace('_', ' ')}
+                            </span>
+                          )}
+                          {txn.notable_reason && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 cursor-help"
+                              title={txn.notable_reason}
+                            >
+                              notable
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
                         {renderCategoryCell(txn)}
@@ -348,6 +384,12 @@ export function TransactionTable({
                       <tr className="bg-background border-b border-border">
                         <td colSpan={10} className="px-4 py-4">
                           <div className="space-y-3">
+                            {txn.notable_reason && (
+                              <div className="border-l-4 border-amber-500 bg-amber-50 px-3 py-2 rounded-r">
+                                <div className="text-xs font-medium text-amber-900 mb-0.5">LLM flagged this row:</div>
+                                <div className="text-sm text-amber-900">{txn.notable_reason}</div>
+                              </div>
+                            )}
                             <div>
                               <div className="text-xs font-medium text-muted-foreground mb-1">Raw OCR:</div>
                               <div className="text-sm text-foreground font-mono bg-card px-3 py-2 rounded border border-border">

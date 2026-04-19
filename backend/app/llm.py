@@ -120,7 +120,12 @@ EXTRACTION_SCHEMA_DOC = """{
   "account": {
     "number_masked": "****1234 (last 4 only, or null)",
     "holder_name": "primary holder, stripped of Mr/Mrs/Shri",
-    "joint_holders": ["additional names, empty list if none"]
+    "joint_holders": ["additional names, empty list if none"],
+    "customer_id": "bank's customer id if visible in the header, else null",
+    "pan_hint": "PAN if printed on the statement, else null",
+    "phone_hint": "mobile number if printed, else null",
+    "email_hint": "email address if printed, else null",
+    "branch": "branch name / code if visible, else null"
   },
   "period": {"start": "YYYY-MM-DD or null", "end": "YYYY-MM-DD or null"},
   "balance": {"opening": 0.0, "closing": 0.0, "currency": "INR"},
@@ -131,11 +136,29 @@ EXTRACTION_SCHEMA_DOC = """{
       "direction": "debit | credit",
       "description": "raw narration as printed",
       "counterparty": "real entity name extracted from narration, e.g. 'Amazon' not 'UPI/DR/123456/Amazon/...'",
+      "entity_type": "individual | business | bank | government | related_party | self | unknown",
       "channel": "UPI | NEFT | IMPS | RTGS | POS | ATM | ECS | NACH | CHEQUE | CASH | OTHER",
+      "category": "Shopping | Food | Transport | Travel | Utility | Telecom | Rent | Salary | Interest | Investment | Insurance | Tax | Transfer | Cash | EMI | Fee | Refund | Medical | Education | Entertainment | Subscription | Other",
+      "is_self_transfer": false,
+      "notable_reason": "null, OR a one-line reason this txn is worth an investigator's attention (unusual amount, round-number cluster, odd counterparty, balance mismatch, etc.)",
       "balance_after": 0.0,
       "transaction_type": "purchase | transfer_in | transfer_out | salary | refund | fee | interest | emi | cash_withdrawal | cash_deposit | other"
     }
   ],
+  "narrative_summary": "2–3 sentence description of the account's typical monthly behaviour: income pattern, major spend categories, anything unusual. Written for an investigator reading one glance.",
+  "anomalies": [
+    {
+      "type": "round_amount_cluster | duplicate_reference | balance_mismatch | large_cash_deposit | structured_transfers | unusual_counterparty | same_day_in_out | sudden_balance_spike | dormant_then_active | high_velocity | other",
+      "severity": "high | medium | low",
+      "description": "Full sentence explaining what you noticed and why it matters",
+      "txn_indices": [0, 3, 12]
+    }
+  ],
+  "risk_level": "high | medium | low",
+  "statement_integrity": {
+    "looks_complete": true,
+    "gaps_noticed": "null, or free text describing any suspicious gaps, renumbered rows, or balance chain breaks"
+  },
   "confidence": "high | medium | low",
   "notes": "free text — anything ambiguous, skipped, or worth flagging"
 }"""
@@ -155,6 +178,51 @@ Rules:
   prefixes (UPI/ NEFT/), reference numbers, bank suffixes (/UTIB, /HDFC0000001). If
   you can't identify an entity, use the cleanest noun phrase from the narration.
 - For a name like "MR. SAURABH SETHI" the `holder_name` is "Saurabh Sethi".
+
+Category vs entity_type — keep these ORTHOGONAL:
+- `category` is about WHAT the transaction is FOR (why money moved):
+  Shopping, Food, Medical, Transport, Rent, Salary, Tax, Transfer, Cash, Fee,
+  Interest, EMI, etc. The same counterparty can have different categories on
+  different txns (a friend: Rent one month, Other next month).
+- `entity_type` is about WHO the counterparty is (a stable property of them):
+    - individual     — a named natural person with no business indicators
+    - business       — any commercial entity, merchant, corporate
+    - bank           — the txn is a bank-internal event (fee, interest, ATM
+                       at this bank's own ATM with no merchant behind it)
+    - government     — tax, court, municipal, PSU
+    - related_party  — a person or non-commercial counterparty that appears
+                       repeatedly in non-arm's-length patterns (family,
+                       housemate, personal contact). Use judgement — if a
+                       person's name appears 5× with varied amounts, this.
+    - self           — counterparty is the holder's own account (same name,
+                       same bank internal transfer, UPI handle with holder's
+                       own initials/phone). Set `is_self_transfer=true`.
+    - unknown        — you truly can't tell from the narration
+  Pick "Other" in category only when nothing else fits. Do NOT use the
+  category enum for entity_type decisions and vice versa.
+
+`is_self_transfer` should be true whenever entity_type="self". Investigators
+use this to measure how much money stayed inside the holder's own network.
+
+`notable_reason` should be null for routine transactions. Fill it only when a
+human investigator should specifically look at this row — unusual amount for
+this holder's pattern, obvious mismatch, suspicious counterparty, structured
+amount just under ₹50K, etc. One short line. Empty means "not notable".
+
+Statement-level fields:
+- `narrative_summary`: 2–3 sentences. "Salary ~₹80K credited monthly around
+  the 5th. ~60% withdrawn via ATM within a week. Recurring POS at Fortis
+  Healthcare suggests chronic medical spend. One unusual ₹1.3L cheque debit
+  on 19 July is out of character." Investigator reads this first.
+- `anomalies`: array of structured findings (see schema). `txn_indices` are
+  0-based positions in the `transactions` array you're about to emit. Empty
+  array if nothing notable. Be specific — "5 debits between ₹9,000-₹9,999
+  within 8 days to same recipient" is useful; "some round numbers" is not.
+- `risk_level`: your overall read. "high" if you found anomalies indicating
+  possible laundering/fraud signals; "medium" if there are rough edges worth
+  review; "low" for clean statements.
+- `statement_integrity`: does the statement itself look intact? Broken
+  balance chain, gap in row numbers, or re-pasted sections → flag it.
 - If the document is not a bank statement or you cannot parse confidently,
   return `{{"transactions": [], "confidence": "low", "notes": "<why>"}}`.
 - The `fingerprint` must be a substring that appears verbatim on the first page
@@ -249,7 +317,11 @@ async def call_claude(system: str, user: str) -> LLMResult:
         client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
         return client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=8192,
+            # 16K covers ~200 txns + the new narrative/anomalies/entity_type
+            # fields with headroom. Claude truncates cleanly if ever hit, but
+            # we'd rather not see that; 8K was tight on 50-txn statements
+            # with the extended schema.
+            max_tokens=16384,
             system=system,
             messages=[{"role": "user", "content": user}],
         )
@@ -302,13 +374,26 @@ async def call_gemini(system: str, user: str, model: str | None = None) -> LLMRe
 
     def _invoke() -> Any:
         client = genai.Client(api_key=api_key)
+        # Gemini 2.5 has "thinking" enabled by default, which burns output
+        # tokens before any visible text appears. For structured-JSON
+        # extraction we don't need chain-of-thought — disable to avoid
+        # truncated output like the 311-completion-token Flash failure.
+        # Older SDK versions lack ThinkingConfig; fall back silently.
+        extra: dict[str, Any] = {}
+        try:
+            extra["thinking_config"] = genai_types.ThinkingConfig(thinking_budget=0)
+        except AttributeError:
+            pass
         return client.models.generate_content(
             model=chosen_model,
             contents=user,
             config=genai_types.GenerateContentConfig(
                 system_instruction=system,
                 response_mime_type="application/json",
-                max_output_tokens=8192,
+                # 8192 cut off mid-JSON on a 50-txn statement. 32K covers
+                # ~200 txns comfortably; both Flash and Pro support this.
+                max_output_tokens=32768,
+                **extra,
             ),
         )
 
@@ -382,6 +467,11 @@ def normalise_llm_response(parsed: dict[str, Any], source_filename: str) -> dict
             "number_masked": account.get("number_masked"),
             "holder_name": account.get("holder_name"),
             "joint_holders": account.get("joint_holders") or [],
+            "customer_id": account.get("customer_id"),
+            "pan_hint": account.get("pan_hint"),
+            "phone_hint": account.get("phone_hint"),
+            "email_hint": account.get("email_hint"),
+            "branch": account.get("branch"),
         },
         "period": {
             "start": period.get("start"),
@@ -399,6 +489,12 @@ def normalise_llm_response(parsed: dict[str, Any], source_filename: str) -> dict
             "net_change": round(total_credit - total_debit, 2),
         },
         "transactions": transactions,
+        "analysis": {
+            "narrative_summary": parsed.get("narrative_summary"),
+            "anomalies": parsed.get("anomalies") or [],
+            "risk_level": parsed.get("risk_level"),
+            "statement_integrity": parsed.get("statement_integrity"),
+        },
         "meta": {
             "filename": source_filename,
             "parser": None,

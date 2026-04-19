@@ -63,6 +63,28 @@ class Account(BaseModel):
     has_warnings: bool = False
 
 
+EntityTypeLiteral = Literal[
+    "individual", "business", "bank", "government",
+    "related_party", "self", "unknown",
+    "merchant", "counterparty",  # legacy values still on older entities
+]
+
+
+class AnomalyFinding(BaseModel):
+    """One row from the LLM's statement-level anomaly scan. `txn_indices`
+    are 0-based positions in the `transactions` array when the LLM produced
+    this; clients may want to map them back to real transaction ids."""
+    type: str
+    severity: Literal["high", "medium", "low"]
+    description: str
+    txn_indices: list[int] = Field(default_factory=list)
+
+
+class StatementIntegrity(BaseModel):
+    looks_complete: Optional[bool] = None
+    gaps_noticed: Optional[str] = None
+
+
 class Statement(BaseModel):
     id: str
     account_id: str
@@ -76,6 +98,12 @@ class Statement(BaseModel):
     sum_check_credits_pct: float = 100.0
     uploaded_at: str
     uploaded_by: str
+    # Statement-level LLM analysis — all optional, populated only when an
+    # LLM call succeeded during extraction.
+    narrative_summary: Optional[str] = None
+    anomalies: list[AnomalyFinding] = Field(default_factory=list)
+    risk_level: Optional[Literal["high", "medium", "low"]] = None
+    statement_integrity: Optional[StatementIntegrity] = None
 
 
 class Transaction(BaseModel):
@@ -95,6 +123,11 @@ class Transaction(BaseModel):
     flags: list[str] = Field(default_factory=list)
     review_status: ReviewStatus = "unreviewed"
     edit_count: int = 0
+    # LLM-supplied per-txn signals. Nullable; populated only when an LLM
+    # call produced them (overlay path or pure-LLM fallback).
+    llm_entity_type: Optional[EntityTypeLiteral] = None
+    is_self_transfer: Optional[bool] = None
+    notable_reason: Optional[str] = None
 
 
 class TransactionPatch(BaseModel):

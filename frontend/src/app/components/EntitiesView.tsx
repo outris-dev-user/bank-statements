@@ -79,8 +79,30 @@ export function EntitiesView({ caseId }: EntitiesViewProps) {
               className="w-full px-4 py-3 text-left hover:bg-background flex items-center justify-between gap-4"
             >
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <div className="font-medium text-foreground truncate">{e.name}</div>
+                  {e.entity_type && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wide font-semibold ${
+                        e.entity_type === 'self'
+                          ? 'bg-blue-100 text-blue-700'
+                          : e.entity_type === 'related_party'
+                          ? 'bg-purple-100 text-purple-700'
+                          : e.entity_type === 'government'
+                          ? 'bg-orange-100 text-orange-700'
+                          : e.entity_type === 'bank'
+                          ? 'bg-slate-200 text-slate-700'
+                          : e.entity_type === 'business' || e.entity_type === 'merchant'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : e.entity_type === 'individual'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                      title={`Entity type: ${e.entity_type}`}
+                    >
+                      {e.entity_type.replace('_', ' ')}
+                    </span>
+                  )}
                   {!e.auto_created && (
                     <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">manual</span>
                   )}

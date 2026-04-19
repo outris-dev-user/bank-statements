@@ -119,47 +119,95 @@ export function CaseOverview() {
                               </div>
                             </div>
                             {accountStatements.length > 0 && (
-                              <div className="border-t border-border px-3 py-2 space-y-1">
+                              <div className="border-t border-border px-3 py-2 space-y-2">
                                 {accountStatements.map((stmt) => (
                                   <div
                                     key={stmt.id}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-between py-1 text-xs"
+                                    className="space-y-1.5"
                                   >
-                                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                                      <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                                      <span className="text-foreground truncate" title={stmt.source_file_name}>
-                                        {stmt.source_file_name}
-                                      </span>
-                                      <span className="text-muted-foreground flex-shrink-0">
-                                        · {stmt.period_start} → {stmt.period_end}
-                                      </span>
-                                      <span className="text-muted-foreground flex-shrink-0">
-                                        · {stmt.extracted_txn_count} txns
-                                      </span>
+                                    <div className="flex items-center justify-between py-1 text-xs">
+                                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                                        <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                                        <span className="text-foreground truncate" title={stmt.source_file_name}>
+                                          {stmt.source_file_name}
+                                        </span>
+                                        <span className="text-muted-foreground flex-shrink-0">
+                                          · {stmt.period_start} → {stmt.period_end}
+                                        </span>
+                                        <span className="text-muted-foreground flex-shrink-0">
+                                          · {stmt.extracted_txn_count} txns
+                                        </span>
+                                        {stmt.risk_level && (
+                                          <span
+                                            className={`flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
+                                              stmt.risk_level === 'high'
+                                                ? 'bg-destructive/15 text-destructive'
+                                                : stmt.risk_level === 'medium'
+                                                ? 'bg-amber-100 text-amber-800'
+                                                : 'bg-emerald-100 text-emerald-700'
+                                            }`}
+                                            title={`LLM overall risk assessment: ${stmt.risk_level}`}
+                                          >
+                                            {stmt.risk_level} risk
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-shrink-0">
+                                        <a
+                                          href={statementPdfUrl(stmt.id)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="text-primary hover:text-primary/80"
+                                          title="Open source PDF"
+                                        >
+                                          PDF
+                                        </a>
+                                        <button
+                                          onClick={() => handleDelete(stmt.id, stmt.source_file_name)}
+                                          disabled={deleteMut.isPending}
+                                          className="text-destructive hover:bg-destructive/10 p-1 rounded disabled:opacity-50"
+                                          title="Delete this statement"
+                                        >
+                                          {deleteMut.isPending && deleteMut.variables === stmt.id
+                                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            : <Trash2 className="w-3.5 h-3.5" />}
+                                        </button>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                      <a
-                                        href={statementPdfUrl(stmt.id)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="text-primary hover:text-primary/80"
-                                        title="Open source PDF"
-                                      >
-                                        PDF
-                                      </a>
-                                      <button
-                                        onClick={() => handleDelete(stmt.id, stmt.source_file_name)}
-                                        disabled={deleteMut.isPending}
-                                        className="text-destructive hover:bg-destructive/10 p-1 rounded disabled:opacity-50"
-                                        title="Delete this statement"
-                                      >
-                                        {deleteMut.isPending && deleteMut.variables === stmt.id
-                                          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                          : <Trash2 className="w-3.5 h-3.5" />}
-                                      </button>
-                                    </div>
+                                    {stmt.narrative_summary && (
+                                      <div className="ml-5 text-xs text-muted-foreground italic border-l-2 border-primary/30 pl-2">
+                                        {stmt.narrative_summary}
+                                      </div>
+                                    )}
+                                    {stmt.anomalies && stmt.anomalies.length > 0 && (
+                                      <div className="ml-5 space-y-1">
+                                        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                                          Anomalies ({stmt.anomalies.length})
+                                        </div>
+                                        {stmt.anomalies.map((a, i) => (
+                                          <div
+                                            key={i}
+                                            className={`text-xs rounded px-2 py-1 border-l-2 ${
+                                              a.severity === 'high'
+                                                ? 'border-destructive bg-destructive/5'
+                                                : a.severity === 'medium'
+                                                ? 'border-amber-500 bg-amber-50'
+                                                : 'border-emerald-500 bg-emerald-50'
+                                            }`}
+                                          >
+                                            <span className="font-medium">{a.type.replace(/_/g, ' ')}:</span>{' '}
+                                            <span className="text-foreground">{a.description}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {stmt.statement_integrity?.gaps_noticed && (
+                                      <div className="ml-5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                                        <span className="font-medium">Integrity note:</span> {stmt.statement_integrity.gaps_noticed}
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>

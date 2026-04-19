@@ -117,6 +117,8 @@ def _account_row_to_schema(row: AccountRow) -> Account:
 
 
 def _statement_row_to_schema(row: StatementRow) -> Statement:
+    anomalies_raw = getattr(row, "anomalies_json", None)
+    integrity_raw = getattr(row, "statement_integrity_json", None)
     return Statement(
         id=row.id, account_id=row.account_id,
         source_file_name=row.source_file_name,
@@ -127,6 +129,10 @@ def _statement_row_to_schema(row: StatementRow) -> Statement:
         sum_check_debits_pct=row.sum_check_debits_pct,
         sum_check_credits_pct=row.sum_check_credits_pct,
         uploaded_at=row.uploaded_at, uploaded_by=row.uploaded_by,
+        narrative_summary=getattr(row, "narrative_summary", None),
+        anomalies=json.loads(anomalies_raw) if anomalies_raw else [],
+        risk_level=getattr(row, "risk_level", None),
+        statement_integrity=json.loads(integrity_raw) if integrity_raw else None,
     )
 
 
@@ -142,6 +148,9 @@ def _txn_row_to_schema(row: TransactionRow) -> Transaction:
         confidence=row.confidence,
         flags=json.loads(row.flags_json or "[]"),
         review_status=row.review_status, edit_count=row.edit_count,
+        llm_entity_type=getattr(row, "llm_entity_type", None),
+        is_self_transfer=getattr(row, "is_self_transfer", None),
+        notable_reason=getattr(row, "notable_reason", None),
     )
 
 
@@ -471,7 +480,9 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
             return None
         txns = s.query(TransactionRow).filter_by(case_id=case_id).all()
 
-        # group txn IDs by canonical key
+        # group txn IDs by canonical key, collecting LLM-supplied entity_type
+        # votes so we can use them as the authoritative type when present
+        # (LLM context-aware >> our keyword-vocab classifier).
         groups: dict[str, dict] = {}
         for r in txns:
             ents = json.loads(r.entities_json or "{}")
@@ -479,10 +490,13 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
             key = _canonical_key(cp)
             if not key:
                 continue
-            g = groups.setdefault(key, {"txn_ids": [], "names": {}, "aliases": set()})
+            g = groups.setdefault(key, {"txn_ids": [], "names": {}, "aliases": set(), "llm_types": {}})
             g["txn_ids"].append(r.id)
             g["names"][cp] = g["names"].get(cp, 0) + 1
             g["aliases"].add(cp)
+            et = getattr(r, "llm_entity_type", None)
+            if et:
+                g["llm_types"][et] = g["llm_types"].get(et, 0) + 1
 
         # upsert entities
         existing = {e.canonical_key: e for e in s.query(EntityRow).filter_by(case_id=case_id).all()}
@@ -494,7 +508,13 @@ def resolve_entities_for_case(case_id: str) -> Optional[dict]:
             most_common_name = max(g["names"].items(), key=lambda kv: kv[1])[0]
             aliases = sorted(a for a in g["aliases"] if a != most_common_name)
 
-            inferred_type = _classify_entity_type(most_common_name)
+            # LLM majority wins when available; otherwise fall back to our
+            # keyword-vocab classifier. Majority resolves ties to the most-
+            # recent-seen type, which is fine for UI purposes.
+            if g["llm_types"]:
+                inferred_type = max(g["llm_types"].items(), key=lambda kv: kv[1])[0]
+            else:
+                inferred_type = _classify_entity_type(most_common_name)
 
             ent = existing.get(key)
             if not ent:
@@ -1127,6 +1147,12 @@ def ingest_statement(
     period_start: str, period_end: str, opening_balance: float, closing_balance: float,
     declared_dr: Optional[float], declared_cr: Optional[float],
     parser_txns: list[dict], uploaded_by: str = "unknown",
+    # Optional LLM-provided statement-level analysis. All four default to
+    # None so every caller that predates this signature keeps working.
+    narrative_summary: Optional[str] = None,
+    anomalies: Optional[list] = None,
+    risk_level: Optional[str] = None,
+    statement_integrity: Optional[dict] = None,
 ) -> Optional[Tuple[Statement, list[Transaction]]]:
     """Persist a parsed statement + its transactions. Used by the upload endpoint."""
     with get_session() as s:
@@ -1165,6 +1191,10 @@ def ingest_statement(
             extracted_txn_count=len(parser_txns),
             sum_check_debits_pct=round(dr_pct, 2), sum_check_credits_pct=round(cr_pct, 2),
             uploaded_at=now, uploaded_by=uploaded_by,
+            narrative_summary=narrative_summary,
+            anomalies_json=json.dumps(anomalies) if anomalies else None,
+            risk_level=risk_level,
+            statement_integrity_json=json.dumps(statement_integrity) if statement_integrity else None,
         )
         s.add(stmt)
         s.flush()
@@ -1200,6 +1230,25 @@ def ingest_statement(
                 conf = "low"; flags.append("NEEDS_REVIEW")
             elif channel == "OTHER":
                 conf = "medium"
+
+            # New LLM-supplied per-txn signals. `entity_type` and
+            # `is_self_transfer` go on the TransactionRow directly (indexed
+            # / filterable columns); `notable_reason` is free text stored
+            # for display in the UI. Nullable when the LLM didn't fire.
+            pre_entity_type = t.get("entity_type")
+            llm_entity_type = pre_entity_type.strip() if isinstance(pre_entity_type, str) and pre_entity_type.strip() else None
+            if "is_self_transfer" in t:
+                is_self_transfer = bool(t.get("is_self_transfer"))
+            else:
+                is_self_transfer = None
+            pre_notable = t.get("notable_reason")
+            notable_reason = pre_notable.strip() if isinstance(pre_notable, str) and pre_notable.strip() else None
+
+            # Self-transfers get a dedicated tag so UIs and queries can
+            # filter without guessing at strings.
+            if is_self_transfer:
+                flags.append("SELF_TRANSFER")
+
             tid = _next_id(s, "t", TransactionRow)
             s.add(TransactionRow(
                 id=tid, statement_id=sid, account_id=acc.id, case_id=case_id,
@@ -1213,6 +1262,9 @@ def ingest_statement(
                 }),
                 tags_json="[]", confidence=conf, flags_json=json.dumps(flags),
                 review_status="unreviewed", edit_count=0,
+                llm_entity_type=llm_entity_type,
+                is_self_transfer=is_self_transfer,
+                notable_reason=notable_reason,
             ))
 
         # Update account totals

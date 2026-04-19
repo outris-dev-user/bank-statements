@@ -35,6 +35,33 @@ export interface Account {
   has_warnings: boolean;
 }
 
+export type LLMEntityType =
+  | 'individual'
+  | 'business'
+  | 'bank'
+  | 'government'
+  | 'related_party'
+  | 'self'
+  | 'unknown'
+  // Legacy values kept so older pre-LLM entities keep rendering without
+  // validation errors. New entities should use the ones above.
+  | 'merchant'
+  | 'counterparty';
+
+export type RiskLevel = 'high' | 'medium' | 'low';
+
+export interface AnomalyFinding {
+  type: string;
+  severity: RiskLevel;
+  description: string;
+  txn_indices: number[];
+}
+
+export interface StatementIntegrity {
+  looks_complete?: boolean | null;
+  gaps_noticed?: string | null;
+}
+
 export interface Statement {
   id: string;
   account_id: string;
@@ -48,11 +75,20 @@ export interface Statement {
   sum_check_credits_pct: number;
   uploaded_at: string;
   uploaded_by: string;
+  // LLM-provided statement-level analysis. All optional — populated only
+  // when Claude/Gemini ran successfully during extraction.
+  narrative_summary?: string | null;
+  anomalies?: AnomalyFinding[];
+  risk_level?: RiskLevel | null;
+  statement_integrity?: StatementIntegrity | null;
 }
 
 export interface EntityValue {
   value: string;
-  source: 'extracted' | 'user_edited' | 'auto_resolved';
+  // Mirrors backend schemas.py EntityValue.source. `llm_overlay` tags values
+  // that Claude/Gemini cleaned up when the deterministic parser produced
+  // noisy text (e.g. card-number-polluted HDFC POS narrations).
+  source: 'extracted' | 'user_edited' | 'auto_resolved' | 'llm_overlay';
   confidence: number;
 }
 
@@ -78,6 +114,11 @@ export interface Transaction {
   flags: string[];
   review_status: 'unreviewed' | 'reviewed' | 'flagged';
   edit_count: number;
+  // LLM-supplied per-txn signals. Populated during extraction when an LLM
+  // call succeeded (overlay or pure-LLM fallback). Null otherwise.
+  llm_entity_type?: LLMEntityType | null;
+  is_self_transfer?: boolean | null;
+  notable_reason?: string | null;
 }
 
 export const mockCases: Case[] = [

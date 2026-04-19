@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from sqlalchemy import (
-    create_engine, Column, String, Integer, Float, Boolean, ForeignKey, JSON,
+    create_engine, Column, String, Integer, Float, Boolean, ForeignKey, JSON, Text, inspect, text as sql_text,
 )
 from sqlalchemy.orm import (
     DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker, Session,
@@ -118,6 +118,13 @@ class StatementRow(Base):
     uploaded_at: Mapped[str] = mapped_column(String)
     uploaded_by: Mapped[str] = mapped_column(String)
 
+    # LLM-provided statement-level analysis (populated during extraction when
+    # Claude/Gemini runs). All nullable so pre-LLM statements keep working.
+    narrative_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    anomalies_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    risk_level: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    statement_integrity_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     account: Mapped[AccountRow] = relationship(back_populates="statements")
     transactions: Mapped[list["TransactionRow"]] = relationship(back_populates="statement", cascade="all, delete-orphan")
 
@@ -140,6 +147,14 @@ class TransactionRow(Base):
     flags_json: Mapped[str] = mapped_column(String, default="[]")
     review_status: Mapped[str] = mapped_column(String, default="unreviewed")
     edit_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # LLM-provided per-txn signals. Nullable; overlay writes them when an
+    # LLM call succeeded for this extraction. `llm_entity_type` feeds up into
+    # EntityRow.entity_type during entity resolution (majority vote across
+    # the txns linked to that entity).
+    llm_entity_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    is_self_transfer: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    notable_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     statement: Mapped[StatementRow] = relationship(back_populates="transactions")
 
@@ -262,6 +277,44 @@ class EditEventRow(Base):
     at: Mapped[str] = mapped_column(String)
 
 
+def _ensure_columns() -> None:
+    """Idempotent lightweight migration for columns we've added after a
+    table was first created.
+
+    `Base.metadata.create_all` creates *missing tables*, not missing
+    columns — so on an existing Postgres deployment (Railway) a new
+    `Column(...)` on an already-created table wouldn't reach the database.
+    Rather than introduce alembic for a small handful of nullable columns,
+    we ALTER TABLE in-place on startup. Runs once per boot, costs nothing
+    when everything is already up to date. All columns we add here MUST be
+    nullable so this stays safe — never add NOT NULL without a default.
+    """
+    # (table, column, DDL type) — Postgres syntax; SQLite accepts it too.
+    wanted: list[tuple[str, str, str]] = [
+        ("statements",   "narrative_summary",        "TEXT"),
+        ("statements",   "anomalies_json",           "TEXT"),
+        ("statements",   "risk_level",               "VARCHAR"),
+        ("statements",   "statement_integrity_json", "TEXT"),
+        ("transactions", "llm_entity_type",          "VARCHAR"),
+        ("transactions", "is_self_transfer",         "BOOLEAN"),
+        ("transactions", "notable_reason",           "TEXT"),
+    ]
+    insp = inspect(engine)
+    existing_tables = set(insp.get_table_names())
+    with engine.begin() as conn:
+        for table, col, ddl in wanted:
+            if table not in existing_tables:
+                continue  # create_all will build it with every column.
+            cols = {c["name"] for c in insp.get_columns(table)}
+            if col in cols:
+                continue
+            try:
+                conn.execute(sql_text(f'ALTER TABLE {table} ADD COLUMN {col} {ddl}'))
+                print(f"[db] added column {table}.{col}")
+            except Exception as exc:  # pragma: no cover — surfaced in logs
+                print(f"[db] could not add {table}.{col}: {exc!r}")
+
+
 def init_db(reset: bool = False) -> None:
     """Create tables if they don't exist. If `reset=True`, drops first.
 
@@ -270,6 +323,7 @@ def init_db(reset: bool = False) -> None:
     if reset:
         Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
+    _ensure_columns()
 
 
 def get_session() -> Session:

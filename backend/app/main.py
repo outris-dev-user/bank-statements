@@ -521,9 +521,14 @@ async def upload_statement(
             "counterparty": t.get("counterparty"),
             "channel": t.get("channel"),
             "category": t.get("category"),
+            "entity_type": t.get("entity_type"),
+            "is_self_transfer": t.get("is_self_transfer"),
+            "notable_reason": t.get("notable_reason"),
         }
         for t in shaped_txns
     ]
+
+    analysis = response.get("analysis") or {}
 
     result = store_mod.ingest_statement(
         case_id=case_id, person_id=person_id,
@@ -539,6 +544,10 @@ async def upload_statement(
         declared_dr=None, declared_cr=None,
         parser_txns=parser_txns,
         uploaded_by="unknown",
+        narrative_summary=analysis.get("narrative_summary"),
+        anomalies=analysis.get("anomalies"),
+        risk_level=analysis.get("risk_level"),
+        statement_integrity=analysis.get("statement_integrity"),
     )
     if result is None:
         raise HTTPException(404, f"Case or person not found (case_id={case_id}, person_id={person_id})")
@@ -759,6 +768,16 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
         cat = claude.get("category")
         if isinstance(cat, str) and cat.strip():
             det["category"] = cat.strip()
+        # New LLM-only per-txn signals. These don't have deterministic
+        # counterparts — we just carry them through when present.
+        et = claude.get("entity_type")
+        if isinstance(et, str) and et.strip():
+            det["entity_type"] = et.strip()
+        if "is_self_transfer" in claude:
+            det["is_self_transfer"] = bool(claude.get("is_self_transfer"))
+        nr = claude.get("notable_reason")
+        if isinstance(nr, str) and nr.strip():
+            det["notable_reason"] = nr.strip()
         overlaid += 1
 
     # Bubble holder_name up only if deterministic returned nothing — don't
@@ -768,6 +787,28 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
         claude_holder = (claude_response.get("account") or {}).get("holder_name")
         if isinstance(claude_holder, str) and claude_holder.strip():
             det_account["holder_name"] = claude_holder.strip()
+    # Side-channel header fields the deterministic parser doesn't extract
+    # — pass them through when Claude picked them up from the PDF header.
+    claude_account = claude_response.get("account") or {}
+    for k in ("customer_id", "pan_hint", "phone_hint", "email_hint", "branch", "joint_holders"):
+        v = claude_account.get(k)
+        if v and not det_account.get(k):
+            det_account[k] = v
+
+    # Statement-level analysis — entirely LLM-only fields. Stash under a
+    # dedicated `analysis` block on the response so `/api/extract` callers
+    # and the case-store ingest can both read them without guessing.
+    analysis = det_response.setdefault("analysis", {})
+    for k in ("narrative_summary", "risk_level"):
+        v = claude_response.get(k)
+        if v and k not in analysis:
+            analysis[k] = v
+    anomalies = claude_response.get("anomalies")
+    if isinstance(anomalies, list) and "anomalies" not in analysis:
+        analysis["anomalies"] = anomalies
+    integrity = claude_response.get("statement_integrity")
+    if isinstance(integrity, dict) and "statement_integrity" not in analysis:
+        analysis["statement_integrity"] = integrity
 
     meta = det_response.setdefault("meta", {})
     meta["source"] = "deterministic+llm-claude"
