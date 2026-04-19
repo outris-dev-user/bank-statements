@@ -795,18 +795,20 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
         if v and not det_account.get(k):
             det_account[k] = v
 
-    # Statement-level analysis — entirely LLM-only fields. Stash under a
-    # dedicated `analysis` block on the response so `/api/extract` callers
-    # and the case-store ingest can both read them without guessing.
+    # Statement-level analysis — entirely LLM-only fields. `normalise_llm_response`
+    # already buckets these under an `analysis` sub-dict on the LLM response,
+    # so read from there (earlier bug: we read top-level and got nothing).
+    # Fall through to top-level too in case a future LLM shape returns them flat.
+    src_analysis = claude_response.get("analysis") or {}
     analysis = det_response.setdefault("analysis", {})
     for k in ("narrative_summary", "risk_level"):
-        v = claude_response.get(k)
+        v = src_analysis.get(k) or claude_response.get(k)
         if v and k not in analysis:
             analysis[k] = v
-    anomalies = claude_response.get("anomalies")
+    anomalies = src_analysis.get("anomalies") or claude_response.get("anomalies")
     if isinstance(anomalies, list) and "anomalies" not in analysis:
         analysis["anomalies"] = anomalies
-    integrity = claude_response.get("statement_integrity")
+    integrity = src_analysis.get("statement_integrity") or claude_response.get("statement_integrity")
     if isinstance(integrity, dict) and "statement_integrity" not in analysis:
         analysis["statement_integrity"] = integrity
 
@@ -1050,8 +1052,38 @@ async def _run_extraction(
             #   "gemini:gemini-2.5-pro"      → Gemini Pro   (if configured)
             llm_responses: dict[str, dict] = {}
             if llm_mod.llm_enabled():
+                # When the deterministic parser produced rows, hand them to
+                # the LLM as authoritative anchors — the model then focuses
+                # on the enrichment fields instead of re-extracting dates
+                # and amounts it might misread. Empty context = full LLM
+                # extraction (used when bank is unknown or parser returned 0).
+                pre_parsed_for_llm: list[dict] | None = None
+                header_hints: dict | None = None
+                if raw_txns:
+                    pre_parsed_for_llm = [
+                        {
+                            "date": iso_date(t.get("date", "")) or t.get("date"),
+                            "amount": t.get("amount"),
+                            "direction": "debit" if t.get("type") == "Dr" else "credit",
+                            "description": t.get("description", ""),
+                        }
+                        for t in raw_txns
+                    ]
+                    header_hints = {
+                        "holder_name_guess": _guess_holder_name(text),
+                        "account_number_guess": _guess_account_number(text),
+                        "period_start": period_start,
+                        "period_end": period_end,
+                        "opening_balance": opening,
+                        "closing_balance": closing,
+                        "detected_bank_key": bank_key if bank_key != "unknown" else None,
+                    }
                 try:
-                    dual = await llm_mod.run_all(text, bank_hint=bank_key)
+                    dual = await llm_mod.run_all(
+                        text, bank_hint=bank_key,
+                        pre_parsed_txns=pre_parsed_for_llm,
+                        header_hints=header_hints,
+                    )
                 except Exception as exc:
                     print(f"[extract] run_all raised: {exc!r}")
                     dual = {}
@@ -1236,10 +1268,19 @@ def get_transaction_audit(txn_id: str) -> list[dict]:
 # ───── entities ─────
 
 @app.get("/api/cases/{case_id}/entities", response_model=list[Entity])
-def list_case_entities(case_id: str) -> list[Entity]:
+def list_case_entities(
+    case_id: str,
+    include_orphans: bool = Query(default=False, description="Include entities with zero linked transactions (usually stale rows from deleted statements)."),
+) -> list[Entity]:
     entities = store_mod.list_entities(case_id)
     if entities is None:
         raise HTTPException(404, f"Case {case_id} not found")
+    if not include_orphans:
+        # Filter out entities with no linked transactions — these accumulate
+        # when a statement is deleted (txns cascade, entities don't) and only
+        # clutter the UI. User-created entities (auto_created=False) are kept
+        # even when empty since the investigator meant to add them.
+        entities = [e for e in entities if e.txn_count > 0 or not e.auto_created]
     return entities
 
 

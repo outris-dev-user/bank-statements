@@ -227,27 +227,132 @@ Statement-level fields:
   return `{{"transactions": [], "confidence": "low", "notes": "<why>"}}`.
 - The `fingerprint` must be a substring that appears verbatim on the first page
   of this bank's statement layout — we use it for future deterministic detection.
+
+Deterministic-assisted mode:
+- When the user message contains a `DETERMINISTIC PRE-PARSE` block, those
+  transactions were already extracted by our regex parser. Date, amount and
+  direction in that block are AUTHORITATIVE — do NOT change them. Your job is
+  to fill in the other fields (counterparty, entity_type, channel, category,
+  is_self_transfer, notable_reason, transaction_type, balance_after) by
+  reading the full statement text for context. Emit the transactions in the
+  same order, same count as the pre-parse. If a pre-parsed row looks clearly
+  wrong to you (e.g. an opening-balance row leaked in), still emit it, leave
+  counterparty/category best-guess, and flag the disagreement in `notes`.
+- Use the deterministic `header_hints` (holder_name_guess, account_number_guess,
+  period, opening/closing) as starting points — override only when the raw
+  statement text clearly shows a better value. Prefer "unknown"/null over
+  guessing when you're uncertain.
 """
 
 
-def build_prompt(pdfplumber_text: str, bank_hint: str | None = None) -> tuple[str, str]:
-    """Returns (system_prompt, user_prompt) ready to send to either provider."""
+# One-line hints per detected bank — appended to the prompt after the
+# deterministic parser identifies the layout. The idea is to surface quirks
+# the model would otherwise have to infer from scratch on every call.
+# Keep each hint under 3 lines; the whole block is pasted verbatim.
+BANK_HINTS: dict[str, str] = {
+    "hdfc_savings": (
+        "HDFC savings POS narrations concatenate the 16-digit card number "
+        "(e.g. `490246XXXXXX2310`) directly against the merchant name and a "
+        "trailing `POSDEBIT` / `SDEBIT` suffix. Strip both the card number and "
+        "the suffix before extracting counterparty. `ATW-<card>-S1...<LOCATION>` "
+        "rows are ATM withdrawals — counterparty is the bank's own ATM at "
+        "that location."
+    ),
+    "hdfc_cc": (
+        "HDFC credit card statements use short merchant names with a city/"
+        "country suffix. The merchant is the first alpha token; strip any "
+        "trailing city name. Interest and late fee rows are bank-level."
+    ),
+    "icici": (
+        "ICICI narrations separate fields with `/`. UPI/IMPS/NEFT rows follow "
+        "`<channel>/<ref-number>/<counterparty>/<remarks>`. After stripping "
+        "the channel prefix and the numeric ref, the next token is the real "
+        "counterparty."
+    ),
+    "axis_savings": (
+        "Axis UPI narrations look like `UPI/DR/<ref>/<counterparty>/<bank-code>"
+        "/<remarks>`. After stripping `UPI/DR/` and the 12-digit reference, "
+        "the first alpha token is the counterparty."
+    ),
+    "kotak": (
+        "Kotak narrations often carry a `UPI-<handle>@<psp>-<counterparty-"
+        "name>-<ref>` shape. The counterparty is the last human-readable "
+        "token before the numeric ref."
+    ),
+    "idfc": (
+        "IDFC First uses multi-line transaction blocks — the narration can "
+        "wrap onto 2-3 lines. Treat any continuation line that starts without "
+        "a date as part of the previous row's description."
+    ),
+}
+
+
+def build_prompt(
+    pdfplumber_text: str,
+    bank_hint: str | None = None,
+    pre_parsed_txns: list[dict] | None = None,
+    header_hints: dict | None = None,
+) -> tuple[str, str]:
+    """Build the (system, user) prompt pair.
+
+    When `pre_parsed_txns` / `header_hints` are provided (deterministic
+    parser succeeded), they're added to the user message as authoritative
+    context — the LLM preserves date/amount/direction and fills only the
+    enrichment fields. When omitted (unknown bank or scanned-only text),
+    the LLM does full extraction from the raw text.
+    """
     text = pdfplumber_text or ""
     truncated = len(text) > MAX_TEXT_CHARS
     if truncated:
         text = text[:MAX_TEXT_CHARS] + "\n[...truncated for LLM context window...]"
 
-    hint = ""
+    sections: list[str] = ["Extract this bank statement."]
+
     if bank_hint and bank_hint != "unknown":
-        hint = (
-            f"\nOur deterministic regex parser identified this as `{bank_hint}`. "
-            f"Use that as the bank.key unless the document clearly contradicts it.\n"
+        sections.append(
+            f"Our deterministic regex parser identified this as `{bank_hint}`. "
+            f"Use that as the bank.key unless the document clearly contradicts it."
+        )
+        hint_line = BANK_HINTS.get(bank_hint)
+        if hint_line:
+            sections.append(f"Bank-specific guidance for `{bank_hint}`:\n{hint_line}")
+
+    if header_hints:
+        # Serialise only the fields that are non-null so the model isn't
+        # distracted by empty placeholders. Labelled "guesses" so the model
+        # knows it's free to correct them with stronger evidence.
+        clean_hints = {k: v for k, v in header_hints.items() if v not in (None, "", [])}
+        if clean_hints:
+            sections.append(
+                "DETERMINISTIC HEADER HINTS (best-effort — override only with "
+                "strong evidence from the statement text):\n"
+                + json.dumps(clean_hints, indent=2, ensure_ascii=False)
+            )
+
+    if pre_parsed_txns:
+        # Keep it tight — only the authoritative anchor fields. The LLM
+        # doesn't need raw_description here because it has the full text.
+        compact = [
+            {
+                "date": t.get("date"),
+                "amount": t.get("amount"),
+                "direction": t.get("direction") or t.get("type"),
+                "description": (t.get("description") or "")[:200],
+            }
+            for t in pre_parsed_txns
+        ]
+        sections.append(
+            f"DETERMINISTIC PRE-PARSE ({len(compact)} transactions — "
+            "date/amount/direction are authoritative, DO NOT change them; "
+            "emit same order, same count, filling the other fields):\n"
+            + json.dumps(compact, ensure_ascii=False)
         )
 
-    user = (
-        f"Extract this bank statement.{hint}\n\n"
+    sections.append(
         f"--- BEGIN STATEMENT TEXT ---\n{text}\n--- END STATEMENT TEXT ---"
     )
+
+    user = "\n\n".join(sections)
     return SYSTEM_PROMPT, user
 
 
@@ -315,6 +420,10 @@ async def call_claude(system: str, user: str) -> LLMResult:
 
     def _invoke() -> Any:
         client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        # Prefill-assistant trick: seeding the assistant turn with `{` forces
+        # Claude to start its response with a JSON object and resist any
+        # preamble prose. We prepend the `{` back onto the raw response
+        # below so parse_llm_json sees the full object.
         return client.messages.create(
             model=CLAUDE_MODEL,
             # 16K covers ~200 txns + the new narrative/anomalies/entity_type
@@ -323,7 +432,10 @@ async def call_claude(system: str, user: str) -> LLMResult:
             # with the extended schema.
             max_tokens=16384,
             system=system,
-            messages=[{"role": "user", "content": user}],
+            messages=[
+                {"role": "user", "content": user},
+                {"role": "assistant", "content": "{"},
+            ],
         )
 
     try:
@@ -334,7 +446,8 @@ async def call_claude(system: str, user: str) -> LLMResult:
         for block in getattr(response, "content", []):
             if getattr(block, "type", None) == "text":
                 text_parts.append(getattr(block, "text", ""))
-        result.raw_response = "".join(text_parts)
+        # Prepend the `{` we prefilled — Claude's response starts after it.
+        result.raw_response = "{" + "".join(text_parts)
         usage = getattr(response, "usage", None)
         if usage is not None:
             result.prompt_tokens = getattr(usage, "input_tokens", None)
@@ -418,17 +531,31 @@ async def call_gemini(system: str, user: str, model: str | None = None) -> LLMRe
     return result
 
 
-async def run_all(text: str, bank_hint: str | None = None) -> dict[str, LLMResult]:
+async def run_all(
+    text: str,
+    bank_hint: str | None = None,
+    pre_parsed_txns: list[dict] | None = None,
+    header_hints: dict | None = None,
+) -> dict[str, LLMResult]:
     """Call Claude + every configured Gemini model concurrently on the same
     prompt. Returns a `{slot_key: LLMResult}` dict where slot_key is one of
     `"claude"` or `"gemini:<model>"` — keys are unique so repeated Gemini
     calls (Flash vs Pro comparison runs) don't collide.
 
+    When deterministic context (`pre_parsed_txns` / `header_hints`) is
+    provided, it's woven into the user prompt — the model uses it as
+    authoritative anchors for date/amount/direction and focuses effort on
+    the enrichment fields. Without it, the model does full extraction.
+
     Providers without keys return with an `error` set; the dict always
     contains at least "claude", so downstream code can iterate without
     branching.
     """
-    system, user = build_prompt(text, bank_hint=bank_hint)
+    system, user = build_prompt(
+        text, bank_hint=bank_hint,
+        pre_parsed_txns=pre_parsed_txns,
+        header_hints=header_hints,
+    )
     tasks: dict[str, Any] = {"claude": call_claude(system, user)}
     for gm in gemini_models():
         tasks[f"gemini:{gm}"] = call_gemini(system, user, model=gm)
