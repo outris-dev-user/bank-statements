@@ -155,7 +155,7 @@ export const fetchStatement = (id: string) =>
   request<Statement>(`/api/statements/${encodeURIComponent(id)}`);
 
 export const statementPdfUrl = (statementId: string): string =>
-  `${BASE}/api/statements/${encodeURIComponent(statementId)}/pdf`;
+  `${API_BASE}/api/statements/${encodeURIComponent(statementId)}/pdf`;
 
 export const deleteStatement = (statementId: string) =>
   request<{ status: string; transactions_deleted: number; account_deleted: boolean }>(
