@@ -10,7 +10,14 @@ from pydantic import BaseModel, Field
 
 class EntityValue(BaseModel):
     value: str
-    source: Literal["extracted", "user_edited", "auto_resolved"]
+    # `source` tracks where a field came from so the UI can show provenance
+    # and the overlay pipeline can be audited:
+    #   extracted    — deterministic regex parser or a direct PDF field match
+    #   user_edited  — investigator edited this value in the UI
+    #   auto_resolved — inferred downstream (e.g. entity clustering)
+    #   llm_overlay  — Claude/Gemini cleaned up a noisy deterministic value
+    #                  (e.g. card-number-polluted HDFC POS narrations)
+    source: Literal["extracted", "user_edited", "auto_resolved", "llm_overlay"]
     confidence: float
 
 
