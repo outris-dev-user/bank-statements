@@ -1174,9 +1174,23 @@ def ingest_statement(
         running_balance = float(opening_balance)
         for idx, t in enumerate(parser_txns, start=1):
             raw = t.get("description", "")
-            channel = infer_channel(raw)
-            category = infer_category(raw)
-            counterparty = infer_counterparty(raw, channel)
+            # Prefer pre-computed fields from the extraction pipeline (which
+            # may have overlaid clean values from Claude). Fall back to the
+            # regex heuristics when the caller didn't supply them — that
+            # keeps the older uploader paths working unchanged.
+            pre_channel = t.get("channel")
+            pre_category = t.get("category")
+            pre_counterparty = t.get("counterparty")
+
+            channel = pre_channel if isinstance(pre_channel, str) and pre_channel.strip() else infer_channel(raw)
+            category = pre_category if isinstance(pre_category, str) and pre_category.strip() else infer_category(raw)
+            if isinstance(pre_counterparty, str) and pre_counterparty.strip():
+                counterparty = pre_counterparty.strip()
+                cp_source = "llm_overlay"
+            else:
+                counterparty = infer_counterparty(raw, channel)
+                cp_source = "extracted"
+
             amount = float(t["amount"])
             direction = t["type"]
             running_balance += amount if direction == "Cr" else -amount
@@ -1194,7 +1208,7 @@ def ingest_statement(
                 raw_description=raw,
                 entities_json=json.dumps({
                     "channel":      {"value": channel,      "source": "extracted",     "confidence": 1.0 if channel != "OTHER" else 0.4},
-                    "counterparty": {"value": counterparty, "source": "extracted",     "confidence": 0.9 if conf == "high" else 0.5 if conf == "medium" else 0.25},
+                    "counterparty": {"value": counterparty, "source": cp_source,       "confidence": 0.95 if cp_source == "llm_overlay" else (0.9 if conf == "high" else 0.5 if conf == "medium" else 0.25)},
                     "category":     {"value": category,     "source": "auto_resolved", "confidence": 0.7},
                 }),
                 tags_json="[]", confidence=conf, flags_json=json.dumps(flags),

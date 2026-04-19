@@ -515,6 +515,12 @@ async def upload_statement(
             "description": t.get("description"),
             "amount": t.get("amount"),
             "type": _to_dr_cr(t.get("direction") or t.get("type")),
+            # Pre-computed fields from the pipeline (possibly overlaid from
+            # Claude) — ingest_statement uses these when present instead of
+            # recomputing from the raw description with regex heuristics.
+            "counterparty": t.get("counterparty"),
+            "channel": t.get("channel"),
+            "category": t.get("category"),
         }
         for t in shaped_txns
     ]
@@ -689,6 +695,87 @@ def _shape_transaction(raw: dict) -> dict:
         "channel": channel,
         "category": infer_category(desc),
         "balance_after": raw.get("balance"),  # only populated by hdfc_savings today
+    }
+
+
+def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict) -> None:
+    """Mutate `det_response` in place: where deterministic has the authoritative
+    structured data (dates, amounts, balances, direction) and Claude has cleaner
+    natural-language fields (counterparty, channel, category), overlay the
+    cleaner fields row-by-row. Also bubble up holder_name when deterministic
+    couldn't find one — Claude usually can because it reads the whole header
+    block as free text.
+
+    Alignment strategy:
+      1. If the txn counts match exactly, zip by index (the fast, common case —
+         both parsers walk the PDF in the same order).
+      2. Otherwise, build an index over (date, amount, direction) and match
+         row-by-row, first-wins. Small mismatches in total count then only
+         skip overlay for the unmatched rows instead of the whole statement.
+      3. If neither can match, leave the deterministic row untouched.
+
+    Records the blend in `meta.source = "deterministic+llm-claude"` and
+    `meta.llm_overlay` with counts so the admin UI can see how much was
+    reshaped vs kept as-is.
+    """
+    det_txns = det_response.get("transactions") or []
+    claude_txns = claude_response.get("transactions") or []
+    if not det_txns or not claude_txns:
+        return
+
+    if len(det_txns) == len(claude_txns):
+        pairs = list(zip(det_txns, claude_txns))
+    else:
+        # Build a lookup over claude txns, first occurrence wins. Using rounded
+        # amounts defends against the odd floating-point drift.
+        claude_index: dict[tuple, dict] = {}
+        for ct in claude_txns:
+            try:
+                amt = round(float(ct.get("amount") or 0), 2)
+            except (TypeError, ValueError):
+                continue
+            key = (ct.get("date"), amt, str(ct.get("direction", "")).lower())
+            claude_index.setdefault(key, ct)
+        pairs = []
+        for dt in det_txns:
+            try:
+                amt = round(float(dt.get("amount") or 0), 2)
+            except (TypeError, ValueError):
+                pairs.append((dt, None))
+                continue
+            key = (dt.get("date"), amt, str(dt.get("direction", "")).lower())
+            pairs.append((dt, claude_index.get(key)))
+
+    overlaid = 0
+    for det, claude in pairs:
+        if not claude:
+            continue
+        cp = claude.get("counterparty")
+        if isinstance(cp, str) and cp.strip() and cp.lower() not in {"unknown", "(unknown)"}:
+            det["counterparty"] = cp.strip()
+        ch = claude.get("channel")
+        if isinstance(ch, str) and ch.strip():
+            det["channel"] = ch.strip()
+        cat = claude.get("category")
+        if isinstance(cat, str) and cat.strip():
+            det["category"] = cat.strip()
+        overlaid += 1
+
+    # Bubble holder_name up only if deterministic returned nothing — don't
+    # override a confident deterministic guess with an LLM paraphrase.
+    det_account = det_response.setdefault("account", {})
+    if not det_account.get("holder_name"):
+        claude_holder = (claude_response.get("account") or {}).get("holder_name")
+        if isinstance(claude_holder, str) and claude_holder.strip():
+            det_account["holder_name"] = claude_holder.strip()
+
+    meta = det_response.setdefault("meta", {})
+    meta["source"] = "deterministic+llm-claude"
+    meta["llm_overlay"] = {
+        "provider": "claude",
+        "overlaid_rows": overlaid,
+        "total_rows": len(det_txns),
+        "count_match": len(det_txns) == len(claude_txns),
     }
 
 
@@ -944,8 +1031,16 @@ async def _run_extraction(
             # Priority: deterministic (if it found txns) > Claude > Gemini.
             # Deterministic is preferred because it's auditable and free; LLMs
             # are the fallback for banks we haven't written a parser for.
+            #
+            # When BOTH deterministic and Claude succeeded, we overlay Claude's
+            # clean counterparty/channel/category names onto the deterministic
+            # rows so the entities tab gets human-readable labels without
+            # losing the deterministic parser's reliable dates/amounts/balances.
             if shaped:
                 response = deterministic_response
+                claude_resp = llm_responses.get("claude")
+                if claude_resp:
+                    _overlay_claude_onto_deterministic(response, claude_resp)
             elif llm_responses.get("claude"):
                 response = llm_responses["claude"]
                 response["meta"]["source"] = "llm-claude"
