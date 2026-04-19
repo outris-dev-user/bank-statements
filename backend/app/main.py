@@ -1410,6 +1410,7 @@ def get_extraction_llm_attempts(extraction_id: str) -> dict:
                 "extracted_bank_key": r.extracted_bank_key,
                 "extracted_holder_name": r.extracted_holder_name,
                 "confidence": r.confidence,
+                "cost_usd": llm_mod.estimate_cost_usd(r.model, r.prompt_tokens, r.completion_tokens),
                 "prompt_text": r.prompt_text,
                 "raw_response": r.raw_response,
                 "parsed_json": json.loads(r.parsed_json) if r.parsed_json else None,
@@ -1434,10 +1435,12 @@ def get_extraction_llm_attempts(extraction_id: str) -> dict:
                 and claude.get("extracted_holder_name") == gemini.get("extracted_holder_name")
             ),
         }
+        total_cost = round(sum(a["cost_usd"] or 0 for a in attempts), 6)
         return {
             "extraction_log_id": extraction_id,
             "attempts": attempts,
             "agreement": agreement,
+            "total_cost_usd": total_cost,
         }
 
 
@@ -1491,8 +1494,88 @@ def list_llm_attempts(
                 "extracted_bank_key": r.extracted_bank_key,
                 "extracted_holder_name": r.extracted_holder_name,
                 "confidence": r.confidence,
+                "cost_usd": llm_mod.estimate_cost_usd(r.model, r.prompt_tokens, r.completion_tokens),
                 "created_at": r.created_at,
             }
             for r in rows
         ]
         return {"total": total, "offset": offset, "limit": limit, "items": items}
+
+
+@app.get("/api/admin/llm-cost-summary")
+def llm_cost_summary(
+    since: str | None = Query(default=None, description="ISO-8601 lower bound (inclusive). E.g. 2026-04-01 or 2026-04-19T00:00:00"),
+    until: str | None = Query(default=None, description="ISO-8601 upper bound (exclusive)."),
+) -> dict:
+    """Roll up cost + usage per provider/model over a time window. Cost is
+    computed on the fly from `app.llm.PRICING` — no stored $ values, so
+    edits to the price table take effect immediately.
+
+    Handy defaults:
+      - No `since` → every call ever made.
+      - Add `since=<today>T00:00:00Z` for "today so far".
+
+    Response: `{totals, per_provider[], per_model[], pricing_table}`. The
+    pricing table is included so you can sanity-check the rates used.
+    """
+    from app.db import LLMAttemptRow, get_session
+    with get_session() as s:
+        q = s.query(LLMAttemptRow)
+        if since:
+            q = q.filter(LLMAttemptRow.created_at >= since)
+        if until:
+            q = q.filter(LLMAttemptRow.created_at < until)
+        rows = q.all()
+
+    per_provider: dict[str, dict] = {}
+    per_model: dict[str, dict] = {}
+
+    for r in rows:
+        cost = llm_mod.estimate_cost_usd(r.model, r.prompt_tokens, r.completion_tokens) or 0.0
+        is_error = bool(r.provider_error or r.parse_error)
+
+        for bucket, key in [(per_provider, r.provider or "unknown"),
+                            (per_model, r.model or "unknown")]:
+            slot = bucket.setdefault(key, {
+                "calls": 0, "successes": 0, "errors": 0,
+                "prompt_tokens": 0, "completion_tokens": 0,
+                "total_latency_ms": 0, "cost_usd": 0.0,
+            })
+            slot["calls"] += 1
+            if is_error:
+                slot["errors"] += 1
+            else:
+                slot["successes"] += 1
+            slot["prompt_tokens"] += r.prompt_tokens or 0
+            slot["completion_tokens"] += r.completion_tokens or 0
+            slot["total_latency_ms"] += r.latency_ms or 0
+            slot["cost_usd"] += cost
+
+    def _finalise(d: dict, key_name: str) -> list[dict]:
+        out = []
+        for k, v in d.items():
+            avg_latency = round(v["total_latency_ms"] / v["calls"], 1) if v["calls"] else None
+            avg_cost = round(v["cost_usd"] / v["calls"], 6) if v["calls"] else None
+            out.append({
+                key_name: k,
+                **v,
+                "cost_usd": round(v["cost_usd"], 6),
+                "avg_latency_ms": avg_latency,
+                "avg_cost_usd": avg_cost,
+            })
+        out.sort(key=lambda x: x["cost_usd"], reverse=True)
+        return out
+
+    total_cost = round(sum(v["cost_usd"] for v in per_provider.values()), 6)
+    total_calls = sum(v["calls"] for v in per_provider.values())
+
+    return {
+        "window": {"since": since, "until": until},
+        "totals": {
+            "calls": total_calls,
+            "cost_usd": total_cost,
+        },
+        "per_provider": _finalise(per_provider, "provider"),
+        "per_model": _finalise(per_model, "model"),
+        "pricing_table": llm_mod.PRICING,
+    }

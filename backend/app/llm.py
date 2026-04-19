@@ -29,6 +29,51 @@ from typing import Any
 CLAUDE_MODEL = os.environ.get("LLM_CLAUDE_MODEL", "claude-sonnet-4-5")
 GEMINI_MODEL = os.environ.get("LLM_GEMINI_MODEL", "gemini-2.5-pro")
 
+
+# USD per 1M tokens — input (prompt) and output (completion). Sourced from
+# each provider's public price card. Keep this table honest; the billing
+# rollup in the admin API reads straight from here. Unknown models return
+# None so we can tell "no data" from "$0.00".
+PRICING: dict[str, dict[str, float]] = {
+    # Anthropic — https://www.anthropic.com/pricing
+    "claude-sonnet-4-5":         {"input": 3.00,  "output": 15.00},
+    "claude-sonnet-4-6":         {"input": 3.00,  "output": 15.00},
+    "claude-opus-4-5":           {"input": 15.00, "output": 75.00},
+    "claude-opus-4-7":           {"input": 15.00, "output": 75.00},
+    "claude-haiku-4-5":          {"input": 1.00,  "output": 5.00},
+    # Google — https://ai.google.dev/gemini-api/docs/pricing
+    # Flash: tiered (<=128k prompt); we use the <=128k rates which apply to
+    # bank statements (tens of thousands of tokens).
+    "gemini-2.5-flash":          {"input": 0.30,  "output": 2.50},
+    "gemini-2.5-pro":            {"input": 1.25,  "output": 10.00},
+    "gemini-2.0-flash":          {"input": 0.10,  "output": 0.40},
+}
+
+
+def estimate_cost_usd(model: str | None, prompt_tokens: int | None,
+                      completion_tokens: int | None) -> float | None:
+    """Compute USD cost for one call from token counts. Returns None when the
+    model isn't in the PRICING table (don't silently lie with $0) or when
+    token counts are missing (Gemini 429s arrive with nulls — we can't price
+    a call that was rejected pre-generation)."""
+    if not model:
+        return None
+    price = PRICING.get(model)
+    if price is None:
+        # Try a case-insensitive prefix match — providers sometimes append
+        # dates ("claude-sonnet-4-5-20260401") to concrete model ids.
+        for k, v in PRICING.items():
+            if model.lower().startswith(k.lower()):
+                price = v
+                break
+    if price is None:
+        return None
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+    pt = prompt_tokens or 0
+    ct = completion_tokens or 0
+    return round((pt * price["input"] + ct * price["output"]) / 1_000_000, 6)
+
 # Per-provider feature toggles. Read lazily so a redeploy picks up changes.
 def claude_enabled() -> bool:
     return bool(os.environ.get("ANTHROPIC_API_KEY"))
