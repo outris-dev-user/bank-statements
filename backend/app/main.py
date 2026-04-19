@@ -745,6 +745,89 @@ def _shape_transaction(raw: dict) -> dict:
     }
 
 
+# Decoder rules that are structurally unambiguous — when the decoder matches
+# one of these the LLM's counterparty is overruled if it disagrees.
+_DECODER_HARD_RULES = {
+    "atm", "chqdep", "chqpaid", "clg_brk", "ib_xfer:cr", "ib_xfer:dr",
+    "static", "by_cash", "crvpos_fuel", "mir_charge", "bil_inft",
+}
+
+
+def _decoder_channel_to_llm(decoder_channel: str) -> str | None:
+    """Map decoder channel vocabulary → LLM/system channel vocabulary.
+
+    Keep this small: only collapse the pairs that actually appear in both.
+    """
+    if not decoder_channel or decoder_channel == "unknown":
+        return None
+    return {
+        "atm_hdfc": "atm",
+        "atm_other": "atm",
+        "pos": "pos",
+        "upi": "upi",
+        "imps": "imps",
+        "neft": "neft",
+        "rtgs": "rtgs",
+        "tpt": "transfer",
+        "ib_xfer": "transfer",
+        "cheque_deposit": "cheque",
+        "cheque_paid": "cheque",
+        "cash_deposit": "cash",
+        "tds": "tax",
+        "interest_credit": "interest",
+        "bank_charge": "fees",
+        "fuel_reversal": "reversal",
+        "bill_pay": "bill",
+        "ecs": "ecs",
+    }.get(decoder_channel, decoder_channel)
+
+
+def _stitch_decoder_into_row(det_row: dict, bank_key: str) -> None:
+    """Pull decoder output for this row and merge structured fields.
+
+    Runs AFTER the LLM overlay so decoder can correct obvious LLM mistakes
+    (e.g. LLM names an ATM withdrawal as a random merchant). For soft rules
+    (pos, upi, imps, tpt), the LLM's presentation usually wins; for hard
+    rules (atm, cheques, IB transfers, static events) the decoder wins.
+    """
+    try:
+        from plugins.bank.extraction.narration import decode as _decode_narr
+    except Exception:
+        return
+    dec = _decode_narr(bank_key, det_row.get("description") or det_row.get("raw_description") or "")
+    rule = dec.get("matched_rule")
+    if rule in (None, "unmatched", "no_decoder"):
+        return
+
+    # Always stitch structured extras (non-destructive).
+    if dec.get("card_last4") and not det_row.get("card_last4"):
+        det_row["card_last4"] = dec["card_last4"]
+    if dec.get("ref_number") and not det_row.get("ref_number"):
+        det_row["ref_number"] = dec["ref_number"]
+    if dec.get("counterparty_bank") and not det_row.get("counterparty_bank"):
+        det_row["counterparty_bank"] = dec["counterparty_bank"]
+
+    # Map channel vocabulary and fill if absent.
+    mapped_channel = _decoder_channel_to_llm(dec.get("channel"))
+    if mapped_channel and not det_row.get("channel"):
+        det_row["channel"] = mapped_channel
+
+    # Hard-rule override: for unambiguous codes, trust decoder over LLM.
+    is_hard = rule in _DECODER_HARD_RULES or rule.startswith("atm") or rule.startswith("ib_xfer")
+    if is_hard:
+        if mapped_channel:
+            det_row["channel"] = mapped_channel
+        if dec.get("merchant"):
+            llm_cp = (det_row.get("counterparty") or "").strip().lower()
+            dec_cp = dec["merchant"].strip().lower()
+            # Override when LLM's answer is missing or doesn't share any token
+            # with the decoder's answer.
+            llm_tokens = set(re.findall(r"[a-z0-9]+", llm_cp))
+            dec_tokens = set(re.findall(r"[a-z0-9]+", dec_cp))
+            if not llm_cp or not (llm_tokens & dec_tokens):
+                det_row["counterparty"] = dec["merchant"]
+
+
 def _overlay_llm_onto_deterministic(det_response: dict, llm_response: dict, provider_slot: str) -> None:
     """Mutate `det_response` in place with richer fields from the LLM.
 
@@ -1110,12 +1193,14 @@ async def _run_extraction(
                 pre_parsed_for_llm: list[dict] | None = None
                 header_hints: dict | None = None
                 if raw_txns:
+                    from plugins.bank.extraction.narration import decode as _decode_narr
                     pre_parsed_for_llm = [
                         {
                             "date": iso_date(t.get("date", "")) or t.get("date"),
                             "amount": t.get("amount"),
                             "direction": "debit" if t.get("type") == "Dr" else "credit",
                             "description": t.get("description", ""),
+                            "decoded": _decode_narr(bank_key, t.get("description", "")),
                         }
                         for t in raw_txns
                     ]
@@ -1178,6 +1263,11 @@ async def _run_extraction(
                 response = deterministic_response
                 if primary_response and primary_slot:
                     _overlay_llm_onto_deterministic(response, primary_response, primary_slot)
+                # Decoder stitch runs after overlay — adds structured
+                # fields (card_last4, ref_number, counterparty_bank) and
+                # corrects obvious LLM mistakes on hard-rule narrations.
+                for _row in response.get("transactions") or []:
+                    _stitch_decoder_into_row(_row, bank_key)
             elif primary_response and primary_slot:
                 response = primary_response
                 response["meta"]["source"] = f"llm-{primary_slot}"

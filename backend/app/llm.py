@@ -374,21 +374,32 @@ def build_prompt(
             )
 
     if pre_parsed_txns:
-        # Keep it tight — only the authoritative anchor fields. The LLM
-        # doesn't need raw_description here because it has the full text.
-        compact = [
-            {
+        compact = []
+        for t in pre_parsed_txns:
+            entry = {
                 "date": t.get("date"),
                 "amount": t.get("amount"),
                 "direction": t.get("direction") or t.get("type"),
                 "description": (t.get("description") or "")[:200],
             }
-            for t in pre_parsed_txns
-        ]
+            # Narration decoder output (regex-level, deterministic). When
+            # present for a row, the model should treat it as strong prior:
+            # use it unless the PDF text clearly contradicts it.
+            dec = t.get("decoded") or None
+            if dec and dec.get("matched_rule") not in (None, "unmatched", "no_decoder"):
+                entry["decoded"] = {
+                    k: v for k, v in dec.items()
+                    if v not in (None, "") and k != "matched_rule"
+                }
+            compact.append(entry)
         sections.append(
             f"DETERMINISTIC PRE-PARSE ({len(compact)} transactions — "
             "date/amount/direction are authoritative, DO NOT change them; "
-            "emit same order, same count, filling the other fields):\n"
+            "emit same order, same count, filling the other fields). "
+            "Rows that include a `decoded` block have been pattern-matched "
+            "by our regex layer — trust those merchant/channel/card_last4/"
+            "ref_number values unless the raw statement text obviously "
+            "says otherwise:\n"
             + json.dumps(compact, ensure_ascii=False)
         )
 
