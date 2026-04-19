@@ -1259,7 +1259,27 @@ def ingest_statement(
 
             amount = float(t["amount"])
             direction = t["type"]
-            running_balance += amount if direction == "Cr" else -amount
+
+            # Prefer the bank's authoritative post-transaction balance when
+            # the caller supplied one (HDFC savings parser + LLM both pull
+            # this directly from the PDF). Falling back to the computed
+            # running total is only correct when we know the true opening
+            # balance — which we often don't, because `_guess_balances` only
+            # matches a few layouts and defaults to 0. Using balance_after
+            # sidesteps that entirely.
+            pre_balance_after = t.get("balance_after")
+            if pre_balance_after is not None:
+                try:
+                    row_running_balance = round(float(pre_balance_after), 2)
+                    # Keep the computed tracker aligned so any subsequent row
+                    # without `balance_after` continues from the right value.
+                    running_balance = row_running_balance
+                except (TypeError, ValueError):
+                    running_balance += amount if direction == "Cr" else -amount
+                    row_running_balance = round(running_balance, 2)
+            else:
+                running_balance += amount if direction == "Cr" else -amount
+                row_running_balance = round(running_balance, 2)
             conf = "high"
             flags: list[str] = []
             if counterparty.startswith("(unknown") or len(counterparty) < 3:
@@ -1289,7 +1309,7 @@ def ingest_statement(
             s.add(TransactionRow(
                 id=tid, statement_id=sid, account_id=acc.id, case_id=case_id,
                 row_index=idx, txn_date=iso_date(t.get("date", "")),
-                amount=amount, direction=direction, running_balance=round(running_balance, 2),
+                amount=amount, direction=direction, running_balance=row_running_balance,
                 raw_description=raw,
                 entities_json=json.dumps({
                     "channel":      {"value": channel,      "source": "extracted",     "confidence": 1.0 if channel != "OTHER" else 0.4},

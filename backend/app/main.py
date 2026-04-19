@@ -556,6 +556,11 @@ async def upload_statement(
             "entity_type": t.get("entity_type"),
             "is_self_transfer": t.get("is_self_transfer"),
             "notable_reason": t.get("notable_reason"),
+            # The bank's authoritative post-transaction balance from the PDF
+            # column (HDFC savings extracts this directly). When present, the
+            # case store uses it verbatim instead of computing running balance
+            # from opening + sum(signed amounts) — avoids the opening=0 bug.
+            "balance_after": t.get("balance_after"),
         }
         for t in shaped_txns
     ]
@@ -827,6 +832,16 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
         v = claude_account.get(k)
         if v and not det_account.get(k):
             det_account[k] = v
+
+    # Balance — deterministic `_guess_balances` only matches a handful of
+    # statement layouts, so it often returns (None, None) even when the PDF
+    # clearly shows opening/closing. Claude reads the whole header block and
+    # almost always gets this right. Promote only when deterministic is missing.
+    det_balance = det_response.setdefault("balance", {})
+    claude_balance = claude_response.get("balance") or {}
+    for k in ("opening", "closing"):
+        if det_balance.get(k) in (None,) and claude_balance.get(k) is not None:
+            det_balance[k] = claude_balance[k]
 
     # Statement-level analysis — entirely LLM-only fields. `normalise_llm_response`
     # already buckets these under an `analysis` sub-dict on the LLM response,
