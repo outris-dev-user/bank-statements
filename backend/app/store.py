@@ -133,6 +133,7 @@ def _statement_row_to_schema(row: StatementRow) -> Statement:
         anomalies=json.loads(anomalies_raw) if anomalies_raw else [],
         risk_level=getattr(row, "risk_level", None),
         statement_integrity=json.loads(integrity_raw) if integrity_raw else None,
+        file_hash=getattr(row, "file_hash", None),
     )
 
 
@@ -219,6 +220,37 @@ def list_case_transactions(
             total=total, offset=offset, limit=limit,
             items=[_txn_row_to_schema(r) for r in items],
         )
+
+
+def find_duplicate_statement_in_case(case_id: str, file_hash: str) -> Optional[dict]:
+    """Return a small summary of an existing statement in `case_id` whose
+    source PDF has the same sha256. Used by the upload endpoint to warn the
+    user before overwriting. Returns None when no duplicate exists or when
+    either argument is falsy.
+
+    The summary is a plain dict (not the full `Statement` schema) so the
+    upload error envelope can embed it without a model import cycle.
+    """
+    if not (case_id and file_hash):
+        return None
+    with get_session() as s:
+        row = (
+            s.query(StatementRow)
+            .join(AccountRow, StatementRow.account_id == AccountRow.id)
+            .join(PersonRow, AccountRow.person_id == PersonRow.id)
+            .filter(PersonRow.case_id == case_id, StatementRow.file_hash == file_hash)
+            .order_by(StatementRow.uploaded_at.desc())
+            .first()
+        )
+        if not row:
+            return None
+        return {
+            "id": row.id,
+            "source_file_name": row.source_file_name,
+            "uploaded_at": row.uploaded_at,
+            "extracted_txn_count": row.extracted_txn_count,
+            "account_id": row.account_id,
+        }
 
 
 def get_statement(statement_id: str) -> Optional[Statement]:
@@ -1153,6 +1185,9 @@ def ingest_statement(
     anomalies: Optional[list] = None,
     risk_level: Optional[str] = None,
     statement_integrity: Optional[dict] = None,
+    # sha256 of the source PDF — lets the upload endpoint detect repeat
+    # uploads (same file into same case) and warn before creating duplicates.
+    file_hash: Optional[str] = None,
 ) -> Optional[Tuple[Statement, list[Transaction]]]:
     """Persist a parsed statement + its transactions. Used by the upload endpoint."""
     with get_session() as s:
@@ -1195,6 +1230,7 @@ def ingest_statement(
             anomalies_json=json.dumps(anomalies) if anomalies else None,
             risk_level=risk_level,
             statement_integrity_json=json.dumps(statement_integrity) if statement_integrity else None,
+            file_hash=file_hash,
         )
         s.add(stmt)
         s.flush()

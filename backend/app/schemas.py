@@ -104,6 +104,8 @@ class Statement(BaseModel):
     anomalies: list[AnomalyFinding] = Field(default_factory=list)
     risk_level: Optional[Literal["high", "medium", "low"]] = None
     statement_integrity: Optional[StatementIntegrity] = None
+    # sha256 of the source PDF (for duplicate-upload detection).
+    file_hash: Optional[str] = None
 
 
 class Transaction(BaseModel):

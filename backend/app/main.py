@@ -446,16 +446,48 @@ async def upload_statement(
     account_number: str | None = Form(default=None),
     holder_name: str | None = Form(default=None),
     password: str | None = Form(default=None),
+    overwrite: bool = Form(default=False),
 ) -> dict:
     """Upload a PDF, run the full extraction pipeline (deterministic +
     dual-LLM when enabled), and ingest the result into the case store.
     Goes through the same `_run_extraction` helper as `/api/extract`, so
     every upload from the frontend is recorded in `extraction_log` and
-    both LLMs fire when `LLM_ENABLED=1`."""
+    both LLMs fire when `LLM_ENABLED=1`.
+
+    Duplicate-upload guard: if a statement with the same sha256 already
+    exists in this case, we 409 with `error_code=DUPLICATE_UPLOAD` and a
+    pointer to the existing statement. The client shows a confirmation
+    dialog; a second POST with `overwrite=true` deletes the old statement
+    first and then ingests the new one (fresh LLM output).
+    """
     if not file.filename:
         raise HTTPException(400, "Missing file")
 
     content = await file.read()
+
+    # Duplicate check BEFORE running the LLM (which costs real money).
+    # sha256 of the raw bytes is what the PDF store already keys on.
+    import hashlib as _hashlib
+    file_hash = _hashlib.sha256(content).hexdigest()
+    existing = store_mod.find_duplicate_statement_in_case(case_id, file_hash)
+    if existing:
+        if not overwrite:
+            raise HTTPException(
+                409,
+                _err(
+                    "DUPLICATE_UPLOAD",
+                    "This PDF has already been uploaded to this case. "
+                    "Re-submit with overwrite=true to replace the existing statement.",
+                    {
+                        "existing_statement_id": existing["id"],
+                        "existing_source_file_name": existing["source_file_name"],
+                        "existing_uploaded_at": existing["uploaded_at"],
+                        "existing_txn_count": existing["extracted_txn_count"],
+                    },
+                ),
+            )
+        # overwrite=true → drop the old one so the re-ingest lands cleanly.
+        store_mod.delete_statement(existing["id"])
 
     # Keep a per-case copy on the local upload dir so `/api/statements/{id}/pdf`
     # streaming keeps working. The extraction pipeline also writes a
@@ -548,6 +580,7 @@ async def upload_statement(
         anomalies=analysis.get("anomalies"),
         risk_level=analysis.get("risk_level"),
         statement_integrity=analysis.get("statement_integrity"),
+        file_hash=file_hash,
     )
     if result is None:
         raise HTTPException(404, f"Case or person not found (case_id={case_id}, person_id={person_id})")

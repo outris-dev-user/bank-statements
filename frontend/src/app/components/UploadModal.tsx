@@ -38,7 +38,14 @@ interface UploadResult {
   transaction_count: number;
 }
 
-type Status = "pick" | "previewing" | "preview_ready" | "uploading" | "done" | "error";
+type Status = "pick" | "previewing" | "preview_ready" | "uploading" | "duplicate_confirm" | "done" | "error";
+
+interface DuplicateInfo {
+  existing_statement_id: string;
+  existing_source_file_name: string;
+  existing_uploaded_at: string;
+  existing_txn_count: number;
+}
 
 export function UploadModal({ onClose, caseId, personId, persons }: UploadModalProps) {
   const navigate = useNavigate();
@@ -50,6 +57,7 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
   const [error, setError] = useState<string | null>(null);
   const [showAddPerson, setShowAddPerson] = useState(false);
   const [autoMatched, setAutoMatched] = useState(false);
+  const [duplicate, setDuplicate] = useState<DuplicateInfo | null>(null);
 
   // Explicit person choice. If a personId was passed in (user clicked a
   // person's Upload button) use it; otherwise leave blank and let detection
@@ -119,13 +127,11 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     qc.invalidateQueries({ queryKey: ["case", caseId] });
   };
 
-  const commitUpload = async () => {
+  /** Single code path used by the first try and the "Overwrite" retry —
+   *  `overwrite=true` tells the backend to replace the existing statement
+   *  that has the same sha256. */
+  const postUpload = async (overwriteFlag: boolean) => {
     if (!file || !selectedPerson) return;
-    if (!accountNumber.trim()) {
-      setError("Account number is required — type the last 4 digits at least.");
-      setStatus("error");
-      return;
-    }
     setStatus("uploading");
     setError(null);
     const fd = new FormData();
@@ -135,16 +141,34 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
     fd.append("account_type", accountType);
     fd.append("account_number", accountNumber.trim());
     fd.append("holder_name", holderName || "Unknown");
+    if (overwriteFlag) fd.append("overwrite", "true");
     try {
       const res = await fetch(`${API_BASE}/api/cases/${caseId}/statements`, {
         method: "POST",
         body: fd,
         headers: apiAuthHeaders(),
       });
+      if (res.status === 409) {
+        // Backend detected duplicate sha256 — surface the confirmation step.
+        const body = await res.json().catch(() => null);
+        const detail = body?.detail;
+        if (detail?.error_code === "DUPLICATE_UPLOAD") {
+          const extra = detail.extra || {};
+          setDuplicate({
+            existing_statement_id: extra.existing_statement_id,
+            existing_source_file_name: extra.existing_source_file_name,
+            existing_uploaded_at: extra.existing_uploaded_at,
+            existing_txn_count: extra.existing_txn_count,
+          });
+          setStatus("duplicate_confirm");
+          return;
+        }
+      }
       if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
       const data: UploadResult = await res.json();
       setResult(data);
       setStatus("done");
+      setDuplicate(null);
       qc.invalidateQueries({ queryKey: ["case", caseId] });
       qc.invalidateQueries({ queryKey: ["cases"] });
       qc.invalidateQueries({ queryKey: ["health"] });
@@ -152,6 +176,20 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
       setError(e.message || "Upload failed");
       setStatus("error");
     }
+  };
+
+  const commitUpload = async () => {
+    if (!file || !selectedPerson) return;
+    if (!accountNumber.trim()) {
+      setError("Account number is required — type the last 4 digits at least.");
+      setStatus("error");
+      return;
+    }
+    await postUpload(false);
+  };
+
+  const confirmOverwrite = async () => {
+    await postUpload(true);
   };
 
   const handleOpenWorkbench = () => {
@@ -174,6 +212,7 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
             {status === "previewing" && "Analysing PDF…"}
             {status === "preview_ready" && "Confirm before upload"}
             {status === "uploading" && `Uploading ${file?.name}…`}
+            {status === "duplicate_confirm" && "Duplicate file detected"}
             {status === "done" && `Uploaded ${file?.name}`}
             {status === "error" && "Upload failed"}
           </h2>
@@ -349,6 +388,27 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
             </div>
           )}
 
+          {status === "duplicate_confirm" && duplicate && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-900 space-y-2">
+                  <div className="font-medium">This PDF has already been uploaded to this case.</div>
+                  <div className="bg-white/60 rounded px-3 py-2 space-y-0.5 font-mono text-xs">
+                    <div>Existing statement: <span className="font-semibold">{duplicate.existing_statement_id}</span></div>
+                    <div>File: {duplicate.existing_source_file_name}</div>
+                    <div>Uploaded: {new Date(duplicate.existing_uploaded_at).toLocaleString()}</div>
+                    <div>Transactions: {duplicate.existing_txn_count}</div>
+                  </div>
+                  <div>
+                    Proceeding will <strong>delete the existing statement</strong> (and its {duplicate.existing_txn_count} transactions,
+                    audit events, and entity links) before re-ingesting the new upload. The LLM analysis will re-run from scratch.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {status === "done" && result && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[color:var(--fl-emerald-500)]">
@@ -382,6 +442,14 @@ export function UploadModal({ onClose, caseId, personId, persons }: UploadModalP
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Confirm &amp; upload
+            </button>
+          )}
+          {status === "duplicate_confirm" && (
+            <button
+              onClick={confirmOverwrite}
+              className="px-4 py-2 bg-destructive text-white rounded-lg hover:bg-destructive/90"
+            >
+              Overwrite &amp; re-upload
             </button>
           )}
           {status === "done" && (

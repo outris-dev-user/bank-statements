@@ -124,6 +124,10 @@ class StatementRow(Base):
     anomalies_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     risk_level: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     statement_integrity_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # sha256 of the source PDF bytes — used for duplicate-upload detection
+    # (warn when the same file lands twice in the same case). Indexed because
+    # the check happens on every upload.
+    file_hash: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
 
     account: Mapped[AccountRow] = relationship(back_populates="statements")
     transactions: Mapped[list["TransactionRow"]] = relationship(back_populates="statement", cascade="all, delete-orphan")
@@ -295,6 +299,7 @@ def _ensure_columns() -> None:
         ("statements",   "anomalies_json",           "TEXT"),
         ("statements",   "risk_level",               "VARCHAR"),
         ("statements",   "statement_integrity_json", "TEXT"),
+        ("statements",   "file_hash",                "VARCHAR"),
         ("transactions", "llm_entity_type",          "VARCHAR"),
         ("transactions", "is_self_transfer",         "BOOLEAN"),
         ("transactions", "notable_reason",           "TEXT"),

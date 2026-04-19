@@ -487,16 +487,18 @@ async def call_gemini(system: str, user: str, model: str | None = None) -> LLMRe
 
     def _invoke() -> Any:
         client = genai.Client(api_key=api_key)
-        # Gemini 2.5 has "thinking" enabled by default, which burns output
-        # tokens before any visible text appears. For structured-JSON
-        # extraction we don't need chain-of-thought — disable to avoid
-        # truncated output like the 311-completion-token Flash failure.
-        # Older SDK versions lack ThinkingConfig; fall back silently.
+        # Gemini 2.5 has "thinking" enabled by default. Flash lets you
+        # turn it off with budget=0 (cheaper + avoids the 311-token
+        # truncation we saw earlier). Pro REQUIRES thinking mode and
+        # rejects budget=0 with "This model only works in thinking
+        # mode" — so only set budget=0 on Flash. Older SDKs lack
+        # ThinkingConfig; fall back silently.
         extra: dict[str, Any] = {}
-        try:
-            extra["thinking_config"] = genai_types.ThinkingConfig(thinking_budget=0)
-        except AttributeError:
-            pass
+        if "flash" in (chosen_model or "").lower():
+            try:
+                extra["thinking_config"] = genai_types.ThinkingConfig(thinking_budget=0)
+            except AttributeError:
+                pass
         return client.models.generate_content(
             model=chosen_model,
             contents=user,

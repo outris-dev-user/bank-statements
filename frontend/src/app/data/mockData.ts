@@ -81,6 +81,9 @@ export interface Statement {
   anomalies?: AnomalyFinding[];
   risk_level?: RiskLevel | null;
   statement_integrity?: StatementIntegrity | null;
+  // sha256 of the source PDF — used by the backend for duplicate-upload
+  // detection. Surfaced for reference; nothing in the UI reads it today.
+  file_hash?: string | null;
 }
 
 export interface EntityValue {
