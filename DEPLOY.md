@@ -31,6 +31,7 @@ Both deploy from the same GitHub repo; each Railway service uses its own `railwa
 | `LLM_CLAUDE_MODEL`   | no  | Override Claude model id. Default `claude-sonnet-4-5`. |
 | `LLM_GEMINI_MODEL`   | no  | Override default Gemini model id. Default `gemini-2.5-pro`. Ignored when `LLM_GEMINI_MODELS` is set. |
 | `LLM_GEMINI_MODELS`  | no  | Comma-separated list of Gemini models to call on every extraction — for head-to-head quality comparison. Example: `gemini-2.5-flash,gemini-2.5-pro`. Each listed model produces its own `llm_attempts` row per upload, so you pay per model. Unset = call only `LLM_GEMINI_MODEL`. |
+| `LLM_PRIMARY`        | no  | Ordered preference (comma-separated) for which LLM's output drives the case-store view when multiple models ran. Accepts `claude`, `gemini-2.5-pro`, `gemini-2.5-flash`, or just `gemini` (any). First available wins, falling through on failure. Default: `claude,gemini-2.5-pro,gemini-2.5-flash,gemini`. The non-primary providers still run and their outputs are retained in `llm_attempts` for comparison, so swapping this value only changes which one drives counterparty overlay + narrative storage. |
 | `PORT`               | auto | Railway injects. |
 | `LEDGERFLOW_RESET_DB`| no  | Set to `1` once to reset+reseed the case store on startup. Does **not** drop `extraction_log`, `extraction_trace`, or `llm_attempts`. |
  minor edit

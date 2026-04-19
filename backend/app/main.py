@@ -745,13 +745,14 @@ def _shape_transaction(raw: dict) -> dict:
     }
 
 
-def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict) -> None:
-    """Mutate `det_response` in place: where deterministic has the authoritative
-    structured data (dates, amounts, balances, direction) and Claude has cleaner
-    natural-language fields (counterparty, channel, category), overlay the
-    cleaner fields row-by-row. Also bubble up holder_name when deterministic
-    couldn't find one — Claude usually can because it reads the whole header
-    block as free text.
+def _overlay_llm_onto_deterministic(det_response: dict, llm_response: dict, provider_slot: str) -> None:
+    """Mutate `det_response` in place with richer fields from the LLM.
+
+    `provider_slot` is the run_all slot key (e.g. "claude" or
+    "gemini:gemini-2.5-pro") — used only for labelling `meta.source` and
+    `meta.llm_overlay.provider`, so admin views can see which model drove
+    the case-store view. The overlay logic is identical across providers
+    since we ask them all for the same schema.
 
     Alignment strategy:
       1. If the txn counts match exactly, zip by index (the fast, common case —
@@ -761,10 +762,11 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
          skip overlay for the unmatched rows instead of the whole statement.
       3. If neither can match, leave the deterministic row untouched.
 
-    Records the blend in `meta.source = "deterministic+llm-claude"` and
+    Records the blend in `meta.source = "deterministic+<slot>"` and
     `meta.llm_overlay` with counts so the admin UI can see how much was
     reshaped vs kept as-is.
     """
+    claude_response = llm_response  # local alias to avoid renaming the rest
     det_txns = det_response.get("transactions") or []
     claude_txns = claude_response.get("transactions") or []
     if not det_txns or not claude_txns:
@@ -861,9 +863,9 @@ def _overlay_claude_onto_deterministic(det_response: dict, claude_response: dict
         analysis["statement_integrity"] = integrity
 
     meta = det_response.setdefault("meta", {})
-    meta["source"] = "deterministic+llm-claude"
+    meta["source"] = f"deterministic+{provider_slot}"
     meta["llm_overlay"] = {
-        "provider": "claude",
+        "provider": provider_slot,
         "overlaid_rows": overlaid,
         "total_rows": len(det_txns),
         "count_match": len(det_txns) == len(claude_txns),
@@ -1154,36 +1156,31 @@ async def _run_extraction(
                             llm_result.parsed, source_filename=fname,
                         )
 
-            # Pick the first successful Gemini result (in insertion order, which
-            # matches `LLM_GEMINI_MODELS` order — Flash then Pro by default) for
-            # the fallback priority. Claude always beats Gemini when both work.
-            gemini_response = next(
-                (v for k, v in llm_responses.items() if k.startswith("gemini:")),
-                None,
-            )
+            # Pick the "primary" LLM — the one whose output overlays onto the
+            # deterministic response and drives what the case store and
+            # front-end see. Configured via `LLM_PRIMARY` env var (default
+            # Claude). All other providers still ran — their attempts stay
+            # in `llm_attempts` for the admin comparison view.
+            primary_slot, primary_response = llm_mod.pick_primary_response(llm_responses)
 
             # ── choose what to return the caller ─────────────────────────
-            # Priority: deterministic (if it found txns) > Claude > Gemini.
-            # Deterministic is preferred because it's auditable and free; LLMs
-            # are the fallback for banks we haven't written a parser for.
+            # Priority: deterministic (if it found txns) > primary LLM > any
+            # successful LLM. Deterministic is preferred because it's
+            # auditable and free; LLMs are the fallback for banks we haven't
+            # written a parser for.
             #
-            # When BOTH deterministic and Claude succeeded, we overlay Claude's
-            # clean counterparty/channel/category names onto the deterministic
-            # rows so the entities tab gets human-readable labels without
-            # losing the deterministic parser's reliable dates/amounts/balances.
+            # When BOTH deterministic and the primary LLM succeeded, we
+            # overlay the LLM's clean counterparty/channel/category/entity_type
+            # onto the deterministic rows so the entities tab gets
+            # human-readable labels without losing the deterministic
+            # parser's reliable dates/amounts/balances.
             if shaped:
                 response = deterministic_response
-                claude_resp = llm_responses.get("claude")
-                if claude_resp:
-                    _overlay_claude_onto_deterministic(response, claude_resp)
-            elif llm_responses.get("claude"):
-                response = llm_responses["claude"]
-                response["meta"]["source"] = "llm-claude"
-                response["meta"]["deterministic_parser"] = bank_key
-                response["meta"]["page_count"] = page_count
-            elif gemini_response:
-                response = gemini_response
-                response["meta"]["source"] = "llm-gemini"
+                if primary_response and primary_slot:
+                    _overlay_llm_onto_deterministic(response, primary_response, primary_slot)
+            elif primary_response and primary_slot:
+                response = primary_response
+                response["meta"]["source"] = f"llm-{primary_slot}"
                 response["meta"]["deterministic_parser"] = bank_key
                 response["meta"]["page_count"] = page_count
             else:
@@ -1563,10 +1560,31 @@ def get_extraction_llm_attempts(extraction_id: str) -> dict:
             for r in rows
         ]
         # Per-model comparison across all providers that returned a parse.
-        # Each field (txn_count, bank_key, holder_name) lists the distinct
-        # values we got and which `<provider>:<model>` reported each. When
-        # every live attempt produced the same value, `unanimous` is True.
-        def _comparison(field: str) -> dict:
+        # Each field lists the distinct values we got and which
+        # `<provider>:<model>` reported each. When every live attempt
+        # produced the same value, `unanimous` is True.
+        #
+        # Top-level fields come from the dedicated extracted_* columns on
+        # the row. Deeper fields (balance, risk_level, anomalies, etc.)
+        # need a dip into parsed_json — handled by _deep_comparison below.
+        def _slot(a: dict) -> str:
+            return f"{a['provider']}:{a['model']}"
+
+        def _dedup_reporter_list(buckets: dict[object, list[str]]) -> dict:
+            values = [{"value": v, "reporters": r} for v, r in buckets.items()]
+            return {
+                "values": values,
+                # A field is "unanimous" when every successful attempt reported
+                # the same value AND at least 2 attempts actually reported.
+                "unanimous": (
+                    len(buckets) == 1
+                    and values
+                    and len(values[0]["reporters"]) > 1
+                ),
+                "distinct_count": len(buckets),
+            }
+
+        def _flat_comparison(field: str) -> dict:
             buckets: dict[object, list[str]] = {}
             for a in attempts:
                 if a.get("provider_error") or a.get("parse_error"):
@@ -1574,18 +1592,82 @@ def get_extraction_llm_attempts(extraction_id: str) -> dict:
                 val = a.get(field)
                 if val is None:
                     continue
-                buckets.setdefault(val, []).append(f"{a['provider']}:{a['model']}")
-            values = [{"value": v, "reporters": r} for v, r in buckets.items()]
-            return {
-                "values": values,
-                "unanimous": len(buckets) == 1 and len(values[0]["reporters"]) > 1 if values else False,
-                "distinct_count": len(buckets),
-            }
+                buckets.setdefault(val, []).append(_slot(a))
+            return _dedup_reporter_list(buckets)
+
+        def _deep_comparison(path: list[str], caster=lambda x: x) -> dict:
+            """Pull `parsed_json[path[0]][path[1]]...` from each attempt."""
+            buckets: dict[object, list[str]] = {}
+            for a in attempts:
+                if a.get("provider_error") or a.get("parse_error"):
+                    continue
+                node = a.get("parsed_json") or {}
+                for p in path:
+                    if not isinstance(node, dict):
+                        node = None
+                        break
+                    node = node.get(p)
+                if node is None:
+                    continue
+                try:
+                    key = caster(node)
+                except (TypeError, ValueError):
+                    continue
+                buckets.setdefault(key, []).append(_slot(a))
+            return _dedup_reporter_list(buckets)
+
+        def _count_comparison(path: list[str]) -> dict:
+            """For list-valued fields — compare list *length* across models."""
+            buckets: dict[object, list[str]] = {}
+            for a in attempts:
+                if a.get("provider_error") or a.get("parse_error"):
+                    continue
+                node = a.get("parsed_json") or {}
+                for p in path:
+                    if not isinstance(node, dict):
+                        node = None
+                        break
+                    node = node.get(p)
+                if not isinstance(node, list):
+                    continue
+                buckets.setdefault(len(node), []).append(_slot(a))
+            return _dedup_reporter_list(buckets)
+
+        def _self_transfer_count(a: dict) -> int | None:
+            parsed = a.get("parsed_json") or {}
+            txns = parsed.get("transactions") or []
+            if not txns:
+                return None
+            return sum(1 for t in txns if t.get("is_self_transfer"))
+
+        def _self_transfer_comparison() -> dict:
+            buckets: dict[object, list[str]] = {}
+            for a in attempts:
+                if a.get("provider_error") or a.get("parse_error"):
+                    continue
+                n = _self_transfer_count(a)
+                if n is None:
+                    continue
+                buckets.setdefault(n, []).append(_slot(a))
+            return _dedup_reporter_list(buckets)
 
         comparison = {
-            "txn_count": _comparison("extracted_txn_count"),
-            "bank_key": _comparison("extracted_bank_key"),
-            "holder_name": _comparison("extracted_holder_name"),
+            # Fast fields pulled from dedicated columns
+            "txn_count":     _flat_comparison("extracted_txn_count"),
+            "bank_key":      _flat_comparison("extracted_bank_key"),
+            "holder_name":   _flat_comparison("extracted_holder_name"),
+            "confidence":    _flat_comparison("confidence"),
+            # Deeper fields from parsed_json
+            "account_type":      _deep_comparison(["bank", "account_type"]),
+            "opening_balance":   _deep_comparison(["balance", "opening"], float),
+            "closing_balance":   _deep_comparison(["balance", "closing"], float),
+            "period_start":      _deep_comparison(["period", "start"]),
+            "period_end":        _deep_comparison(["period", "end"]),
+            "risk_level":        _deep_comparison(["risk_level"]),
+            # List-valued — compare counts so we can see "how much did each
+            # model flag" at a glance without dumping the whole list.
+            "anomaly_count":     _count_comparison(["anomalies"]),
+            "self_transfer_rows": _self_transfer_comparison(),
         }
         total_cost = round(sum(a["cost_usd"] or 0 for a in attempts), 6)
         return {

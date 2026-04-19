@@ -42,6 +42,50 @@ def gemini_models() -> list[str]:
     return [GEMINI_MODEL]
 
 
+def primary_provider_preference() -> list[str]:
+    """Ordered list of run_all slot keys (or prefixes) to use as the
+    "authoritative" LLM when picking which result overlays onto the
+    deterministic response. First entry wins if it succeeded; we fall
+    through to the next on parse/provider error.
+
+    Configured via `LLM_PRIMARY` env var (comma-separated). Each entry
+    matches a run_all slot by prefix:
+      - "claude"                  → the Claude result
+      - "gemini-2.5-pro"          → the specific Gemini slot
+      - "gemini"                  → any Gemini slot
+      - "gemini:gemini-2.5-flash" → exact slot match
+
+    Default order keeps current behaviour (Claude primary, Gemini as
+    fallback), so a deploy without the env var set doesn't change the
+    selection. During the test phase we call every configured model so
+    `llm_attempts` always has the full comparison data regardless of
+    which one ended up driving the case-store view.
+    """
+    raw = os.environ.get("LLM_PRIMARY", "").strip()
+    if not raw:
+        return ["claude", "gemini-2.5-pro", "gemini-2.5-flash", "gemini"]
+    return [e.strip() for e in raw.split(",") if e.strip()]
+
+
+def pick_primary_response(llm_responses: dict[str, dict]) -> tuple[str | None, dict | None]:
+    """Pick the primary LLM response from a `{slot: normalised_response}` dict
+    using the configured preference order. Returns `(slot_key, response)`.
+    If nothing matched (all models errored), returns `(None, None)`.
+
+    Slot keys look like `"claude"` or `"gemini:gemini-2.5-flash"`; we match
+    by prefix so `LLM_PRIMARY=gemini` accepts any Gemini variant."""
+    for pref in primary_provider_preference():
+        for slot, resp in llm_responses.items():
+            # Accept exact match or prefix match on the provider portion.
+            if slot == pref or slot.startswith(pref) or slot.replace(":", "-").startswith(pref.replace(":", "-")):
+                return slot, resp
+            # Also try after the colon (e.g. "gemini-2.5-pro" matching
+            # "gemini:gemini-2.5-pro").
+            if ":" in slot and slot.split(":", 1)[1] == pref:
+                return slot, resp
+    return None, None
+
+
 # USD per 1M tokens — input (prompt) and output (completion). Sourced from
 # each provider's public price card. Keep this table honest; the billing
 # rollup in the admin API reads straight from here. Unknown models return
