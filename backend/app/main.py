@@ -426,6 +426,7 @@ def _suggest_person_match(holder: str | None, persons: list[dict]) -> str | None
 
 @app.post("/api/cases/{case_id}/statements", status_code=201)
 async def upload_statement(
+    request: Request,
     case_id: str,
     file: UploadFile = File(...),
     person_id: str = Form(...),
@@ -433,56 +434,93 @@ async def upload_statement(
     account_type: str | None = Form(default=None),
     account_number: str | None = Form(default=None),
     holder_name: str | None = Form(default=None),
+    password: str | None = Form(default=None),
 ) -> dict:
+    """Upload a PDF, run the full extraction pipeline (deterministic +
+    dual-LLM when enabled), and ingest the result into the case store.
+    Goes through the same `_run_extraction` helper as `/api/extract`, so
+    every upload from the frontend is recorded in `extraction_log` and
+    both LLMs fire when `LLM_ENABLED=1`."""
     if not file.filename:
         raise HTTPException(400, "Missing file")
 
-    # Persist the PDF
+    content = await file.read()
+
+    # Keep a per-case copy on the local upload dir so `/api/statements/{id}/pdf`
+    # streaming keeps working. The extraction pipeline also writes a
+    # content-addressed archive into the PDF store — that's the long-term copy.
     safe_name = re.sub(r"[^A-Za-z0-9._\-]", "_", file.filename)
     dest = UPLOAD_DIR / f"{case_id}_{int(datetime.utcnow().timestamp())}_{safe_name}"
-    with dest.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
+    dest.write_bytes(content)
 
-    # Parse
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+
     try:
-        with pdfplumber.open(dest) as pdf:
-            text = "\n".join((p.extract_text() or "") for p in pdf.pages)
-    except Exception as exc:
-        raise HTTPException(400, f"Could not read PDF: {exc}") from exc
+        _eid, response, _text = await _run_extraction(
+            content=content,
+            filename=file.filename,
+            content_type=file.content_type,
+            password=password,
+            submitter=f"case:{case_id}",
+            client_ip=client_ip,
+            user_agent=user_agent,
+        )
+    except ExtractionError as e:
+        raise HTTPException(e.status, _err(e.code, e.message, e.extra))
 
-    bank_key = detect_bank(text)
-    parser_txns = parse_text(text)
-    if not parser_txns:
-        raise HTTPException(400, f"No transactions extracted (bank={bank_key}). Try a different file or manual account setup.")
+    shaped_txns = response.get("transactions") or []
+    if not shaped_txns:
+        bank_key_ui = (response.get("bank") or {}).get("key") or "unknown"
+        raise HTTPException(
+            400,
+            f"No transactions extracted (bank={bank_key_ui}). "
+            f"Try a different file or manual account setup.",
+        )
 
-    # Bank metadata
-    bank_label = bank or BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])["display"]
-    acc_type = account_type or BANK_DEFAULTS.get(bank_key, BANK_DEFAULTS["unknown"])["account_type"]
-    acc_num = account_number or _guess_account_number(text) or "****????"
+    resp_bank = response.get("bank") or {}
+    resp_account = response.get("account") or {}
+    resp_period = response.get("period") or {}
+    resp_balance = response.get("balance") or {}
 
-    # Period: header text first, then the envelope of the parsed transactions
-    # (which is what the investigator actually sees). If both fail, leave it
-    # unknown rather than writing today's date — that was the bug where
-    # April-2021 CC statements showed "2026-04-16 → 2026-04-16".
-    period_start, period_end = _guess_period(text)
-    if not period_start or not period_end:
-        txn_start, txn_end = _period_from_txns(parser_txns)
-        period_start = period_start or txn_start
-        period_end = period_end or txn_end
+    bank_key = resp_bank.get("key") or "unknown"
+    bank_label = bank or resp_bank.get("label") or BANK_DEFAULTS["unknown"]["display"]
+    acc_type = account_type or resp_bank.get("account_type") or BANK_DEFAULTS["unknown"]["account_type"]
+    acc_num = account_number or resp_account.get("number_masked") or "****????"
+    resolved_holder = holder_name or resp_account.get("holder_name") or "Unknown"
 
-    # Ingest
+    # ingest_statement expects `{date, description, amount, type}` where
+    # `type` ∈ {"Dr", "Cr"}. The shared pipeline returns the public shape
+    # with `direction` ∈ {"debit", "credit"} — map back here so the case
+    # store keeps its existing contract.
+    def _to_dr_cr(v: str | None) -> str:
+        if v in ("Dr", "Cr"):
+            return v
+        return "Dr" if v == "debit" else "Cr"
+
+    parser_txns = [
+        {
+            "date": t.get("date"),
+            "description": t.get("description"),
+            "amount": t.get("amount"),
+            "type": _to_dr_cr(t.get("direction") or t.get("type")),
+        }
+        for t in shaped_txns
+    ]
+
     result = store_mod.ingest_statement(
         case_id=case_id, person_id=person_id,
         source_file_name=file.filename,
         source_file_path=str(dest),
         bank=bank_label, account_type=acc_type,
         account_number=acc_num,
-        holder_name=holder_name or "Unknown",
-        period_start=period_start or "", period_end=period_end or "",
-        opening_balance=0.0, closing_balance=0.0,
+        holder_name=resolved_holder,
+        period_start=resp_period.get("start") or "",
+        period_end=resp_period.get("end") or "",
+        opening_balance=resp_balance.get("opening") or 0.0,
+        closing_balance=resp_balance.get("closing") or 0.0,
         declared_dr=None, declared_cr=None,
-        parser_txns=[{"date": t["date"], "description": t["description"],
-                      "amount": t["amount"], "type": t["type"]} for t in parser_txns],
+        parser_txns=parser_txns,
         uploaded_by="unknown",
     )
     if result is None:
@@ -490,6 +528,7 @@ async def upload_statement(
     statement, txns = result
     return {
         "bank_detected": bank_key,
+        "extraction_source": (response.get("meta") or {}).get("source"),
         "statement": statement.model_dump(),
         "transaction_count": len(txns),
     }
@@ -654,36 +693,41 @@ def _err(code: str, message: str, extra: dict | None = None) -> dict:
     return body
 
 
-@app.post("/api/extract")
-async def extract_statement(
-    request: Request,
-    file: UploadFile = File(...),
-    password: str | None = Form(default=None),
-    submitted_by: str | None = Form(default=None),
-) -> dict:
-    """Standalone PDF → structured bank-statement extraction.
+class ExtractionError(Exception):
+    """Raised by `_run_extraction` for any validation / parse failure that
+    should surface to the caller as an HTTP error. Carries the fields the
+    `/api/extract` error envelope expects so either caller can re-raise it
+    as an HTTPException cleanly."""
+    def __init__(self, status: int, code: str, message: str, extra: dict | None = None):
+        super().__init__(message)
+        self.status = status
+        self.code = code
+        self.message = message
+        self.extra = extra or {}
 
-    Input  : multipart `file` (required, PDF, ≤25 MB), `password` (optional),
-             `submitted_by` (optional free-text tag — e.g. "rahul-cousin" —
-             persisted in the extraction log so we can triage later uploads).
-             You can also send the tag as the `X-Submitter` header.
-    Output : `{bank, account, period, balance, summary, transactions, meta}`.
 
-    Every call is recorded in the `extraction_log` table regardless of
-    success, and every valid PDF is archived by content hash in the PDF store.
-    See api_reference_bank_statement.md for the full contract.
-    """
-    # Context we collect as we go — log at the end (finally) whether we
-    # succeed, raise, or short-circuit on a soft failure.
-    submitter = (submitted_by or request.headers.get("x-submitter") or "").strip() or None
-    client_ip = request.client.host if request.client else None
-    user_agent = request.headers.get("user-agent")
+async def _run_extraction(
+    *,
+    content: bytes,
+    filename: str,
+    content_type: str | None,
+    password: str | None,
+    submitter: str | None,
+    client_ip: str | None,
+    user_agent: str | None,
+) -> tuple[str, dict, str]:
+    """Core PDF→structured-JSON pipeline shared by `/api/extract` and the
+    frontend upload endpoint. Archives the PDF, runs pdfplumber + the
+    deterministic parser, dual-runs Claude + Gemini (when enabled), and
+    records every step to `extraction_log` / `extraction_trace` /
+    `llm_attempts`. Returns `(extraction_id, response_dict, pdfplumber_text)`.
+    Raises `ExtractionError` on any validation / read failure — the finally
+    block still records the row so failed uploads are visible in the log."""
     extraction_id = extraction_log.new_extraction_id()
-
     log_ctx: dict = {
         "extraction_id": extraction_id,
-        "filename": (file.filename or ""),
-        "file_size": 0,
+        "filename": filename or "",
+        "file_size": len(content),
         "file_hash": None,
         "pdf_stored_path": None,
         "was_password_protected": bool(password),
@@ -699,28 +743,23 @@ async def extract_statement(
     def _raise(status: int, code: str, message: str, extra: dict | None = None):
         log_ctx["http_status"] = status
         log_ctx["error_code"] = code
-        raise HTTPException(status, _err(code, message, extra))
+        raise ExtractionError(status, code, message, extra)
 
     try:
         # ── validation ────────────────────────────────────────────────────
-        if not file.filename:
+        if not filename:
             _raise(400, "MISSING_FILE", "No file was uploaded.")
 
-        fname = file.filename
-        log_ctx["filename"] = fname
-
+        fname = filename
         if not fname.lower().endswith(".pdf"):
             _raise(415, "INVALID_FILE_TYPE",
                    "Only PDF files are supported.",
                    {"filename": fname, "expected_extension": ".pdf"})
 
-        if file.content_type and file.content_type.lower() not in ALLOWED_PDF_MIMES:
+        if content_type and content_type.lower() not in ALLOWED_PDF_MIMES:
             _raise(415, "INVALID_FILE_TYPE",
                    "Expected application/pdf.",
-                   {"received_content_type": file.content_type})
-
-        content = await file.read()
-        log_ctx["file_size"] = len(content)
+                   {"received_content_type": content_type})
 
         if len(content) == 0:
             _raise(400, "EMPTY_FILE", "Uploaded file is empty (0 bytes).")
@@ -800,7 +839,7 @@ async def extract_statement(
                 )
                 log_ctx["success"] = True
                 log_ctx["response"] = response
-                return response
+                return extraction_id, response, text
 
             # ── deterministic parse ──────────────────────────────────────
             raw_txns = parse_text(text)
@@ -911,7 +950,7 @@ async def extract_statement(
 
             log_ctx["success"] = True
             log_ctx["response"] = response
-            return response
+            return extraction_id, response, text
         finally:
             try:
                 tmp.unlink()
@@ -935,6 +974,45 @@ async def extract_statement(
             client_ip=log_ctx["client_ip"],
             user_agent=log_ctx["user_agent"],
         )
+
+
+@app.post("/api/extract")
+async def extract_statement(
+    request: Request,
+    file: UploadFile = File(...),
+    password: str | None = Form(default=None),
+    submitted_by: str | None = Form(default=None),
+) -> dict:
+    """Standalone PDF → structured bank-statement extraction.
+
+    Input  : multipart `file` (required, PDF, ≤25 MB), `password` (optional),
+             `submitted_by` (optional free-text tag — e.g. "rahul-cousin" —
+             persisted in the extraction log so we can triage later uploads).
+             You can also send the tag as the `X-Submitter` header.
+    Output : `{bank, account, period, balance, summary, transactions, meta}`.
+
+    Every call is recorded in the `extraction_log` table regardless of
+    success, and every valid PDF is archived by content hash in the PDF store.
+    See api_reference_bank_statement.md for the full contract.
+    """
+    submitter = (submitted_by or request.headers.get("x-submitter") or "").strip() or None
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+
+    content = await file.read()
+    try:
+        _eid, response, _text = await _run_extraction(
+            content=content,
+            filename=file.filename or "",
+            content_type=file.content_type,
+            password=password,
+            submitter=submitter,
+            client_ip=client_ip,
+            user_agent=user_agent,
+        )
+    except ExtractionError as e:
+        raise HTTPException(e.status, _err(e.code, e.message, e.extra))
+    return response
 
 
 @app.get("/api/statements/{statement_id}", response_model=Statement)
