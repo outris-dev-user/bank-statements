@@ -55,6 +55,16 @@ _IMPSP2P_RE = re.compile(
 _MIR_RE = re.compile(
     r"^(?P<code>[A-Z]{4,})-(?P<period>[A-Z]+-[A-Z]+\d*)-\d+-MIR.*$", re.I)
 
+# Modern HDFC UPI envelope (2022+ statements):
+#   UPI-<NAME>-<VPA_LOCAL>@<HANDLE>-<IFSC>-<REF>-<TYPE>
+# Example: UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17-1@OKHDFCBANK-HDFC0000146-327302563522-UPI
+#
+# PDF column cuts truncate narrations at arbitrary points, so we only
+# *require* the NAME+VPA_LOCAL heads; everything else is scanned from the
+# tail.
+_UPI_MODERN_HEAD_RE = re.compile(
+    r"^UPI-(?P<name>[A-Z0-9]+)-(?P<rest>.+)$", re.I)
+
 
 def decode(narration: str) -> dict:
     raw = (narration or "").strip()
@@ -140,5 +150,51 @@ def decode(narration: str) -> dict:
     if m:
         return S.result("ecs", f"HDFC — {m.group('code').upper()} charge",
                         None, None, None, "mir_charge")
+
+    # 8b. ACHD / ACHC — NACH (Automated Clearing House) debit / credit.
+    #     Used for EMIs, mutual-fund SIPs, utility ECS mandates.
+    m = re.match(r"^ACH(?P<dir>[DC])-(?P<umrn>[A-Z0-9]+)-(?P<merchant>.+)$", raw, re.I)
+    if m:
+        direction = m.group("dir").upper()
+        ch = "ecs" if direction == "D" else "ecs_credit"
+        return S.result(ch, S.titlecase(m.group("merchant")), None, None,
+                        m.group("umrn"), "ach_" + direction.lower())
+
+    # 8c. EMI<numeric>CHQS<numeric>...  — loan-EMI debit (auto-collected)
+    m = re.match(r"^EMI(?P<loan>\d+)CHQS\d+.*$", raw, re.I)
+    if m:
+        return S.result("ecs", "Loan EMI", None, None, m.group("loan"),
+                        "emi_chqs", "HDFC Bank")
+
+    # 9. Modern UPI envelope (HDFC 2022+)
+    # Head match gives us the name; scan the rest for VPA/IFSC/ref/type.
+    m = _UPI_MODERN_HEAD_RE.match(raw.replace(" ", ""))
+    if m:
+        name = m.group("name")
+        rest = m.group("rest")
+        # Handle: from @<HANDLE> in VPA (e.g. @OKHDFCBANK → HDFC).
+        handle_m = re.search(r"@([A-Z]+)", rest, re.I)
+        # IFSC: 4-letter bank code + 0 + 6 alphanumeric
+        ifsc_m = S.IFSC_RE.search(rest.upper())
+        # Reference: a 10+ digit run
+        ref_m = re.search(r"\b(\d{10,})\b", rest)
+        bank = None
+        if handle_m:
+            h = handle_m.group(1).upper()
+            # "OKHDFCBANK" → strip leading OK
+            if h.startswith("OK"):
+                h = h[2:]
+            bank = S.identify_bank(h)
+        if not bank and ifsc_m:
+            bank = S.identify_bank(ifsc_m.group(0))
+        return S.result("upi", S.titlecase(name), None, None,
+                        ref_m.group(1) if ref_m else None,
+                        "upi_modern", bank)
+
+    # 9b. UPI-<NAME> with no further tokens (PDF truncation).
+    m = re.match(r"^UPI-(?P<name>[A-Z0-9]+)\s*$", raw.replace(" ", ""), re.I)
+    if m:
+        return S.result("upi", S.titlecase(m.group("name")), None, None,
+                        None, "upi_name_only")
 
     return S.result("unknown", None, None, None, None, "unmatched")
