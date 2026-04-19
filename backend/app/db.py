@@ -175,6 +175,52 @@ class TransactionEntityLinkRow(Base):
     role: Mapped[str] = mapped_column(String, default="counterparty")
 
 
+class ExtractionTraceRow(Base):
+    """Full diagnostic snapshot of one `/api/extract` call.
+
+    Separate from the lean `extraction_log` (which is what we show in admin
+    lists) because trace rows are large — `pdfplumber_text` alone is 5-100 KB
+    per statement. Keep the list-view fast and move the heavy blobs here.
+    """
+    __tablename__ = "extraction_trace"
+    id: Mapped[str] = mapped_column(String, primary_key=True)           # uuid4
+    extraction_log_id: Mapped[str] = mapped_column(String, index=True)  # FK string (soft — no cross-table constraint)
+    pdfplumber_text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    deterministic_raw_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)   # list[dict] from plugins.bank.extraction.parser
+    bank_detected: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    text_char_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[str] = mapped_column(String)
+
+
+class LLMAttemptRow(Base):
+    """One row per LLM provider call made for a given extraction.
+
+    We run both Claude and Gemini on every request during the F&F test phase,
+    so each extraction produces 2 rows here. Both the prompt we sent and the
+    raw response we got back are stored verbatim so Saurabh can audit any
+    single call end-to-end later without having to re-run anything.
+    """
+    __tablename__ = "llm_attempts"
+    id: Mapped[str] = mapped_column(String, primary_key=True)           # uuid4
+    extraction_log_id: Mapped[str] = mapped_column(String, index=True)
+    provider: Mapped[str] = mapped_column(String, index=True)           # "claude" | "gemini"
+    model: Mapped[str] = mapped_column(String)
+    prompt_text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    raw_response: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    parsed_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    parse_error: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    provider_error: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    latency_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Derived for convenience so admin lists don't need to parse `parsed_json`.
+    extracted_txn_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    extracted_bank_key: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)
+    extracted_holder_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    confidence: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[str] = mapped_column(String, index=True)
+
+
 class ExtractionLogRow(Base):
     """One row per `/api/extract` call — success or failure.
 

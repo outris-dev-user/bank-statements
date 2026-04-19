@@ -1,0 +1,345 @@
+"""LLM-based bank-statement extraction.
+
+Runs in parallel with the deterministic parser (during the F&F test phase we
+call both LLMs on every request, regardless of whether the regex parser
+succeeded, so we can compare them against each other and against the regex
+output). Each call records prompt + raw response + parsed JSON + token usage
++ latency in the `llm_attempts` table so nothing is lost.
+
+Providers wired: Anthropic Claude, Google Gemini. Both return the same
+extraction schema (see `EXTRACTION_SCHEMA_DOC`) so the downstream response
+shape is provider-agnostic.
+
+Designed to be safe to import even when neither provider SDK is available —
+attempts to call a disabled provider raise inside the helper, the caller
+catches and records a `parse_error`, and the request continues.
+"""
+from __future__ import annotations
+import asyncio
+import json
+import os
+import re
+import time
+from dataclasses import dataclass, field
+from typing import Any
+
+
+# ────────────────────────── configuration ──────────────────────────
+
+CLAUDE_MODEL = os.environ.get("LLM_CLAUDE_MODEL", "claude-sonnet-4-5")
+GEMINI_MODEL = os.environ.get("LLM_GEMINI_MODEL", "gemini-2.5-pro")
+
+# Per-provider feature toggles. Read lazily so a redeploy picks up changes.
+def claude_enabled() -> bool:
+    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+
+def gemini_enabled() -> bool:
+    return bool(os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"))
+
+def llm_enabled() -> bool:
+    """Master toggle. LLM fallback only runs when this is truthy AND at least
+    one provider has a key."""
+    if os.environ.get("LLM_ENABLED", "").lower() not in ("1", "true", "yes", "on"):
+        return False
+    return claude_enabled() or gemini_enabled()
+
+
+# The raw input to the LLM is the pdfplumber-extracted text. Cap at ~40K chars
+# (~10K tokens). Statements longer than that are *extremely* rare; we trim the
+# tail rather than skip entirely and flag it for the record.
+MAX_TEXT_CHARS = 40_000
+
+
+# ────────────────────────── schema / prompt ──────────────────────────
+
+EXTRACTION_SCHEMA_DOC = """{
+  "bank": {
+    "key": "stable snake_case id, e.g. 'axis_savings', 'hdfc_cc'",
+    "label": "human bank name, e.g. 'Axis Bank'",
+    "account_type": "SA | CA | CC | NRE | NRO | OD | other",
+    "fingerprint": "30-60 char substring unique to this bank's header — so a future regex parser can detect this bank",
+    "layout_notes": "one-line description of how transaction rows are structured (columns, multi-line vs single, date format)"
+  },
+  "account": {
+    "number_masked": "****1234 (last 4 only, or null)",
+    "holder_name": "primary holder, stripped of Mr/Mrs/Shri",
+    "joint_holders": ["additional names, empty list if none"]
+  },
+  "period": {"start": "YYYY-MM-DD or null", "end": "YYYY-MM-DD or null"},
+  "balance": {"opening": 0.0, "closing": 0.0, "currency": "INR"},
+  "transactions": [
+    {
+      "date": "YYYY-MM-DD",
+      "amount": 0.0,
+      "direction": "debit | credit",
+      "description": "raw narration as printed",
+      "counterparty": "real entity name extracted from narration, e.g. 'Amazon' not 'UPI/DR/123456/Amazon/...'",
+      "channel": "UPI | NEFT | IMPS | RTGS | POS | ATM | ECS | NACH | CHEQUE | CASH | OTHER",
+      "balance_after": 0.0,
+      "transaction_type": "purchase | transfer_in | transfer_out | salary | refund | fee | interest | emi | cash_withdrawal | cash_deposit | other"
+    }
+  ],
+  "confidence": "high | medium | low",
+  "notes": "free text — anything ambiguous, skipped, or worth flagging"
+}"""
+
+
+SYSTEM_PROMPT = f"""You extract structured data from Indian bank statements.
+
+Return ONLY a JSON object matching this schema, no prose, no code fences:
+
+{EXTRACTION_SCHEMA_DOC}
+
+Rules:
+- Dates ISO-8601 YYYY-MM-DD. If you cannot determine year, use the statement period year.
+- Amounts are POSITIVE floats. `direction` tells you debit vs credit.
+- Skip opening-balance, closing-balance, and summary rows from `transactions`.
+- `counterparty` should be the *real* entity (person, merchant, bank) — strip channel
+  prefixes (UPI/ NEFT/), reference numbers, bank suffixes (/UTIB, /HDFC0000001). If
+  you can't identify an entity, use the cleanest noun phrase from the narration.
+- For a name like "MR. SAURABH SETHI" the `holder_name` is "Saurabh Sethi".
+- If the document is not a bank statement or you cannot parse confidently,
+  return `{{"transactions": [], "confidence": "low", "notes": "<why>"}}`.
+- The `fingerprint` must be a substring that appears verbatim on the first page
+  of this bank's statement layout — we use it for future deterministic detection.
+"""
+
+
+def build_prompt(pdfplumber_text: str, bank_hint: str | None = None) -> tuple[str, str]:
+    """Returns (system_prompt, user_prompt) ready to send to either provider."""
+    text = pdfplumber_text or ""
+    truncated = len(text) > MAX_TEXT_CHARS
+    if truncated:
+        text = text[:MAX_TEXT_CHARS] + "\n[...truncated for LLM context window...]"
+
+    hint = ""
+    if bank_hint and bank_hint != "unknown":
+        hint = (
+            f"\nOur deterministic regex parser identified this as `{bank_hint}`. "
+            f"Use that as the bank.key unless the document clearly contradicts it.\n"
+        )
+
+    user = (
+        f"Extract this bank statement.{hint}\n\n"
+        f"--- BEGIN STATEMENT TEXT ---\n{text}\n--- END STATEMENT TEXT ---"
+    )
+    return SYSTEM_PROMPT, user
+
+
+# ────────────────────────── result dataclass ──────────────────────────
+
+@dataclass
+class LLMResult:
+    provider: str                         # "claude" | "gemini"
+    model: str
+    raw_response: str = ""                # full unparsed response text
+    parsed: dict[str, Any] | None = None  # parsed JSON, None if parse_error set
+    parse_error: str | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    latency_ms: int = 0
+    error: str | None = None              # any transport / API error
+    prompt_text: str = ""                 # what we sent (system + user concatenated)
+    extra: dict[str, Any] = field(default_factory=dict)
+
+
+# ────────────────────────── JSON extraction helper ──────────────────────────
+
+_CODE_FENCE_RX = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
+_FIRST_JSON_OBJECT_RX = re.compile(r"\{[\s\S]*\}")
+
+
+def parse_llm_json(raw: str) -> dict[str, Any]:
+    """Parse JSON out of an LLM response that may be wrapped in code fences
+    or have leading/trailing prose. Raises ValueError if no JSON found."""
+    if not raw:
+        raise ValueError("empty response")
+    # 1. Strip code fences if present
+    m = _CODE_FENCE_RX.search(raw)
+    if m:
+        candidate = m.group(1).strip()
+    else:
+        candidate = raw.strip()
+    # 2. Try direct parse
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    # 3. Fallback — grab the first {...} block from the full response
+    m = _FIRST_JSON_OBJECT_RX.search(raw)
+    if not m:
+        raise ValueError("no JSON object found in response")
+    return json.loads(m.group(0))
+
+
+# ────────────────────────── provider calls ──────────────────────────
+
+async def call_claude(system: str, user: str) -> LLMResult:
+    """Call Anthropic Claude. Runs the SDK in a threadpool since the SDK
+    is sync-only in some versions."""
+    started = time.time()
+    result = LLMResult(provider="claude", model=CLAUDE_MODEL, prompt_text=f"{system}\n\n{user}")
+    if not claude_enabled():
+        result.error = "ANTHROPIC_API_KEY not set"
+        return result
+    try:
+        from anthropic import Anthropic  # type: ignore
+    except ImportError as exc:
+        result.error = f"anthropic SDK not installed: {exc}"
+        return result
+
+    def _invoke() -> Any:
+        client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        return client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=8192,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+
+    try:
+        response = await asyncio.to_thread(_invoke)
+        result.latency_ms = int((time.time() - started) * 1000)
+        # Concatenate text blocks from the content array.
+        text_parts: list[str] = []
+        for block in getattr(response, "content", []):
+            if getattr(block, "type", None) == "text":
+                text_parts.append(getattr(block, "text", ""))
+        result.raw_response = "".join(text_parts)
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            result.prompt_tokens = getattr(usage, "input_tokens", None)
+            result.completion_tokens = getattr(usage, "output_tokens", None)
+    except Exception as exc:
+        result.error = f"{type(exc).__name__}: {exc}"
+        result.latency_ms = int((time.time() - started) * 1000)
+        return result
+
+    try:
+        result.parsed = parse_llm_json(result.raw_response)
+    except Exception as exc:
+        result.parse_error = f"{type(exc).__name__}: {exc}"
+    return result
+
+
+async def call_gemini(system: str, user: str) -> LLMResult:
+    """Call Google Gemini via the google-genai SDK."""
+    started = time.time()
+    result = LLMResult(provider="gemini", model=GEMINI_MODEL, prompt_text=f"{system}\n\n{user}")
+    if not gemini_enabled():
+        result.error = "GOOGLE_API_KEY / GEMINI_API_KEY not set"
+        return result
+    try:
+        from google import genai  # type: ignore
+        from google.genai import types as genai_types  # type: ignore
+    except ImportError as exc:
+        result.error = f"google-genai SDK not installed: {exc}"
+        return result
+
+    api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+
+    def _invoke() -> Any:
+        client = genai.Client(api_key=api_key)
+        return client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=user,
+            config=genai_types.GenerateContentConfig(
+                system_instruction=system,
+                response_mime_type="application/json",
+                max_output_tokens=8192,
+            ),
+        )
+
+    try:
+        response = await asyncio.to_thread(_invoke)
+        result.latency_ms = int((time.time() - started) * 1000)
+        # google-genai exposes `.text` as the concatenated primary text output
+        result.raw_response = getattr(response, "text", "") or ""
+        usage = getattr(response, "usage_metadata", None)
+        if usage is not None:
+            result.prompt_tokens = getattr(usage, "prompt_token_count", None)
+            result.completion_tokens = getattr(usage, "candidates_token_count", None)
+    except Exception as exc:
+        result.error = f"{type(exc).__name__}: {exc}"
+        result.latency_ms = int((time.time() - started) * 1000)
+        return result
+
+    try:
+        result.parsed = parse_llm_json(result.raw_response)
+    except Exception as exc:
+        result.parse_error = f"{type(exc).__name__}: {exc}"
+    return result
+
+
+async def run_dual(text: str, bank_hint: str | None = None) -> dict[str, LLMResult]:
+    """Call Claude and Gemini concurrently on the same prompt. Returns a
+    `{provider: LLMResult}` dict. Providers without keys return with an
+    `error` set — the dict always contains both keys so downstream code
+    can iterate without branching.
+    """
+    system, user = build_prompt(text, bank_hint=bank_hint)
+    tasks = {
+        "claude": call_claude(system, user),
+        "gemini": call_gemini(system, user),
+    }
+    results = await asyncio.gather(*tasks.values(), return_exceptions=False)
+    return dict(zip(tasks.keys(), results))
+
+
+# ────────────────────────── normalisation ──────────────────────────
+
+def normalise_llm_response(parsed: dict[str, Any], source_filename: str) -> dict[str, Any]:
+    """Shape an LLM's parsed JSON into the `/api/extract` response envelope.
+    Missing sections are filled with nulls / empty lists so the caller can
+    treat this indistinguishably from a deterministic response.
+    """
+    bank = parsed.get("bank") or {}
+    account = parsed.get("account") or {}
+    period = parsed.get("period") or {}
+    balance = parsed.get("balance") or {}
+    transactions = parsed.get("transactions") or []
+
+    # Compute summary from transactions if the LLM didn't.
+    debits = [float(t.get("amount") or 0) for t in transactions if str(t.get("direction", "")).lower() == "debit"]
+    credits = [float(t.get("amount") or 0) for t in transactions if str(t.get("direction", "")).lower() == "credit"]
+    total_debit = round(sum(debits), 2)
+    total_credit = round(sum(credits), 2)
+
+    return {
+        "bank": {
+            "key": bank.get("key") or "unknown",
+            "label": bank.get("label") or "Unknown",
+            "account_type": bank.get("account_type"),
+            "fingerprint": bank.get("fingerprint"),
+            "layout_notes": bank.get("layout_notes"),
+        },
+        "account": {
+            "number_masked": account.get("number_masked"),
+            "holder_name": account.get("holder_name"),
+            "joint_holders": account.get("joint_holders") or [],
+        },
+        "period": {
+            "start": period.get("start"),
+            "end": period.get("end"),
+        },
+        "balance": {
+            "opening": balance.get("opening"),
+            "closing": balance.get("closing"),
+            "currency": balance.get("currency") or "INR",
+        },
+        "summary": {
+            "transaction_count": len(transactions),
+            "total_debit": total_debit,
+            "total_credit": total_credit,
+            "net_change": round(total_credit - total_debit, 2),
+        },
+        "transactions": transactions,
+        "meta": {
+            "filename": source_filename,
+            "parser": None,
+            "text_empty": False,
+            "issues": [],
+            "confidence": parsed.get("confidence"),
+            "notes": parsed.get("notes"),
+        },
+    }

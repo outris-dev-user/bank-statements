@@ -20,7 +20,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from app.db import BACKEND, ExtractionLogRow, get_session
+from app.db import (
+    BACKEND, ExtractionLogRow, ExtractionTraceRow, LLMAttemptRow, get_session,
+)
 
 
 def _pdf_store_dir() -> Path:
@@ -51,8 +53,15 @@ def resolve_pdf_path(rel_path: str) -> Path:
     return _pdf_store_dir() / rel_path
 
 
+def new_extraction_id() -> str:
+    """Pre-generate an extraction id so trace + llm_attempt rows written
+    *before* the main log row finalises can still FK to the right parent."""
+    return str(uuid.uuid4())
+
+
 def record(
     *,
+    extraction_id: str | None = None,
     filename: str,
     file_size: int,
     file_hash: str | None,
@@ -66,12 +75,13 @@ def record(
     client_ip: str | None,
     user_agent: str | None,
 ) -> str:
-    """Insert an extraction_log row. Returns the new row id.
+    """Insert an extraction_log row. Returns the row id (either the supplied
+    `extraction_id` or a freshly-generated one).
 
     All failures are swallowed and logged — logging must never block the
     user-facing response.
     """
-    row_id = str(uuid.uuid4())
+    row_id = extraction_id or str(uuid.uuid4())
     meta = (response or {}).get("meta") or {}
     summary = (response or {}).get("summary") or {}
     bank = (response or {}).get("bank") or {}
@@ -103,4 +113,95 @@ def record(
         # Don't let logging failures break the request. Print is picked up by
         # the Railway log aggregator and surfaced in the service logs.
         print(f"[extraction_log] failed to record extraction: {exc!r}")
+    return row_id
+
+
+def record_trace(
+    *,
+    extraction_log_id: str,
+    pdfplumber_text: str | None,
+    deterministic_raw: list[dict] | None,
+    bank_detected: str | None,
+) -> None:
+    """Store the full pdfplumber + deterministic-parser snapshot for one
+    extraction. Large blobs live here, off the hot list-view path.
+    Non-blocking: a write failure is logged but does not affect the response.
+    """
+    try:
+        with get_session() as s:
+            s.add(ExtractionTraceRow(
+                id=str(uuid.uuid4()),
+                extraction_log_id=extraction_log_id,
+                pdfplumber_text=pdfplumber_text,
+                deterministic_raw_json=json.dumps(deterministic_raw) if deterministic_raw is not None else None,
+                bank_detected=bank_detected,
+                text_char_count=len(pdfplumber_text) if pdfplumber_text else 0,
+                created_at=datetime.now(timezone.utc).isoformat(),
+            ))
+            s.commit()
+    except Exception as exc:  # pragma: no cover
+        print(f"[extraction_log] failed to record trace: {exc!r}")
+
+
+def record_llm_attempt(
+    *,
+    extraction_log_id: str,
+    provider: str,
+    model: str,
+    prompt_text: str | None,
+    raw_response: str | None,
+    parsed_json: dict | None,
+    parse_error: str | None,
+    provider_error: str | None,
+    prompt_tokens: int | None,
+    completion_tokens: int | None,
+    latency_ms: int | None,
+) -> str:
+    """Store one LLM call. Returns the attempt id. Always best-effort.
+
+    Derived columns (`extracted_txn_count`, `extracted_bank_key`,
+    `extracted_holder_name`, `confidence`) are populated from `parsed_json`
+    when present, so admin list views can sort/filter without re-parsing.
+    """
+    row_id = str(uuid.uuid4())
+    try:
+        txn_count = None
+        bank_key = None
+        holder_name = None
+        confidence = None
+        if parsed_json:
+            txns = parsed_json.get("transactions")
+            if isinstance(txns, list):
+                txn_count = len(txns)
+            bank = parsed_json.get("bank") or {}
+            if isinstance(bank, dict):
+                bank_key = bank.get("key")
+            account = parsed_json.get("account") or {}
+            if isinstance(account, dict):
+                holder_name = account.get("holder_name")
+            confidence = parsed_json.get("confidence")
+
+        with get_session() as s:
+            s.add(LLMAttemptRow(
+                id=row_id,
+                extraction_log_id=extraction_log_id,
+                provider=provider,
+                model=model,
+                prompt_text=prompt_text,
+                raw_response=raw_response,
+                parsed_json=json.dumps(parsed_json) if parsed_json is not None else None,
+                parse_error=parse_error,
+                provider_error=provider_error,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                latency_ms=latency_ms,
+                extracted_txn_count=txn_count,
+                extracted_bank_key=bank_key,
+                extracted_holder_name=holder_name,
+                confidence=confidence,
+                created_at=datetime.now(timezone.utc).isoformat(),
+            ))
+            s.commit()
+    except Exception as exc:  # pragma: no cover
+        print(f"[extraction_log] failed to record llm_attempt: {exc!r}")
     return row_id

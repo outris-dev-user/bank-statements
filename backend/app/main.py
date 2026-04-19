@@ -38,6 +38,7 @@ from pydantic import BaseModel
 
 from app import store as store_mod
 from app import extraction_log
+from app import llm as llm_mod
 from app.auth import api_key_middleware, require_api_key
 from app.schemas import (
     Case, CaseDetail, Person, Transaction, TransactionPage, TransactionPatch,
@@ -297,6 +298,8 @@ _HOLDER_BLOCKLIST = re.compile(
     # Email/URL fragments and meta-tokens
     r"|GMAIL|YAHOO|HOTMAIL|OUTLOOK|COM|WWW|HTTP"
     r"|JOINT|HOLDERS?|NOMINEE|CHEQUE|REF|SUMMARY|OPERATIVE|TYPE|NUMBER|CENTER"
+    # Notice/disclaimer text that appears in statement footers
+    r"|IMPORTANT|MESSAGE|NOTICE|DISCLAIMER|SAFETY|TIPS|WARNING|ALERT|INFORMATION"
     # Localities / common suffixes
     r"|ANDHERI|VIKHROLI|POWAI|SAKI|VIHAR|BHILWARA|AJMER|GANDHI)\b",
     re.I,
@@ -675,8 +678,10 @@ async def extract_statement(
     submitter = (submitted_by or request.headers.get("x-submitter") or "").strip() or None
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
+    extraction_id = extraction_log.new_extraction_id()
 
     log_ctx: dict = {
+        "extraction_id": extraction_id,
         "filename": (file.filename or ""),
         "file_size": 0,
         "file_hash": None,
@@ -782,14 +787,22 @@ async def extract_statement(
                         "parser": None,
                         "text_empty": True,
                         "issues": ["scanned_pdf_no_text_layer"],
+                        "source": "pdfplumber",
                         "note": "pdfplumber returned no text — likely a scanned/image PDF. Send a text-layer PDF, or retry once the OCR fallback is enabled.",
                     },
                 }
+                # Record the empty-text trace so scan samples show up in the corpus.
+                extraction_log.record_trace(
+                    extraction_log_id=extraction_id,
+                    pdfplumber_text=text,
+                    deterministic_raw=[],
+                    bank_detected=bank_key,
+                )
                 log_ctx["success"] = True
                 log_ctx["response"] = response
                 return response
 
-            # ── parse transactions ───────────────────────────────────────
+            # ── deterministic parse ──────────────────────────────────────
             raw_txns = parse_text(text)
             shaped = [_shape_transaction(t) for t in raw_txns]
 
@@ -801,16 +814,24 @@ async def extract_statement(
 
             opening, closing = _guess_balances(text)
 
-            total_debit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "debit")
-            total_credit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "credit")
+            det_total_debit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "debit")
+            det_total_credit = sum(t["amount"] or 0.0 for t in shaped if t["direction"] == "credit")
 
-            issues: list[str] = []
+            # Snapshot pdfplumber text + deterministic raw parse before LLM work.
+            extraction_log.record_trace(
+                extraction_log_id=extraction_id,
+                pdfplumber_text=text,
+                deterministic_raw=raw_txns,
+                bank_detected=bank_key,
+            )
+
+            det_issues: list[str] = []
             if bank_key == "unknown":
-                issues.append("unknown_bank_format")
+                det_issues.append("unknown_bank_format")
             if not shaped:
-                issues.append("zero_transactions_extracted")
+                det_issues.append("zero_transactions_extracted")
 
-            response = {
+            deterministic_response = {
                 "bank": {
                     "key": bank_key,
                     "label": defaults["display"],
@@ -824,9 +845,9 @@ async def extract_statement(
                 "balance": {"opening": opening, "closing": closing, "currency": "INR"},
                 "summary": {
                     "transaction_count": len(shaped),
-                    "total_debit": round(total_debit, 2),
-                    "total_credit": round(total_credit, 2),
-                    "net_change": round(total_credit - total_debit, 2),
+                    "total_debit": round(det_total_debit, 2),
+                    "total_credit": round(det_total_credit, 2),
+                    "net_change": round(det_total_credit - det_total_debit, 2),
                 },
                 "transactions": shaped,
                 "meta": {
@@ -834,9 +855,60 @@ async def extract_statement(
                     "page_count": page_count,
                     "parser": bank_key if bank_key != "unknown" else None,
                     "text_empty": False,
-                    "issues": issues,
+                    "issues": det_issues,
+                    "source": "deterministic",
                 },
             }
+
+            # ── dual-provider LLM extraction (test phase: always run) ────
+            # Fires for every non-empty-text request, regardless of whether
+            # the deterministic parser succeeded. Every attempt is recorded
+            # so we can compare Claude vs Gemini vs deterministic later.
+            llm_responses: dict[str, dict] = {}
+            if llm_mod.llm_enabled():
+                try:
+                    dual = await llm_mod.run_dual(text, bank_hint=bank_key)
+                except Exception as exc:
+                    print(f"[extract] run_dual raised: {exc!r}")
+                    dual = {}
+                for provider, llm_result in dual.items():
+                    extraction_log.record_llm_attempt(
+                        extraction_log_id=extraction_id,
+                        provider=llm_result.provider,
+                        model=llm_result.model,
+                        prompt_text=llm_result.prompt_text,
+                        raw_response=llm_result.raw_response,
+                        parsed_json=llm_result.parsed,
+                        parse_error=llm_result.parse_error,
+                        provider_error=llm_result.error,
+                        prompt_tokens=llm_result.prompt_tokens,
+                        completion_tokens=llm_result.completion_tokens,
+                        latency_ms=llm_result.latency_ms,
+                    )
+                    if llm_result.parsed:
+                        llm_responses[provider] = llm_mod.normalise_llm_response(
+                            llm_result.parsed, source_filename=fname,
+                        )
+
+            # ── choose what to return the caller ─────────────────────────
+            # Priority: deterministic (if it found txns) > Claude > Gemini.
+            # Deterministic is preferred because it's auditable and free; LLMs
+            # are the fallback for banks we haven't written a parser for.
+            if shaped:
+                response = deterministic_response
+            elif llm_responses.get("claude"):
+                response = llm_responses["claude"]
+                response["meta"]["source"] = "llm-claude"
+                response["meta"]["deterministic_parser"] = bank_key
+                response["meta"]["page_count"] = page_count
+            elif llm_responses.get("gemini"):
+                response = llm_responses["gemini"]
+                response["meta"]["source"] = "llm-gemini"
+                response["meta"]["deterministic_parser"] = bank_key
+                response["meta"]["page_count"] = page_count
+            else:
+                response = deterministic_response  # zero-txn, but still shaped
+
             log_ctx["success"] = True
             log_ctx["response"] = response
             return response
@@ -849,6 +921,7 @@ async def extract_statement(
         # Always record — validation reject, password error, unreadable, or
         # success. Gives us the full picture of what users are sending us.
         extraction_log.record(
+            extraction_id=log_ctx["extraction_id"],
             filename=log_ctx["filename"],
             file_size=log_ctx["file_size"],
             file_hash=log_ctx["file_hash"],
@@ -1095,3 +1168,147 @@ def download_extraction_pdf(extraction_id: str):
             media_type="application/pdf",
             headers={"Content-Disposition": f'inline; filename="{r.filename}"'},
         )
+
+
+@app.get("/api/admin/extractions/{extraction_id}/trace")
+def get_extraction_trace(extraction_id: str) -> dict:
+    """Return the heavy diagnostic blobs we stashed during this extraction —
+    raw pdfplumber text and the deterministic parser's raw output (before
+    it was shaped into the wire format)."""
+    from app.db import ExtractionTraceRow, get_session
+    with get_session() as s:
+        row = (
+            s.query(ExtractionTraceRow)
+            .filter(ExtractionTraceRow.extraction_log_id == extraction_id)
+            .order_by(ExtractionTraceRow.created_at.desc())
+            .first()
+        )
+        if not row:
+            raise HTTPException(404, f"No trace recorded for extraction {extraction_id}")
+        return {
+            "id": row.id,
+            "extraction_log_id": row.extraction_log_id,
+            "bank_detected": row.bank_detected,
+            "text_char_count": row.text_char_count,
+            "pdfplumber_text": row.pdfplumber_text,
+            "deterministic_raw": json.loads(row.deterministic_raw_json) if row.deterministic_raw_json else None,
+            "created_at": row.created_at,
+        }
+
+
+@app.get("/api/admin/extractions/{extraction_id}/llm-attempts")
+def get_extraction_llm_attempts(extraction_id: str) -> dict:
+    """Return every LLM provider call made for this extraction. One row per
+    provider per request — so 2 rows in dual-provider mode (Claude + Gemini).
+
+    `agreement` summarises how the providers compare on txn count, bank key,
+    and holder name — useful for spotting divergence at a glance.
+    """
+    from app.db import LLMAttemptRow, get_session
+    with get_session() as s:
+        rows = (
+            s.query(LLMAttemptRow)
+            .filter(LLMAttemptRow.extraction_log_id == extraction_id)
+            .order_by(LLMAttemptRow.created_at.asc())
+            .all()
+        )
+        attempts = [
+            {
+                "id": r.id,
+                "provider": r.provider,
+                "model": r.model,
+                "prompt_tokens": r.prompt_tokens,
+                "completion_tokens": r.completion_tokens,
+                "latency_ms": r.latency_ms,
+                "provider_error": r.provider_error,
+                "parse_error": r.parse_error,
+                "extracted_txn_count": r.extracted_txn_count,
+                "extracted_bank_key": r.extracted_bank_key,
+                "extracted_holder_name": r.extracted_holder_name,
+                "confidence": r.confidence,
+                "prompt_text": r.prompt_text,
+                "raw_response": r.raw_response,
+                "parsed_json": json.loads(r.parsed_json) if r.parsed_json else None,
+                "created_at": r.created_at,
+            }
+            for r in rows
+        ]
+        by_provider = {a["provider"]: a for a in attempts}
+        claude = by_provider.get("claude") or {}
+        gemini = by_provider.get("gemini") or {}
+        agreement = {
+            "txn_count_match": (
+                claude.get("extracted_txn_count") is not None
+                and claude.get("extracted_txn_count") == gemini.get("extracted_txn_count")
+            ),
+            "bank_key_match": (
+                claude.get("extracted_bank_key") is not None
+                and claude.get("extracted_bank_key") == gemini.get("extracted_bank_key")
+            ),
+            "holder_name_match": (
+                claude.get("extracted_holder_name") is not None
+                and claude.get("extracted_holder_name") == gemini.get("extracted_holder_name")
+            ),
+        }
+        return {
+            "extraction_log_id": extraction_id,
+            "attempts": attempts,
+            "agreement": agreement,
+        }
+
+
+@app.get("/api/admin/llm-attempts")
+def list_llm_attempts(
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    provider: str | None = Query(default=None),
+    bank: str | None = Query(default=None),
+    has_error: bool | None = Query(default=None),
+) -> dict:
+    """Browse every LLM call we've ever made. Use for cross-cutting analysis:
+    cost trends, latency distributions, failure rates, per-bank accuracy."""
+    from app.db import LLMAttemptRow, get_session
+    with get_session() as s:
+        q = s.query(LLMAttemptRow)
+        if provider:
+            q = q.filter(LLMAttemptRow.provider == provider)
+        if bank:
+            q = q.filter(LLMAttemptRow.extracted_bank_key == bank)
+        if has_error is True:
+            q = q.filter(
+                (LLMAttemptRow.provider_error.isnot(None))
+                | (LLMAttemptRow.parse_error.isnot(None))
+            )
+        elif has_error is False:
+            q = q.filter(
+                LLMAttemptRow.provider_error.is_(None),
+                LLMAttemptRow.parse_error.is_(None),
+            )
+        total = q.count()
+        rows = (
+            q.order_by(LLMAttemptRow.created_at.desc())
+            .offset(offset).limit(limit).all()
+        )
+        # Do NOT include `prompt_text` / `raw_response` / `parsed_json` here
+        # — keep the list view small. Fetch /api/admin/extractions/{id}/llm-attempts
+        # for the full payload.
+        items = [
+            {
+                "id": r.id,
+                "extraction_log_id": r.extraction_log_id,
+                "provider": r.provider,
+                "model": r.model,
+                "prompt_tokens": r.prompt_tokens,
+                "completion_tokens": r.completion_tokens,
+                "latency_ms": r.latency_ms,
+                "provider_error": r.provider_error,
+                "parse_error": r.parse_error,
+                "extracted_txn_count": r.extracted_txn_count,
+                "extracted_bank_key": r.extracted_bank_key,
+                "extracted_holder_name": r.extracted_holder_name,
+                "confidence": r.confidence,
+                "created_at": r.created_at,
+            }
+            for r in rows
+        ]
+        return {"total": total, "offset": offset, "limit": limit, "items": items}
