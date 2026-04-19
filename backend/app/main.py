@@ -332,8 +332,15 @@ def _clean_holder_candidate(line: str) -> str:
     return name
 
 
-def _is_holder_candidate(line: str) -> bool:
-    """True if `line` looks like a plausible account-holder name."""
+def _is_holder_candidate(line: str, *, has_prefix_anchor: bool = False) -> bool:
+    """True if `line` looks like a plausible account-holder name.
+
+    `has_prefix_anchor=True` means the original line started with an honorific
+    (MR/MRS/etc) — a strong signal, so we drop the "single-token must be 14+
+    chars" rule that exists to protect the unanchored Pass 3 from false
+    positives. A 12-char concatenated name like `SAURABHSETHI` coming right
+    after `MR.` should be accepted.
+    """
     line = line.strip()
     if not (5 <= len(line) <= 80):
         return False
@@ -354,8 +361,12 @@ def _is_holder_candidate(line: str) -> bool:
     if _HOLDER_BLOCKLIST.search(line):
         return False
     parts = line.split()
-    # A single token is only OK if it's long (e.g. "BILALABDULKUDDUSKHANMOHAMMED")
-    if len(parts) == 1 and len(line.replace(".", "")) < 14:
+    # A single token is only OK if it's long enough to be distinctive. With
+    # an honorific anchor (MR./MRS./etc) we trust the signal and skip this
+    # floor entirely; unanchored we insist on 8+ chars so very short noise
+    # like "SDEBIT" or random header tokens can't leak in. 8 covers short
+    # concatenated names like "AMITSHAH" / "RAJKUMAR" but still filters.
+    if len(parts) == 1 and not has_prefix_anchor and len(line.replace(".", "")) < 8:
         return False
     return True
 
@@ -377,7 +388,7 @@ def _guess_holder_name(text: str) -> str | None:
         if not _PREFIX_RX.match(line):
             continue
         probe = _PREFIX_RX.sub("", line).strip()
-        if _is_holder_candidate(probe):
+        if _is_holder_candidate(probe, has_prefix_anchor=True):
             return _clean_holder_candidate(line)
 
     # Pass 3 — first plausible all-caps line in the header, skipping

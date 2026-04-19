@@ -20,9 +20,13 @@ WORKDIR /app
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Now the app + its plugin sibling.
+# Now the app + its plugin sibling. `core/` holds shared analysis modules
+# (`core.analysis.entity_classification` et al.) that store.py imports at
+# runtime when resolving counterparties into entities — if we skip this,
+# entity resolution silently fails and the graph shows no entity nodes.
 COPY backend /app/backend
 COPY plugins /app/plugins
+COPY core /app/core
 
 WORKDIR /app/backend
 
