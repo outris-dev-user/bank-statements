@@ -30,6 +30,18 @@ CLAUDE_MODEL = os.environ.get("LLM_CLAUDE_MODEL", "claude-sonnet-4-5")
 GEMINI_MODEL = os.environ.get("LLM_GEMINI_MODEL", "gemini-2.5-pro")
 
 
+def gemini_models() -> list[str]:
+    """Which Gemini model(s) to call per extraction. Accepts a comma-separated
+    list in `LLM_GEMINI_MODELS` for head-to-head comparison runs (e.g.
+    `gemini-2.5-flash,gemini-2.5-pro` fires both every time) — falls back to
+    the single `LLM_GEMINI_MODEL` when unset so existing deployments keep
+    their current behaviour."""
+    raw = os.environ.get("LLM_GEMINI_MODELS", "").strip()
+    if raw:
+        return [m.strip() for m in raw.split(",") if m.strip()]
+    return [GEMINI_MODEL]
+
+
 # USD per 1M tokens — input (prompt) and output (completion). Sourced from
 # each provider's public price card. Keep this table honest; the billing
 # rollup in the admin API reads straight from here. Unknown models return
@@ -267,10 +279,15 @@ async def call_claude(system: str, user: str) -> LLMResult:
     return result
 
 
-async def call_gemini(system: str, user: str) -> LLMResult:
-    """Call Google Gemini via the google-genai SDK."""
+async def call_gemini(system: str, user: str, model: str | None = None) -> LLMResult:
+    """Call Google Gemini via the google-genai SDK.
+
+    `model` overrides the default — useful for running Flash and Pro on the
+    same extraction to compare quality head-to-head. Caller is responsible
+    for slotting the returned result under a unique key in `run_all`."""
+    chosen_model = model or GEMINI_MODEL
     started = time.time()
-    result = LLMResult(provider="gemini", model=GEMINI_MODEL, prompt_text=f"{system}\n\n{user}")
+    result = LLMResult(provider="gemini", model=chosen_model, prompt_text=f"{system}\n\n{user}")
     if not gemini_enabled():
         result.error = "GOOGLE_API_KEY / GEMINI_API_KEY not set"
         return result
@@ -286,7 +303,7 @@ async def call_gemini(system: str, user: str) -> LLMResult:
     def _invoke() -> Any:
         client = genai.Client(api_key=api_key)
         return client.models.generate_content(
-            model=GEMINI_MODEL,
+            model=chosen_model,
             contents=user,
             config=genai_types.GenerateContentConfig(
                 system_instruction=system,
@@ -316,17 +333,20 @@ async def call_gemini(system: str, user: str) -> LLMResult:
     return result
 
 
-async def run_dual(text: str, bank_hint: str | None = None) -> dict[str, LLMResult]:
-    """Call Claude and Gemini concurrently on the same prompt. Returns a
-    `{provider: LLMResult}` dict. Providers without keys return with an
-    `error` set — the dict always contains both keys so downstream code
-    can iterate without branching.
+async def run_all(text: str, bank_hint: str | None = None) -> dict[str, LLMResult]:
+    """Call Claude + every configured Gemini model concurrently on the same
+    prompt. Returns a `{slot_key: LLMResult}` dict where slot_key is one of
+    `"claude"` or `"gemini:<model>"` — keys are unique so repeated Gemini
+    calls (Flash vs Pro comparison runs) don't collide.
+
+    Providers without keys return with an `error` set; the dict always
+    contains at least "claude", so downstream code can iterate without
+    branching.
     """
     system, user = build_prompt(text, bank_hint=bank_hint)
-    tasks = {
-        "claude": call_claude(system, user),
-        "gemini": call_gemini(system, user),
-    }
+    tasks: dict[str, Any] = {"claude": call_claude(system, user)}
+    for gm in gemini_models():
+        tasks[f"gemini:{gm}"] = call_gemini(system, user, model=gm)
     results = await asyncio.gather(*tasks.values(), return_exceptions=False)
     return dict(zip(tasks.keys(), results))
 

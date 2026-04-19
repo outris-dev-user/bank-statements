@@ -997,18 +997,24 @@ async def _run_extraction(
                 },
             }
 
-            # ── dual-provider LLM extraction (test phase: always run) ────
+            # ── multi-provider LLM extraction (test phase: always run) ───
             # Fires for every non-empty-text request, regardless of whether
             # the deterministic parser succeeded. Every attempt is recorded
-            # so we can compare Claude vs Gemini vs deterministic later.
+            # so we can compare Claude vs Gemini Flash vs Gemini Pro vs the
+            # deterministic parser later.
+            #
+            # `llm_responses` is keyed by the run_all slot:
+            #   "claude"                     → Claude result (normalised)
+            #   "gemini:gemini-2.5-flash"    → Gemini Flash (if configured)
+            #   "gemini:gemini-2.5-pro"      → Gemini Pro   (if configured)
             llm_responses: dict[str, dict] = {}
             if llm_mod.llm_enabled():
                 try:
-                    dual = await llm_mod.run_dual(text, bank_hint=bank_key)
+                    dual = await llm_mod.run_all(text, bank_hint=bank_key)
                 except Exception as exc:
-                    print(f"[extract] run_dual raised: {exc!r}")
+                    print(f"[extract] run_all raised: {exc!r}")
                     dual = {}
-                for provider, llm_result in dual.items():
+                for slot, llm_result in dual.items():
                     extraction_log.record_llm_attempt(
                         extraction_log_id=extraction_id,
                         provider=llm_result.provider,
@@ -1023,9 +1029,17 @@ async def _run_extraction(
                         latency_ms=llm_result.latency_ms,
                     )
                     if llm_result.parsed:
-                        llm_responses[provider] = llm_mod.normalise_llm_response(
+                        llm_responses[slot] = llm_mod.normalise_llm_response(
                             llm_result.parsed, source_filename=fname,
                         )
+
+            # Pick the first successful Gemini result (in insertion order, which
+            # matches `LLM_GEMINI_MODELS` order — Flash then Pro by default) for
+            # the fallback priority. Claude always beats Gemini when both work.
+            gemini_response = next(
+                (v for k, v in llm_responses.items() if k.startswith("gemini:")),
+                None,
+            )
 
             # ── choose what to return the caller ─────────────────────────
             # Priority: deterministic (if it found txns) > Claude > Gemini.
@@ -1046,8 +1060,8 @@ async def _run_extraction(
                 response["meta"]["source"] = "llm-claude"
                 response["meta"]["deterministic_parser"] = bank_key
                 response["meta"]["page_count"] = page_count
-            elif llm_responses.get("gemini"):
-                response = llm_responses["gemini"]
+            elif gemini_response:
+                response = gemini_response
                 response["meta"]["source"] = "llm-gemini"
                 response["meta"]["deterministic_parser"] = bank_key
                 response["meta"]["page_count"] = page_count
@@ -1418,28 +1432,36 @@ def get_extraction_llm_attempts(extraction_id: str) -> dict:
             }
             for r in rows
         ]
-        by_provider = {a["provider"]: a for a in attempts}
-        claude = by_provider.get("claude") or {}
-        gemini = by_provider.get("gemini") or {}
-        agreement = {
-            "txn_count_match": (
-                claude.get("extracted_txn_count") is not None
-                and claude.get("extracted_txn_count") == gemini.get("extracted_txn_count")
-            ),
-            "bank_key_match": (
-                claude.get("extracted_bank_key") is not None
-                and claude.get("extracted_bank_key") == gemini.get("extracted_bank_key")
-            ),
-            "holder_name_match": (
-                claude.get("extracted_holder_name") is not None
-                and claude.get("extracted_holder_name") == gemini.get("extracted_holder_name")
-            ),
+        # Per-model comparison across all providers that returned a parse.
+        # Each field (txn_count, bank_key, holder_name) lists the distinct
+        # values we got and which `<provider>:<model>` reported each. When
+        # every live attempt produced the same value, `unanimous` is True.
+        def _comparison(field: str) -> dict:
+            buckets: dict[object, list[str]] = {}
+            for a in attempts:
+                if a.get("provider_error") or a.get("parse_error"):
+                    continue
+                val = a.get(field)
+                if val is None:
+                    continue
+                buckets.setdefault(val, []).append(f"{a['provider']}:{a['model']}")
+            values = [{"value": v, "reporters": r} for v, r in buckets.items()]
+            return {
+                "values": values,
+                "unanimous": len(buckets) == 1 and len(values[0]["reporters"]) > 1 if values else False,
+                "distinct_count": len(buckets),
+            }
+
+        comparison = {
+            "txn_count": _comparison("extracted_txn_count"),
+            "bank_key": _comparison("extracted_bank_key"),
+            "holder_name": _comparison("extracted_holder_name"),
         }
         total_cost = round(sum(a["cost_usd"] or 0 for a in attempts), 6)
         return {
             "extraction_log_id": extraction_id,
             "attempts": attempts,
-            "agreement": agreement,
+            "comparison": comparison,
             "total_cost_usd": total_cost,
         }
 
