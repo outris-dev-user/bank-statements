@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { Search, Plus, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useCases } from "../lib/queries";
+import { NewCaseDialog } from "./NewCaseDialog";
 
 export function CaseDashboard() {
   const { data: cases, isLoading, error } = useCases();
+  const [showNewCase, setShowNewCase] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -12,7 +15,10 @@ export function CaseDashboard() {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <h1 className="font-headline text-xl font-extrabold tracking-tight text-primary uppercase">LedgerFlow</h1>
           <div className="flex items-center gap-4">
-            <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2">
+            <button
+              onClick={() => setShowNewCase(true)}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2"
+            >
               <Plus className="w-4 h-4" />
               New Case
             </button>
@@ -22,6 +28,8 @@ export function CaseDashboard() {
           </div>
         </div>
       </header>
+
+      {showNewCase && <NewCaseDialog onClose={() => setShowNewCase(false)} />}
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
@@ -45,7 +53,23 @@ export function CaseDashboard() {
           </div>
         )}
 
-        {cases && (
+        {cases && cases.length === 0 && (
+          <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center">
+            <div className="text-foreground font-medium mb-1">No cases yet</div>
+            <div className="text-sm text-muted-foreground mb-4">
+              Create a case to start uploading statements and tracking investigations.
+            </div>
+            <button
+              onClick={() => setShowNewCase(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4" />
+              New Case
+            </button>
+          </div>
+        )}
+
+        {cases && cases.length > 0 && (
           <div className="bg-card rounded-lg border border-border divide-y divide-border">
             {cases.map((caseItem) => (
               <Link

@@ -96,6 +96,18 @@ export const fetchHealth = () => request<Health>("/api/health");
 
 export const fetchCases = () => request<Case[]>("/api/cases");
 
+export interface CaseCreate {
+  fir_number: string;
+  title: string;
+  officer_name: string;
+}
+
+export const createCase = (body: CaseCreate) =>
+  request<Case>("/api/cases", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
 export interface CaseDetail {
   case: Case;
   persons: Person[];
