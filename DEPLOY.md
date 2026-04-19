@@ -25,8 +25,13 @@ Both deploy from the same GitHub repo; each Railway service uses its own `railwa
 | `ALLOWED_ORIGINS`    | yes | Comma-separated list. For a fronted-only deploy: `https://your-frontend.up.railway.app`. Add additional origins comma-separated. |
 | `DATABASE_URL`       | optional → recommended | When set, the backend uses Postgres instead of the local SQLite file. On Railway, add a Postgres plugin and reference it as `${{Postgres.DATABASE_URL}}`. Supports both `postgres://` and `postgresql://` forms — we rewrite to the psycopg driver automatically. |
 | `LEDGERFLOW_PDF_STORE_DIR` | optional → recommended | Absolute path where uploaded PDFs are archived (content-addressed by sha256). On Railway, mount a **volume** and set this to the mount path (e.g. `/data/pdf_store`). Without a volume, archived PDFs are lost on every redeploy. |
+| `LLM_ENABLED`        | no  | Set to `1` to turn on dual-provider LLM extraction. When off (default), only the deterministic regex parser runs. |
+| `ANTHROPIC_API_KEY`  | yes, if `LLM_ENABLED=1` | Claude API key. |
+| `GOOGLE_API_KEY`     | yes, if `LLM_ENABLED=1` | Gemini API key. (Accepts `GEMINI_API_KEY` as an alias.) |
+| `LLM_CLAUDE_MODEL`   | no  | Override Claude model id. Default `claude-sonnet-4-5`. |
+| `LLM_GEMINI_MODEL`   | no  | Override Gemini model id. Default `gemini-2.5-pro`. |
 | `PORT`               | auto | Railway injects. |
-| `LEDGERFLOW_RESET_DB`| no  | Set to `1` once to reset+reseed the case store on startup. Does **not** drop `extraction_log`. |
+| `LEDGERFLOW_RESET_DB`| no  | Set to `1` once to reset+reseed the case store on startup. Does **not** drop `extraction_log`, `extraction_trace`, or `llm_attempts`. |
  minor edit
 ### Generate an API key
 Any 32-byte URL-safe random string is fine:
@@ -128,7 +133,32 @@ GET /api/admin/extractions/{extraction_id}
 # Download the archived PDF.
 GET /api/admin/extractions/{extraction_id}/pdf
   → application/pdf stream
+
+# Full diagnostic trace: raw pdfplumber text + deterministic parser raw output.
+GET /api/admin/extractions/{extraction_id}/trace
+  → {..., "pdfplumber_text": "...", "deterministic_raw": [...]}
+
+# Every LLM attempt for this extraction (both Claude and Gemini in dual mode).
+GET /api/admin/extractions/{extraction_id}/llm-attempts
+  → {"attempts": [...], "agreement": {...}}
+
+# Cross-cutting: browse every LLM call ever made.
+GET /api/admin/llm-attempts?provider=claude&bank=axis_savings&has_error=false
+  → {"total": N, "items": [...]}
 ```
+
+### LLM extraction — what gets recorded
+
+When `LLM_ENABLED=1`, every `/api/extract` call runs Claude and Gemini concurrently on the pdfplumber text (regardless of whether the deterministic regex parser succeeded). For each call we persist:
+
+1. The raw PDF bytes (keyed by sha256) in the PDF store
+2. The pdfplumber text output and the deterministic parser's raw output (`extraction_trace` table)
+3. One row per provider per call (`llm_attempts` table), storing the full prompt we sent, the verbatim response we got back, the parsed JSON, token counts, latency, and any errors
+4. The final response we returned to the caller (`extraction_log.response_json`)
+
+Nothing is lost. Any single upload can be inspected end-to-end: `GET /api/admin/extractions/{id}/pdf` + `/trace` + `/llm-attempts` gives you the complete audit trail.
+
+Response priority: deterministic (if it found transactions) → Claude → Gemini → empty shape. `response.meta.source` identifies which path produced the final answer.
 
 ### Friends-and-family rollout — checklist
 - [ ] Postgres + Volume set up on Railway (see Persistence section above).
