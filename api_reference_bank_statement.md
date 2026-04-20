@@ -24,10 +24,36 @@ X-API-Key: <your-key>
 
 **Content-Type**: `multipart/form-data`
 
-| Field      | Type   | Required | Notes |
-|------------|--------|----------|-------|
-| `file`     | file   | yes      | PDF file. Extension must be `.pdf`. Must start with the `%PDF-` signature. Max 25 MB. |
-| `password` | string | no       | Password for encrypted PDFs. Omit or leave blank if unencrypted. |
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `file` | file | yes | PDF file. Extension must be `.pdf`. Must start with the `%PDF-` signature. Max 25 MB. |
+| `password` | string | no | Password for encrypted PDFs. Omit or leave blank if unencrypted. |
+| `submitted_by` | string | no | Free-text tag stored with the extraction log (e.g. `"internal-api"`, `"rahul-cousin"`). Also accepted as the `X-Submitter` header. |
+| `use_llm` | bool | no | Per-request override of the `LLM_ENABLED` env var. Omit to use the server default. `false` skips the LLM entirely (deterministic + decoder only — zero AI cost, much faster, slightly less accurate counterparty naming and no `analysis` block). `true` requires the server to have `LLM_ENABLED=true` and valid API keys; it does not force LLM on if credentials are missing. |
+| `llm_providers` | string | no | Comma-separated filter narrowing which LLM slots run for this call. Values are prefix-matched against slot keys (`claude`, `gemini`, or full `gemini-2.5-flash`/`gemini-2.5-pro`). Example: `claude,gemini-2.5-flash` runs only those two. Omit to use the server's default fan-out (`LLM_GEMINI_MODELS` + Claude). |
+
+### Controlling LLM behaviour
+
+Three levers, in order of precedence (per-request beats env):
+
+| Lever | Scope | Values | Purpose |
+|---|---|---|---|
+| `use_llm` request field | per call | `true` / `false` / omit | Turn the LLM off for a single call (e.g. bulk re-ingest where cost matters). |
+| `llm_providers` request field | per call | comma-sep slot prefixes | Narrow the fan-out for this call. |
+| `LLM_ENABLED` env var | server | `true` / `false` | Master switch — when off, no call ever triggers the LLM regardless of request fields. |
+| `LLM_GEMINI_MODELS` env var | server | comma-sep model IDs | Which Gemini models the server fans out to by default (e.g. `gemini-2.5-flash` for cost, `gemini-2.5-flash,gemini-2.5-pro` for head-to-head comparison). |
+| `LLM_PRIMARY` env var | server | comma-sep slot prefixes | Preference order for which provider's output drives the final `transactions` array. Falls through on parse/provider error. |
+
+**Recommended config for internal release:**
+- `LLM_ENABLED=true`, `LLM_GEMINI_MODELS=gemini-2.5-flash`, `LLM_PRIMARY=claude,gemini-2.5-flash`.
+- Two LLM calls per extraction (Claude + Flash), ~$0.01-0.02/statement. Both opinions retained in the admin `llm_attempts` table for post-hoc analysis. Claude drives the response unless it errors; Flash takes over if it does.
+
+The response always records what actually happened:
+- `meta.llm_requested` — `"on"`, `"off"`, or `"default"` (reflects the request field)
+- `meta.llm_enabled` — whether the call actually fired
+- `meta.llm_providers_filter` — present when `llm_providers` was set
+- `meta.source` — `deterministic`, `deterministic+<provider>`, or `llm-<provider>`
+- `meta.llm_overlay` — provider + model that produced the final rows (when the overlay path ran)
 
 ### Limits
 

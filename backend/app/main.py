@@ -447,6 +447,8 @@ async def upload_statement(
     holder_name: str | None = Form(default=None),
     password: str | None = Form(default=None),
     overwrite: bool = Form(default=False),
+    use_llm: bool | None = Form(default=None),
+    llm_providers: str | None = Form(default=None),
 ) -> dict:
     """Upload a PDF, run the full extraction pipeline (deterministic +
     dual-LLM when enabled), and ingest the result into the case store.
@@ -499,6 +501,10 @@ async def upload_statement(
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
 
+    providers_list = (
+        [p.strip() for p in llm_providers.split(",") if p.strip()]
+        if llm_providers else None
+    )
     try:
         _eid, response, _text = await _run_extraction(
             content=content,
@@ -508,6 +514,8 @@ async def upload_statement(
             submitter=f"case:{case_id}",
             client_ip=client_ip,
             user_agent=user_agent,
+            use_llm=use_llm,
+            llm_providers=providers_list,
         )
     except ExtractionError as e:
         raise HTTPException(e.status, _err(e.code, e.message, e.extra))
@@ -998,6 +1006,8 @@ async def _run_extraction(
     submitter: str | None,
     client_ip: str | None,
     user_agent: str | None,
+    use_llm: bool | None = None,
+    llm_providers: list[str] | None = None,
 ) -> tuple[str, dict, str]:
     """Core PDF→structured-JSON pipeline shared by `/api/extract` and the
     frontend upload endpoint. Archives the PDF, runs pdfplumber + the
@@ -1193,7 +1203,18 @@ async def _run_extraction(
             #   "gemini:gemini-2.5-flash"    → Gemini Flash (if configured)
             #   "gemini:gemini-2.5-pro"      → Gemini Pro   (if configured)
             llm_responses: dict[str, dict] = {}
-            if llm_mod.llm_enabled():
+            # Per-request override: explicit False wins even if env is true;
+            # explicit True still requires the env key so we can't run the LLM
+            # without credentials.
+            llm_allowed = (use_llm is not False) and llm_mod.llm_enabled()
+            # Record what we decided so the response is self-documenting.
+            deterministic_response["meta"]["llm_requested"] = (
+                "on" if use_llm is True else "off" if use_llm is False else "default"
+            )
+            deterministic_response["meta"]["llm_enabled"] = llm_allowed
+            if llm_providers:
+                deterministic_response["meta"]["llm_providers_filter"] = list(llm_providers)
+            if llm_allowed:
                 # When the deterministic parser produced rows, hand them to
                 # the LLM as authoritative anchors — the model then focuses
                 # on the enrichment fields instead of re-extracting dates
@@ -1231,6 +1252,23 @@ async def _run_extraction(
                 except Exception as exc:
                     print(f"[extract] run_all raised: {exc!r}")
                     dual = {}
+                # Per-request provider filter: callers can narrow the default
+                # fan-out by passing e.g. llm_providers=["claude"] or
+                # llm_providers=["gemini-2.5-flash"]. Matches slots by prefix
+                # so "gemini" accepts any Gemini variant and "claude" matches
+                # the sole Claude slot.
+                if llm_providers:
+                    wanted = [p.strip().lower() for p in llm_providers if p.strip()]
+                    def _slot_matches(slot: str) -> bool:
+                        sl = slot.lower()
+                        return any(
+                            sl == w
+                            or sl.startswith(w)
+                            or (":" in sl and sl.split(":", 1)[1] == w)
+                            or (":" in sl and sl.split(":", 1)[1].startswith(w))
+                            for w in wanted
+                        )
+                    dual = {s: r for s, r in dual.items() if _slot_matches(s)}
                 for slot, llm_result in dual.items():
                     extraction_log.record_llm_attempt(
                         extraction_log_id=extraction_id,
@@ -1339,6 +1377,8 @@ async def extract_statement(
     file: UploadFile = File(...),
     password: str | None = Form(default=None),
     submitted_by: str | None = Form(default=None),
+    use_llm: bool | None = Form(default=None),
+    llm_providers: str | None = Form(default=None),
 ) -> dict:
     """Standalone PDF → structured bank-statement extraction.
 
@@ -1356,6 +1396,10 @@ async def extract_statement(
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
 
+    providers_list = (
+        [p.strip() for p in llm_providers.split(",") if p.strip()]
+        if llm_providers else None
+    )
     content = await file.read()
     try:
         _eid, response, _text = await _run_extraction(
@@ -1366,6 +1410,8 @@ async def extract_statement(
             submitter=submitter,
             client_ip=client_ip,
             user_agent=user_agent,
+            use_llm=use_llm,
+            llm_providers=providers_list,
         )
     except ExtractionError as e:
         raise HTTPException(e.status, _err(e.code, e.message, e.extra))
