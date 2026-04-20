@@ -39,34 +39,87 @@ X-API-Key: <your-key>
 
 ```jsonc
 {
-  "bank":    {"key": "idfc", "label": "IDFC First Bank", "account_type": "CA"},
-  "account": {"number_masked": "****0888", "holder_name": "Saurabh Sethi"},
-  "period":  {"start": "2026-04-13", "end": "2026-04-13"},   // ISO-8601
-  "balance": {"opening": 1154791.51, "closing": 1129791.51, "currency": "INR"},
+  "bank":    {"key": "hdfc_savings", "label": "HDFC Savings", "account_type": "SA"},
+  "account": {
+    "number_masked": "****8420",
+    "holder_name":   "Bilal Khan",
+    "customer_id":   "74905945",         // optional — from statement header when present
+    "pan_hint":      null,               // optional — PAN if printed on statement
+    "phone_hint":    "18002026161",      // optional
+    "email_hint":    "kmb78660@gmail.com",
+    "branch":        "ANDHERI EAST",     // optional
+    "joint_holders": []                  // optional — array of names if statement lists them
+  },
+  "period":  {"start": "2023-10-01", "end": "2024-03-31"},
+  "balance": {"opening": 70622.10, "closing": 128530.10, "currency": "INR"},
   "summary": {
-    "transaction_count": 1,
-    "total_debit":  25000.00,
-    "total_credit":     0.00,
-    "net_change":  -25000.00
+    "transaction_count": 42,
+    "total_debit":  312450.00,
+    "total_credit": 355800.00,
+    "net_change":    43350.00
   },
   "transactions": [
     {
-      "date": "2026-04-13",                 // ISO-8601
-      "amount": 25000.00,
-      "direction": "debit",                 // "debit" | "credit"
-      "description": "UPI/DR/840398205126/FPL Tech/UTIB/getonec/UPIInte",
-      "counterparty": "FPL Tech",
-      "channel": "UPI",                     // UPI | NEFT | IMPS | RTGS | POS | ATM | ECS | NACH | CHEQUE | CASH | OTHER
+      "date": "2023-10-01",
+      "amount": 1200.00,
+      "direction": "debit",                         // "debit" | "credit"
+      "description": "UPI-SAMEERTASIBULLAKHA-SAMEERKHAN.SK17-1@OKHDFCBANK-HDFC0000146-327302563522-UPI",
+      "counterparty": "Sameertasibullakha",         // cleaned merchant/payee
+      "channel": "UPI",                             // UPI | NEFT | IMPS | RTGS | POS | ATM | ECS | NACH | CHEQUE | CASH | TRANSFER | OTHER
       "category": "Transfer",
-      "balance_after": null                 // populated for hdfc_savings today; null elsewhere
+      "balance_after": 69422.10,
+
+      // Narration-decoder output (deterministic, no AI). Present when the
+      // per-bank decoder matched the row; `null` otherwise.
+      "card_last4":        null,
+      "ref_number":        "327302563522",
+      "counterparty_bank": "HDFC Bank",
+
+      // LLM-supplied enrichment. Present when the LLM call succeeded and
+      // returned these fields for the row; `null` otherwise.
+      "entity_type":       "individual",            // individual|business|bank|government|self|unknown
+      "is_self_transfer":  false,
+      "notable_reason":    null                     // short string if the LLM flagged this row
     }
   ],
+
+  // Statement-level LLM analysis. All fields nullable; present only when
+  // an LLM call succeeded on the statement.
+  "analysis": {
+    "narrative_summary":   "Regular salary-credit savings account with monthly household UPI spends and quarterly tax debits.",
+    "anomalies": [
+      {"severity": "medium",
+       "category": "unusual_amount",
+       "description": "Single UPI debit of ₹35,000 — ~10× the typical UPI amount on this account.",
+       "related_row_indices": [2]}
+    ],
+    "risk_level": "low",                            // "low" | "medium" | "high"
+    "statement_integrity": {
+      "balance_chain_ok": true,
+      "notes": []
+    }
+  },
+
   "meta": {
-    "filename": "IDFC Apr 2026.PDF",
-    "page_count": 1,
-    "parser": "idfc",                       // null when bank detection failed
-    "text_empty": false,                    // true for image-PDFs
-    "issues": []                            // see "Non-fatal issues" below
+    "filename":   "Acct Statement_XX3584_29042024.pdf",
+    "page_count": 3,
+    "parser":     "hdfc_savings",                   // detected bank key; null on detection failure
+    "text_empty": false,                            // true for image-only PDFs
+    "issues":     [],                               // see "Non-fatal issues" below
+    "source":     "deterministic+claude",           // which layer produced the final rows
+    "llm_overlay": {                                // present when an LLM overlaid deterministic rows
+      "provider":   "claude",
+      "model":      "claude-sonnet-4-5",
+      "overlaid":   42,
+      "unmatched":  0
+    },
+    "decoder_stats": {                              // narration-decoder coverage for this statement
+      "bank_key":     "hdfc_savings",
+      "rows_total":   42,
+      "rows_matched": 40,
+      "hit_rate":     0.952,
+      "rules_fired":  {"upi_modern": 32, "atm": 4, "ib_xfer:cr": 3, "chqdep": 1, "unmatched": 2}
+    }
   }
 }
 ```
@@ -75,9 +128,15 @@ X-API-Key: <your-key>
 
 - **Dates** are ISO-8601 `YYYY-MM-DD` when parsable, else the raw input string. Period dates derive from the statement header first, then the envelope of the parsed transactions.
 - **`balance.opening` / `closing`** are best-effort heuristics over the statement header (`Opening Balance`, `Closing Balance`, `B/F Balance`). Either can be `null` — banks print this inconsistently.
-- **`balance_after`** on each transaction is present only for **HDFC Savings** today (its parser tracks running balance). Other parsers don't emit it, so the field is `null`.
-- **`counterparty`** is an inference from the raw description. UPI/NEFT/IMPS narrations are stripped of channel + direction prefixes and ref numbers. Not guaranteed to be a real-world entity; use it as a hint, not as truth.
-- **`bank.key`** is one of `hdfc_cc`, `hdfc_savings`, `idfc`, `icici`, `kotak`, or `unknown`. When `unknown`, all parsers are tried and any results merged.
+- **`balance_after`** on each transaction is populated by the deterministic parser when it reads the bank's running-balance column (HDFC Savings today), and is otherwise filled from the LLM's output when available. `null` means neither path produced a value.
+- **`counterparty`** is the best available name — in order of preference: narration-decoder merchant (for hard-rule matches like ATM, cheques, IB transfers), LLM-supplied counterparty, then a regex fallback on the raw description.
+- **`counterparty_bank`** is the *other* bank involved in the transaction (identified via IFSC prefix, 4-letter code, or narration keyword). Useful for building money-flow graphs. Null when not identifiable.
+- **`ref_number`** is the bank-side reference (UPI ref, UTR, IMPS ref, cheque number) extracted by the decoder. Not guaranteed unique across banks.
+- **`entity_type`**, **`is_self_transfer`**, **`notable_reason`** are LLM-only signals — present when the LLM call succeeded and returned them, else `null`. Treat as hints, not truth.
+- **`analysis`** is a statement-level block summarising the whole document. All fields nullable. Anomalies include severity, category, a short description, and a list of row indices to inspect. `risk_level` is a coarse tier, not a score — use it for triage, not for decisions.
+- **`bank.key`** is one of `hdfc_cc`, `hdfc_savings`, `idfc`, `icici`, `kotak`, `axis`, `sbi`, or `unknown`. When `unknown`, all parsers are tried and any results merged.
+- **`meta.source`** documents which layer produced the final rows: `deterministic` (parser only), `deterministic+<provider>` (LLM overlaid on parser output — the normal successful case), or `llm-<provider>` (parser returned nothing, LLM did the whole extraction).
+- **`meta.decoder_stats.hit_rate`** is the fraction of rows the narration decoder could pattern-match. Low hit rate (<0.5) usually means either an unrecognised bank format or a heavily truncated PDF text layer — worth flagging for manual review.
 
 #### Non-fatal issues — `meta.issues[]`
 
@@ -167,16 +226,29 @@ HTTP/1.1 413
 
 ## Bank coverage
 
-| Bank key       | Full name                | Account types  | Parser confidence |
-|----------------|--------------------------|----------------|-------------------|
-| `hdfc_cc`      | HDFC Credit Card         | CC             | Validated on benchmark corpus |
-| `hdfc_savings` | HDFC Savings             | SA             | Validated — running balance tracked |
-| `idfc`         | IDFC First Bank          | CA / SA        | Validated |
-| `icici`        | ICICI Bank               | CA             | Validated |
-| `kotak`        | Kotak Mahindra           | SA             | Validated |
-| `unknown`      | (fingerprint didn't match) | —            | All parsers tried and merged |
+| Bank key       | Full name                  | Account types | Parser           | Narration decoder |
+|----------------|----------------------------|---------------|------------------|-------------------|
+| `hdfc_cc`      | HDFC Credit Card           | CC            | Validated        | —                 |
+| `hdfc_savings` | HDFC Savings               | SA            | Validated (running balance tracked) | ~95% on live samples (legacy POS/ATW/TPT + modern UPI) |
+| `idfc`         | IDFC First Bank            | CA / SA       | Validated        | Validated (UPI/IMPS/NEFT/RTGS envelopes) |
+| `icici`        | ICICI Bank                 | CA / SA       | Validated        | ~97% on live samples (BIL/INFT, MMT/IMPS, UPI, CLG, VPS) |
+| `kotak`        | Kotak Mahindra             | SA            | Validated        | 100% on live sample (UPI/, MB:, PCD/) |
+| `axis`         | Axis Bank                  | CA / SA       | Validated        | Documented envelopes; tuning against live samples pending |
+| `sbi`          | State Bank of India        | CA / SA       | Validated        | Documented envelopes; tuning against live samples pending |
+| `unknown`      | (fingerprint didn't match) | —             | All parsers tried and merged | `meta.decoder_stats.hit_rate` will be 0.0 |
 
-Adding a new bank = one new parser in [plugins/bank/parsers/](plugins/bank/parsers/) + one fingerprint line in `detect_bank()`. Existing banks unaffected.
+Adding a new bank = one new parser in [plugins/bank/parsers/](plugins/bank/parsers/) + one fingerprint line in `detect_bank()` + one narration decoder in [plugins/bank/extraction/narration/](plugins/bank/extraction/narration/). Existing banks unaffected.
+
+### Extraction pipeline
+
+For every successful call the backend runs up to four layers and records each in `meta.source`:
+
+1. **Text extraction** — pdfplumber (OCR not enabled; scanned PDFs return empty txns + `scanned_pdf_no_text_layer`).
+2. **Deterministic parser** — per-bank regex/table parser produces rows with authoritative date/amount/direction/balance.
+3. **Narration decoder** — per-bank regex decoder extracts channel, merchant, card last-4, reference number, counterparty bank from the narration. Zero AI. Contributes to `decoder_stats` and overrides the LLM on unambiguous rules (ATM, cheques, IB transfers, bank-internal events).
+4. **LLM enrichment** — Claude + Gemini called in parallel; the configured primary provides entity_type, is_self_transfer, notable_reason per row, and the whole `analysis` block.
+
+Layers 3 and 4 are independent — if the LLM call fails the response still includes decoder output; if the decoder produces nothing the LLM output still flows through. `meta.source` tells you which layers contributed.
 
 ---
 

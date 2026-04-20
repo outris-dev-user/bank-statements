@@ -741,7 +741,16 @@ def _shape_transaction(raw: dict) -> dict:
         "counterparty": _counterparty_from_description(desc, channel),
         "channel": channel,
         "category": infer_category(desc),
-        "balance_after": raw.get("balance"),  # only populated by hdfc_savings today
+        "balance_after": raw.get("balance"),
+        # Fields filled in by later pipeline stages — seeded as None so the
+        # response contract has stable keys regardless of whether the LLM
+        # or decoder produced a value for this row.
+        "entity_type": None,
+        "is_self_transfer": None,
+        "notable_reason": None,
+        "card_last4": None,
+        "ref_number": None,
+        "counterparty_bank": None,
     }
 
 
@@ -1266,8 +1275,28 @@ async def _run_extraction(
                 # Decoder stitch runs after overlay — adds structured
                 # fields (card_last4, ref_number, counterparty_bank) and
                 # corrects obvious LLM mistakes on hard-rule narrations.
-                for _row in response.get("transactions") or []:
+                from plugins.bank.extraction.narration import decode as _decode_narr
+                _rule_counts: dict[str, int] = {}
+                _matched = 0
+                _rows = response.get("transactions") or []
+                for _row in _rows:
                     _stitch_decoder_into_row(_row, bank_key)
+                    _dec = _decode_narr(bank_key, _row.get("description") or "")
+                    _rule = _dec.get("matched_rule") or "unmatched"
+                    _rule_counts[_rule] = _rule_counts.get(_rule, 0) + 1
+                    if _rule not in ("unmatched", "no_decoder", None):
+                        _matched += 1
+                # Expose decoder coverage so API consumers can gauge
+                # extraction confidence without running the decoder
+                # themselves. Rates are floats in [0, 1].
+                response.setdefault("meta", {})["decoder_stats"] = {
+                    "bank_key": bank_key,
+                    "rows_total": len(_rows),
+                    "rows_matched": _matched,
+                    "hit_rate": (round(_matched / len(_rows), 3)
+                                 if _rows else 0.0),
+                    "rules_fired": _rule_counts,
+                }
             elif primary_response and primary_slot:
                 response = primary_response
                 response["meta"]["source"] = f"llm-{primary_slot}"
